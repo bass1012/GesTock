@@ -1,5 +1,8 @@
-# Build stage
-FROM node:20-alpine AS builder
+# Build stage - use slim (Debian) instead of alpine for Prisma compatibility
+FROM node:20-slim AS builder
+
+# Install OpenSSL for Prisma
+RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
@@ -21,8 +24,11 @@ RUN npx prisma generate
 # Build TypeScript
 RUN npm run build
 
-# Production stage
-FROM node:20-alpine
+# Production stage - use slim for Prisma compatibility
+FROM node:20-slim
+
+# Install OpenSSL for Prisma
+RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 

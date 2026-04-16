@@ -42,8 +42,10 @@ services:
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
       PORT: 3001
       NODE_ENV: production
-      FRONTEND_URL: https://gestock.allsite.cloud
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost}
       ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      SUPER_ADMIN_SECRET: ${SUPER_ADMIN_SECRET}
     depends_on:
       postgres:
         condition: service_healthy

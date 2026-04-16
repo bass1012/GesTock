@@ -25,8 +25,8 @@ FROM nginx:stable-alpine
 # Copy built files
 COPY --from=builder /app/frontend/dist /usr/share/nginx/html
 
-# Copy nginx configuration
-COPY nginx/nginx.conf /etc/nginx/conf.d/default.conf
+# Copy nginx configuration for SPA
+COPY frontend/nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
 
