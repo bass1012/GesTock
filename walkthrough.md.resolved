@@ -1,0 +1,32 @@
+# Walkthrough — Interface Utilisateur Phase 2
+
+## Résumé
+L'interface utilisateur de la **Phase 2 (Mouvements, Fournisseurs, Bons de commande)** a été implémentée avec succès. Les "placeholders" statiques ont été remplacés par des composants haut-de-gamme complets interactifs interfacés avec notre API REST.
+
+## Composants créés
+
+### Hooks React Query (API)
+Les couches de communication avec le backend ont été modularisées dans le dossier `hooks/` pour une excellente réutilisabilité et la gestion automatique du cache :
+- `useSuppliers.ts` : Fonctions pour lister, créer, modifier, supprimer des fournisseurs.
+- `useOrders.ts` : Fonctions pour gérer les bons de commande complets (y compris le chargement direct du stock lorsqu'un achat est Reçu).
+- `useStockMovements.ts` : Historique des entrées sorties et validations sécurisées.
+
+### Pages & Modales (Vues)
+L'interface a été alignée sur la charte design existante :
+1. **Fournisseurs (`SuppliersPage`)** : Tableau de recherche, actions rapides (Edit/Delete).
+2. **Nouveau Fournisseur (`SupplierModal`)** : Formulaire adaptatif pour l'édition/création.
+3. **Mouvements (`StockMovementsPage`)** : Un log d'audit complet en design premium avec badges distinctifs selon le type (Entrée en vert, Sortie en rouge, Ajustement...).
+4. **Modale Mouvement manuel (`NewMovementModal`)** : Possibilité en 3 clics de faire une soustraction ou un ajout direct au stock d'un produit.
+5. **Commandes d'Achat (`OrdersPage`)** : Vue centralisée et sélection rapide d'un menu déroulant pour changer dynamiquement le statut. Calcul automatisé des prix selon les types de composant reçus.
+6. **Formulaire de Commande Complexe (`NewOrderModal`)** : Un formulaire étendu qui permet d'ajouter des lignes de *PurchaseOrderItem* dynamiquement (calcul du prix total, association automatique des prix des articles au clic).
+
+> [!TIP]
+> **Expérience utilisateur (UX)**
+> Essayez de changer le statut d'un "Bon de commande" à **Reçue** depuis la liste. Le système actualisera automatiquement (en temps-réel via React Query) l'historique de vos mouvements ainsi que le stock de base de vos articles.
+
+## Vérification Technique
+- La compilation TypeScrypt a remonté tous les imports morts qui ont été soigneusement retirés. Le code est sûr.
+- Les validations et les futures alertes React Router (`v7_startTransition` et `v7_relativeSplatPath`) préviennent les crashs lors d'une évolution de la stack logicielle dans le futur.
+
+## Conclusion
+Le bloc principal de votre métier GesTock est clos et fonctionnel !

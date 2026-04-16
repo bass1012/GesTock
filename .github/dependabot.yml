@@ -1,0 +1,64 @@
+version: 2
+updates:
+  # Backend dependencies
+  - package-ecosystem: "npm"
+    directory: "/backend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    target-branch: "main"
+    versioning-strategy: increase-if-necessary
+    labels:
+      - "dependencies"
+      - "backend"
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+    # Security updates
+    allow:
+      - dependency-type: "production"
+    ignore:
+      # Ignore patch updates for dev dependencies
+      - dependency-name: "@types/*"
+        update-types: ["version-update:semver-patch"]
+    # Auto-assign reviewers
+    reviewers:
+      - "team:backend"
+    # Security alerts
+    open-pull-requests-limit: 10
+
+  # Frontend dependencies
+  - package-ecosystem: "npm"
+    directory: "/frontend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    target-branch: "main"
+    versioning-strategy: increase-if-necessary
+    labels:
+      - "dependencies"
+      - "frontend"
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+    allow:
+      - dependency-type: "production"
+    open-pull-requests-limit: 10
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    target-branch: "main"
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+    open-pull-requests-limit: 5

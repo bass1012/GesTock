@@ -1,0 +1,22 @@
+{
+  "name": "gestock-saas",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:frontend": "npm -w frontend run dev",
+    "dev:backend": "npm -w backend run dev",
+    "build": "npm -w frontend run build && npm -w backend run build",
+    "lint": "npm -w frontend run lint && npm -w backend run lint"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.1"
+  },
+  "overrides": {
+    "lru-cache": "10.2.0"
+  }
+}

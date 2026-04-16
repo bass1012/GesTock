@@ -1,0 +1,53 @@
+# Lessons Learned — GesStock SaaS
+
+<!-- Format : [date] | Problème rencontré | Règle pour l'éviter -->
+
+## 2026-04-08 — Phase 1 & 2
+
+- **Conflit PostgreSQL port 5432** | PostgreSQL Homebrew (local) tournait en même temps que le conteneur Docker, provoquant des conflits et des échecs de migration Prisma. | **Règle** : Toujours vérifier si un service d'infrastructure tourne déjà (`lsof -i :5432`) avant de lancer Docker. Configurer le `.env` en conséquence (port custom ou arrêter le service local).
+
+- **Permissions PostgreSQL manquantes** | L'utilisateur `gestock` n'avait pas les droits nécessaires pour créer des schémas et exécuter des migrations Prisma. | **Règle** : Dès la création du projet, exécuter les GRANTs nécessaires : `ALTER USER gestock CREATEDB; GRANT ALL PRIVILEGES ON DATABASE gestock_db TO gestock;`.
+
+- **Warnings React Router Future Flags** | Warnings dans la console concernant `v7_startTransition` et `v7_relativeSplatPath`. | **Règle** : Activer préventivement ces flags dans `<BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>` pour anticiper la migration vers la v7.
+
+- **Imports TypeScript inutilisés** | Les erreurs `TS6133` (variable déclarée mais non utilisée) font échouer la compilation et bloquent le build. | **Règle** : Toujours nettoyer les imports inutilisés avant chaque commit. Configurer ESLint avec `no-unused-vars` pour détecter ça en temps réel.
+
+- **`prisma migrate dev` interactif** | La commande demande un nom de migration de façon interactive, ce qui bloque les scripts automatiques. | **Règle** : Utiliser `npx prisma migrate dev --name <nom>` pour passer le nom directement et éviter le mode interactif.
+
+- **Isolement multi-tenant par schéma PostgreSQL** | Chaque tenant a son propre schéma (`tenant_<slug>`). Les nouvelles tables doivent être ajoutées à la fois dans `schema.prisma` (modèles globaux) ET dans `tenant.service.ts` (`createTenantSchema`). | **Règle** : Toute nouvelle entité métier doit être déclarée dans ces deux endroits. Créer un ticket ou checklist pour ne pas oublier l'un ou l'autre.
+
+- **Relations Prisma bidirectionnelles** | Prisma exige que toute relation soit définie dans les deux modèles (ex: `PurchaseOrderItem` doit référencer `Product` ET `Product` doit avoir `purchaseOrderItems`). | **Règle** : Toujours vérifier les deux côtés d'une relation Prisma avant de lancer `migrate`. Utiliser `npx prisma format` pour détecter les relations manquantes.
+
+## 2026-04-08 — Phase 2 UI
+
+- **Devise incorrecte** | L'EUR (€) avait été utilisée par défaut dans les composants générés. Le SaaS cible l'Afrique de l'Ouest. | **Règle** : Dès le début du projet, définir la devise dans un fichier de config global (ex: `src/lib/currency.ts`) et l'importer partout. Pour le F CFA : `Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF' })`.
+
+- **Todo.md non mis à jour** | Le fichier de suivi des tâches n'a pas été mis à jour après la complétion des phases. | **Règle** : Mettre à jour `tasks/todo.md` après chaque session de travail, avec le détail de ce qui a été fait.
+
+## 2026-04-09 — Phase 3
+
+- **Stripe en mode test uniquement** | La configuration Stripe est prête mais nécessite des clés réelles (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`) et des produits créés dans le dashboard Stripe. | **Règle** : Utiliser des clés de test (`sk_test_...`) pour le développement local. Ne jamais committer les clés Stripe dans le code — utiliser uniquement les variables d'environnement.
+
+- **Plans tarifaires en F CFA** | Les prix Stripe doivent être créés dans la devise XOF (Franc CFA BCEAO). Stripe supporte XOF mais les montants sont en centimes (×100). | **Règle** : Vérifier la devise supportée par Stripe pour chaque marché cible. Pour XOF : 19 000 F CFA = `1900000` en unité Stripe (centimes).
+
+- **Walkthroughs séparés par module** | Créer des walkthroughs séparés (`walkthrough_phase3_reports.md`, `walkthrough_phase3_billing.md`) pour documenter chaque module. | **Règle** : Un walkthrough par module majeur pour garder la traçabilité et faciliter les reprises de sessions.
+
+- **Dashboard KPIs statiques → dynamiques** | Le `DashboardPage.tsx` affiche encore des valeurs statiques (`—`). Il devrait utiliser `useDashboardStats` de `useReports.ts`. | **Règle** : Ne jamais laisser des composants KPI en mode statique en production. Connecter les données dès que le hook est disponible.
+
+## 2026-04-10 — Phase 6 (Entrepôts & Stabilisation)
+
+- **Erreur de référence `Building` (Lucide)** | L'icône `Building` n'était pas reconnue dans certains fichiers malgré l'import, causant des crashes `ReferenceError`. | **Règle** : Privilégier des noms d'icônes universels comme `Warehouse` ou `Home`. En cas d'erreur de référence sur un import valide, suspecter une version de bibliothèque incompatible ou un cache de build corrompu.
+
+- **Migration Multi-Entrepôts** | L'ajout d'une table `product_warehouses` rend les données existantes "orphelines" si elles ne sont pas rattachées à un entrepôt par défaut dès la migration. | **Règle** : Toujours accompagner un changement structurel de stock par un script de migration (`migrate_warehouses.ts`) qui initialise un "Dépôt Principal" et y transfère les stocks actuels.
+
+- **Flux d'activation Manuel SaaS** | L'automatisation complète via Stripe peut être rigide pour certains marchés. Un dashboard "HQ" permettant l'activation manuelle offre plus de flexibilité pour les paiements hors-ligne (Mobile Money). | **Règle** : Toujours prévoir un "kill-switch" ou un mode manuel dans le Super-Admin pour outrepasser les automates de facturation en cas de besoin client spécifique.
+
+- **Oubli d'imports dans App.tsx** | L'ajout de nouvelles routes sans import correspondant dans `App.tsx` bloque toute l'application. | **Règle** : Chaque nouvelle page créée doit être immédiatement importée et déclarée dans le routeur principal avant de passer à la suite.
+
+## 2026-04-11 — Modernisation & Polissage
+
+- **Sérialisation JSON d'`Infinity`** | Dans le backend, les limites du plan "Enterprise" sont à `Infinity`. Lors du passage via JSON (API), ces valeurs deviennent `null`. Le frontend affichait "Max null". | **Règle** : Dans le frontend, toujours prévoir un test `(limit === Infinity || limit === null)` pour identifier un quota illimité venant d'une API.
+
+- **Notifications statiques vs dynamiques** | Une cloche de notification sans données réelles déçoit l'utilisateur. | **Règle** : Dès qu'une source de données critique (ex: alertes stock bas) existe, elle doit être connectée au Header via un hook dédié (`useAlerts`) avec rafraîchissement périodique.
+
+- **First Impression & Login UI** | La page de connexion est la première vitrine. Un design générique (gradients simples) peut sembler "amateur". | **Règle** : Investir dans des visuels 3D, du glassmorphism et des animations de flottaison (`animate-float`) dès le login pour instaurer une confiance "Premium" immédiate.

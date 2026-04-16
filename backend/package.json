@@ -1,0 +1,50 @@
+{
+    "name": "gestock-backend",
+    "version": "1.0.0",
+    "private": true,
+    "scripts": {
+        "dev": "tsx watch src/app.ts",
+        "build": "tsc",
+        "start": "node dist/app.js",
+        "lint": "eslint src --ext .ts",
+        "prisma:generate": "prisma generate",
+        "prisma:migrate": "prisma migrate dev",
+        "prisma:studio": "prisma studio",
+        "seed": "tsx src/prisma/seed.ts",
+        "migrate:warehouses": "tsx src/scripts/migrate_warehouses.ts",
+        "migrate:expiry": "tsx src/scripts/migrate_expiry_fields.ts",
+        "test": "jest"
+    },
+    "dependencies": {
+        "@prisma/client": "^5.8.1",
+        "bcryptjs": "^2.4.3",
+        "cors": "^2.8.5",
+        "dotenv": "^16.3.1",
+        "express": "^4.18.2",
+        "express-rate-limit": "^7.1.5",
+        "helmet": "^7.1.0",
+        "jsonwebtoken": "^9.0.2",
+        "node-cron": "^4.2.1",
+        "nodemailer": "^8.0.5",
+        "redis": "^4.6.12",
+        "stripe": "^14.25.0",
+        "zod": "^3.22.4"
+    },
+    "devDependencies": {
+        "@types/bcryptjs": "^2.4.6",
+        "@types/cors": "^2.8.17",
+        "@types/express": "^4.17.21",
+        "@types/jest": "^30.0.0",
+        "@types/jsonwebtoken": "^9.0.5",
+        "@types/node": "^20.11.5",
+        "@types/node-cron": "^3.0.11",
+        "@types/nodemailer": "^8.0.0",
+        "@types/supertest": "^7.2.0",
+        "jest": "^30.3.0",
+        "prisma": "^5.8.1",
+        "supertest": "^7.2.2",
+        "ts-jest": "^29.4.9",
+        "tsx": "^4.7.0",
+        "typescript": "^5.3.3"
+    }
+}

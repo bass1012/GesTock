@@ -1,0 +1,258 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Schema Public : Tables globales ───
+
+model Tenant {
+  id        String   @id @default(uuid())
+  slug      String   @unique
+  name      String
+  plan      String   @default("starter") // starter | pro | enterprise
+  config    Json     @default("{}")      // feature flags, thème, modules
+  isSuspended Boolean  @default(false) @map("is_suspended")
+  apiEnabled  Boolean  @default(true)  @map("api_enabled")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  users     User[]
+  apiKeys   ApiKey[]
+
+  @@map("tenants")
+}
+
+model ApiKey {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  iv        String?  // Initialization Vector pour le chiffrement
+  name      String   // ex: "WooCommerce", "Mobile App"
+  tenantId  String   @map("tenant_id")
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  lastUsedAt DateTime? @map("last_used_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([tenantId])
+  @@index([createdAt])
+  @@map("api_keys")
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  action    String   // ex: "DELETE_PRODUCT", "RESET_PASSWORD"
+  userId    String?  @map("user_id")
+  tenantId  String?  @map("tenant_id")
+  resource  String?  // ex: "product", "user"
+  resourceId String?  @map("resource_id")
+  metadata  Json?    @default("{}")
+  ip        String?
+  userAgent String?  @map("user_agent")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([tenantId])
+  @@index([createdAt])
+  @@index([action])
+  @@index([userId])
+  @@map("audit_logs")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String
+  password  String
+  firstName String   @map("first_name")
+  lastName  String   @map("last_name")
+  role      String   @default("admin") // admin | manager | lecteur
+  tenantId  String   @map("tenant_id")
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  resetPasswordToken   String?   @map("reset_password_token")
+  resetPasswordExpires DateTime? @map("reset_password_expires")
+  mustChangePassword   Boolean   @default(false) @map("must_change_password")
+  twoFactorSecret      String?   @map("two_factor_secret")
+  twoFactorEnabled     Boolean   @default(false) @map("two_factor_enabled")
+  twoFactorBackupCodes Json?     @map("two_factor_backup_codes")
+
+  refreshTokens RefreshToken[]
+
+  @@unique([email, tenantId])
+  @@index([tenantId])
+  @@index([createdAt])
+  @@index([role])
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@index([token])
+  @@index([expiresAt])
+  @@map("refresh_tokens")
+}
+
+// ─── Tables tenant (seront créées dynamiquement par schema) ───
+// Les tables ci-dessous sont dans le schema public pour la migration,
+// mais seront dupliquées par tenant schema via SQL brut.
+
+model Product {
+  id           String   @id @default(uuid())
+  sku          String
+  name         String
+  description  String?
+  categoryId   String?  @map("category_id")
+  category     Category? @relation(fields: [categoryId], references: [id])
+  unit         String   @default("unité")
+  minStock     Int      @default(0) @map("min_stock")
+  currentStock Int      @default(0) @map("current_stock")
+  price        Float    @default(0)
+  expiryDate   DateTime? @map("expiry_date")
+  batchNumber  String?  @map("batch_number")
+  isDeleted    Boolean  @default(false) @map("is_deleted")
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  movements          StockMovement[]
+  purchaseOrderItems PurchaseOrderItem[]
+  saleItems          SaleItem[]
+
+  @@index([categoryId])
+  @@index([createdAt])
+  @@index([sku])
+  @@index([isActive])
+  @@index([isDeleted])
+  @@map("products")
+}
+
+model Category {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  products Product[]
+
+  @@map("categories")
+}
+
+model StockMovement {
+  id        String   @id @default(uuid())
+  productId String   @map("product_id")
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  type      String   // IN | OUT | TRANSFER | ADJUSTMENT
+  quantity  Int
+  reference String?
+  note      String?
+  createdBy String?  @map("created_by")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([productId])
+  @@index([createdAt])
+  @@index([type])
+  @@map("stock_movements")
+}
+
+model Supplier {
+  id        String   @id @default(uuid())
+  name      String
+  email     String?
+  phone     String?
+  address   String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  purchaseOrders PurchaseOrder[]
+
+  @@map("suppliers")
+}
+
+model PurchaseOrder {
+  id           String   @id @default(uuid())
+  supplierId   String   @map("supplier_id")
+  supplier     Supplier @relation(fields: [supplierId], references: [id])
+  status       String   @default("DRAFT") // DRAFT, SENT, RECEIVED, CANCELLED
+  totalAmount  Float    @default(0) @map("total_amount")
+  expectedDate DateTime? @map("expected_date")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  items PurchaseOrderItem[]
+
+  @@index([supplierId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("purchase_orders")
+}
+
+model PurchaseOrderItem {
+  id              String   @id @default(uuid())
+  purchaseOrderId String   @map("purchase_order_id")
+  purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+  productId       String   @map("product_id")
+  product         Product  @relation(fields: [productId], references: [id])
+  quantity        Int
+  unitPrice       Float    @map("unit_price")
+
+  @@index([purchaseOrderId])
+  @@index([productId])
+  @@map("purchase_order_items")
+}
+
+model Client {
+  id        String   @id @default(uuid())
+  name      String
+  email     String?
+  phone     String?
+  address   String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  sales     Sale[]
+
+  @@map("clients")
+}
+
+model Sale {
+  id           String   @id @default(uuid())
+  clientId     String?  @map("client_id")
+  client       Client?  @relation(fields: [clientId], references: [id])
+  status       String   @default("DRAFT") // DRAFT, COMPLETED, CANCELLED
+  totalAmount  Float    @default(0) @map("total_amount")
+  taxRate      Float?   @default(0) @map("tax_rate")
+  taxAmount    Float?   @default(0) @map("tax_amount")
+  reference    String   @default(uuid()) @unique // Numéro de facture/devis (généré aut.)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  items        SaleItem[]
+
+  @@index([clientId])
+  @@index([status])
+  @@index([createdAt])
+  @@index([reference])
+  @@map("sales")
+}
+
+model SaleItem {
+  id        String   @id @default(uuid())
+  saleId    String   @map("sale_id")
+  sale      Sale     @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  productId String   @map("product_id")
+  product   Product  @relation(fields: [productId], references: [id])
+  quantity  Int
+  unitPrice Float    @map("unit_price")
+
+  @@index([saleId])
+  @@index([productId])
+  @@map("sale_items")
+}

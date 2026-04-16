@@ -1,0 +1,159 @@
+import { useState, FormEvent } from 'react'
+import { X } from 'lucide-react'
+import { useCreateProduct, useUpdateProduct, Product, ProductFormData } from '../../hooks/useProducts'
+
+interface ProductModalProps {
+    product: Product | null
+    onClose: () => void
+}
+
+export default function ProductModal({ product, onClose }: ProductModalProps) {
+    const [form, setForm] = useState<ProductFormData>({
+        sku: product?.sku || '',
+        name: product?.name || '',
+        description: product?.description || '',
+        unit: product?.unit || 'unité',
+        minStock: product?.minStock || 0,
+        currentStock: product?.currentStock || 0,
+        price: product?.price || 0,
+        expiryDate: product?.expiryDate ? new Date(product.expiryDate).toISOString().split('T')[0] : '',
+        batchNumber: product?.batchNumber || '',
+        isActive: product?.isActive ?? true,
+        categoryId: product?.categoryId || '',
+    })
+
+    const createProduct = useCreateProduct()
+    const updateProduct = useUpdateProduct()
+    const isEditing = !!product
+
+    const handleSubmit = async (e: FormEvent) => {
+        e.preventDefault()
+        
+        // Sanitize data: convert empty strings to undefined for optional DB fields
+        const sanitizedData: ProductFormData = {
+            ...form,
+            expiryDate: form.expiryDate === '' ? undefined : form.expiryDate,
+            categoryId: form.categoryId === '' ? undefined : form.categoryId,
+            description: form.description === '' ? undefined : form.description,
+            batchNumber: form.batchNumber === '' ? undefined : form.batchNumber,
+        }
+
+        if (isEditing) {
+            await updateProduct.mutateAsync({ ...sanitizedData, id: product.id })
+        } else {
+            await createProduct.mutateAsync(sanitizedData)
+        }
+        onClose()
+    }
+
+    const updateField = (field: keyof ProductFormData, value: any) => {
+        setForm((prev) => ({ ...prev, [field]: value }))
+    }
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+            {/* Backdrop */}
+            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
+
+            {/* Modal */}
+            <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
+                <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                    <h2 className="text-lg font-semibold text-gray-900">
+                        {isEditing ? 'Modifier le produit' : 'Nouveau produit'}
+                    </h2>
+                    <button onClick={onClose} className="p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                        <X size={20} className="text-gray-500" />
+                    </button>
+                </div>
+
+                <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="col-span-2">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Nom du produit</label>
+                            <input type="text" value={form.name} onChange={(e) => updateField('name', e.target.value)} className="input" placeholder="Ex: Ciment Portland 50kg" required />
+                        </div>
+
+                        {/* Potentially add Category Select here later if needed, 
+                            but for now we just make sure we don't lose the ID if it exists */}
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">SKU / Code</label>
+                            <input type="text" value={form.sku} onChange={(e) => updateField('sku', e.target.value)} className="input font-mono" placeholder="CIM-001" required />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Statut du produit</label>
+                            <select 
+                                value={form.isActive ? 'active' : 'inactive'} 
+                                onChange={(e) => updateField('isActive', e.target.value === 'active')}
+                                className={`input font-medium ${form.isActive ? 'text-green-600' : 'text-amber-600'}`}
+                            >
+                                <option value="active">🟢 Actif (En vente)</option>
+                                <option value="inactive">🟠 Inactif (Désactivé)</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Unité</label>
+                            <select value={form.unit} onChange={(e) => updateField('unit', e.target.value)} className="input">
+                                <option value="unité">Unité</option>
+                                <option value="kg">Kilogramme (kg)</option>
+                                <option value="litre">Litre (L)</option>
+                                <option value="mètre">Mètre (m)</option>
+                                <option value="carton">Carton</option>
+                                <option value="palette">Palette</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Prix unitaire (F CFA)</label>
+                            <input type="number" step="0.01" min="0" value={form.price} onChange={(e) => updateField('price', parseFloat(e.target.value) || 0)} className="input" required />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Stock actuel</label>
+                            <input type="number" min="0" value={form.currentStock} onChange={(e) => updateField('currentStock', parseInt(e.target.value) || 0)} className="input" required />
+                        </div>
+
+                        <div className="col-span-2">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Stock minimum (alerte)</label>
+                            <input type="number" min="0" value={form.minStock} onChange={(e) => updateField('minStock', parseInt(e.target.value) || 0)} className="input" />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">📅 Date d'expiration</label>
+                            <input type="date" value={form.expiryDate || ''} onChange={(e) => updateField('expiryDate', e.target.value)} className="input" />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">🔢 Numéro de lot</label>
+                            <input type="text" value={form.batchNumber || ''} onChange={(e) => updateField('batchNumber', e.target.value)} className="input" placeholder="Batch-123" />
+                        </div>
+
+                        <div className="col-span-2">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                            <textarea value={form.description || ''} onChange={(e) => updateField('description', e.target.value)} className="input min-h-[80px] resize-none" placeholder="Description optionnelle..." rows={3} />
+                        </div>
+                    </div>
+
+                    <div className="flex gap-3 pt-4 border-t border-gray-200">
+                        <button type="button" onClick={onClose} className="btn-secondary flex-1">
+                            Annuler
+                        </button>
+                        <button
+                            type="submit"
+                            disabled={createProduct.isPending || updateProduct.isPending}
+                            className="btn-primary flex-1"
+                        >
+                            {createProduct.isPending || updateProduct.isPending
+                                ? 'Enregistrement...'
+                                : isEditing
+                                    ? 'Mettre à jour'
+                                    : 'Créer le produit'}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    )
+}

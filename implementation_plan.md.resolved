@@ -1,0 +1,183 @@
+# Phase 1 — Fondations du Projet SaaS Gestion de Stock
+
+Application web multi-tenant de gestion de stock, construite avec React + Vite (frontend) et Node.js + Express + Prisma (backend). Cette phase couvre l'initialisation du monorepo, l'infrastructure Docker, le schéma de données, l'authentification JWT, le middleware multi-tenant, le CRUD produits et le système de feature flags.
+
+## Architecture 4 Couches
+
+Architecture validée depuis le diagramme de modélisation fourni :
+
+```mermaid
+graph TD
+    subgraph "Frontend — React.js"
+        F1["Dashboard"]
+        F2["Inventaire"]
+        F3["Commandes"]
+        F4["Rapports"]
+        F5["Paramètres"]
+    end
+
+    subgraph "API Gateway — Node.js / Express"
+        AG["Auth JWT · Rate limiting · Multi-tenant routing · Versioning"]
+    end
+
+    subgraph "Services métier"
+        S1["Stock<br/>CRUD · alertes"]
+        S2["Fournisseurs<br/>Catalogue · PO"]
+        S3["Facturation<br/>Plans · usage"]
+        S4["Rapports<br/>PDF · exports"]
+        S5["Notifs<br/>Email · SMS"]
+    end
+
+    subgraph "Couche données"
+        D1["PostgreSQL<br/>principal"]
+        D2["Redis<br/>cache/sessions"]
+        D3["S3<br/>fichiers/docs"]
+        D4["Queue<br/>jobs"]
+    end
+
+    subgraph "Isolation multi-tenant"
+        T1["Client A<br/>Schema dédié"]
+        T2["Client B<br/>Schema dédié"]
+        T3["Client N<br/>Schema dédié"]
+    end
+
+    F1 & F2 & F3 & F4 & F5 -->|"REST / JWT"| AG
+    AG --> S1 & S2 & S3 & S4 & S5
+    S1 & S2 & S3 & S4 & S5 --> D1 & D2 & D3 & D4
+    D1 --> T1 & T2 & T3
+```
+
+> [!IMPORTANT]
+> **Stack confirmée** : React + Vite + TailwindCSS, Node.js + Express, Prisma ORM, PostgreSQL (schema-per-tenant), Redis, JWT.
+
+> [!WARNING]
+> **Multi-tenant schema-per-tenant** : chaque nouveau tenant crée un schema PostgreSQL dédié. L'utilisateur PostgreSQL doit avoir les droits `CREATE SCHEMA`.
+
+---
+
+## Proposed Changes
+
+### 1. Monorepo — Initialisation
+
+#### [NEW] [package.json](file:///Users/bassoued/Documents/GesTock/package.json)
+- Package racine avec workspaces npm (`frontend/`, `backend/`)
+- Scripts globaux : `dev`, `build`, `lint`
+
+---
+
+### 2. Frontend — React + Vite + TailwindCSS
+
+#### [NEW] frontend/ (via `npx create-vite`)
+
+Structure alignée sur les 5 modules du diagramme :
+```
+frontend/src/
+├── components/       # Layout, Sidebar, Header, ProtectedRoute
+├── pages/
+│   ├── auth/         # LoginPage, RegisterPage
+│   ├── dashboard/    # DashboardPage (KPIs, alertes)
+│   ├── inventory/    # ProductsPage (catalogue, stocks)
+│   ├── orders/       # CommandesPage (bons de commande)
+│   ├── reports/      # RapportsPage (exports PDF/Excel)
+│   └── settings/     # ParamètresPage (config tenant, users, rôles)
+├── hooks/            # useAuth, useProducts, useTenant
+├── services/         # api.ts (Axios + JWT interceptors + header tenant)
+├── store/            # Zustand — authStore, tenantStore
+└── App.tsx           # Routes + layout
+```
+
+**Phase 1** : seuls `auth/`, `dashboard/` et `inventory/` seront implémentés. Les autres pages sont créées comme placeholders.
+
+---
+
+### 3. Backend — Node.js + Express + Prisma
+
+#### [NEW] backend/ (via `npm init`)
+
+Structure alignée sur les 5 services métier du diagramme :
+```
+backend/src/
+├── routes/            # auth, products, tenants
+├── controllers/       # auth, products
+├── services/
+│   ├── auth.service.ts
+│   ├── stock.service.ts        # Service Stock (CRUD · alertes)
+│   ├── supplier.service.ts     # Service Fournisseurs (placeholder)
+│   ├── billing.service.ts      # Service Facturation (placeholder)
+│   ├── report.service.ts       # Service Rapports (placeholder)
+│   └── notification.service.ts # Service Notifs (placeholder)
+├── middleware/         # auth, tenant, rateLimiter
+├── prisma/            # schema.prisma, migrations/, seed.ts
+├── utils/             # jwt.ts, errors.ts, validators.ts
+├── jobs/              # Jobs asynchrones (placeholder)
+└── app.ts             # Point d'entrée Express
+```
+
+#### Middleware multi-tenant (`tenant.middleware.ts`)
+- Extraction tenant via header `X-Tenant-ID` ou sous-domaine
+- Résolution du schema PostgreSQL → `SET search_path TO tenant_xxx`
+- Injection `tenantId` + `schemaName` dans `req`
+
+#### API Gateway
+- Auth JWT (access 15min + refresh 7j)
+- Rate limiting (express-rate-limit)
+- Versioning `/api/v1/...`
+
+#### Auth endpoints
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/v1/auth/register` | Crée tenant + user admin + schema |
+| POST | `/api/v1/auth/login` | Retourne access + refresh tokens |
+| POST | `/api/v1/auth/refresh` | Renouvelle les tokens |
+| POST | `/api/v1/auth/logout` | Invalide le refresh token |
+
+#### CRUD Produits
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/v1/products` | Liste avec pagination, recherche, tri |
+| GET | `/api/v1/products/:id` | Détail produit |
+| POST | `/api/v1/products` | Création |
+| PUT | `/api/v1/products/:id` | Mise à jour |
+| DELETE | `/api/v1/products/:id` | Suppression (soft delete) |
+
+---
+
+### 4. Schéma Prisma
+
+#### [NEW] [schema.prisma](file:///Users/bassoued/Documents/GesTock/backend/prisma/schema.prisma)
+
+**Schema `public`** (tables globales) :
+- **Tenant** — id, slug, name, plan, config (JSONB), createdAt
+- **User** — id, email, password, role, tenantId, createdAt
+- **RefreshToken** — id, token, userId, expiresAt
+
+**Schema par tenant** (isolation complète) :
+- **Product** — id, sku, name, description, categoryId, unit, minStock, currentStock, price, isActive, timestamps
+- **Category** — id, name, description
+- **StockMovement** — id, productId, type (IN/OUT/TRANSFER/ADJUSTMENT), quantity, reference, note, createdBy, createdAt
+
+---
+
+### 5. Infrastructure Docker
+
+#### [NEW] [docker-compose.yml](file:///Users/bassoued/Documents/GesTock/docker-compose.yml)
+- **postgres** — PostgreSQL 16, port 5432, volume persistant
+- **redis** — Redis 7, port 6379
+
+#### [NEW] [.env.example](file:///Users/bassoued/Documents/GesTock/.env.example)
+- DATABASE_URL, REDIS_URL, JWT_SECRET, JWT_REFRESH_SECRET, STRIPE_KEY, etc.
+
+---
+
+## Verification Plan
+
+### Automated Tests
+1. **Backend** — `cd backend && npm test` (Jest + Supertest : auth, CRUD, tenant isolation)
+2. **Prisma** — `cd backend && npx prisma validate`
+3. **Frontend** — `cd frontend && npm run build`
+
+### Tests navigateur
+4. Lancer `npm run dev` et vérifier : login → dashboard → page produits CRUD
+
+### Infrastructure
+5. `docker-compose up -d` — PostgreSQL (5432) + Redis (6379) accessibles
