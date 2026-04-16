@@ -115,7 +115,7 @@ export const billingController = {
 
     async handleWebhook(req: Request, res: Response, next: NextFunction) {
         try {
-            const { billingService, stripe } = await import('../services/billing.service')
+            const { billingService, requireStripe } = await import('../services/billing.service')
 
             const signature = req.headers['stripe-signature'] as string
             if (!signature) {
@@ -124,7 +124,7 @@ export const billingController = {
 
             let event
             try {
-                event = stripe.webhooks.constructEvent(
+                event = requireStripe().webhooks.constructEvent(
                     req.body,
                     signature,
                     process.env.STRIPE_WEBHOOK_SECRET || ''

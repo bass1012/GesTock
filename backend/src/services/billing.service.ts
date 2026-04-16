@@ -4,14 +4,22 @@ import { NotFoundError, BadRequestError } from '../utils/errors'
 
 const prisma = new PrismaClient()
 
-// Initialize Stripe
+// Initialize Stripe (optional - billing features won't work without it)
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY || ''
 if (!stripeSecretKey && process.env.NODE_ENV === 'production') {
-    throw new Error('STRIPE_SECRET_KEY environment variable is required in production')
+    console.warn('⚠️ STRIPE_SECRET_KEY not set - billing features will be disabled')
 }
-const stripe = new Stripe(stripeSecretKey, {
+const stripe = stripeSecretKey ? new Stripe(stripeSecretKey, {
     apiVersion: '2023-10-16' as any,
-})
+}) : null
+
+// Helper to ensure Stripe is configured
+const requireStripe = () => {
+    if (!stripe) {
+        throw new BadRequestError('Stripe n\'est pas configuré. Contactez l\'administrateur.')
+    }
+    return stripe
+}
 
 // Plan definitions (should match Stripe Product/Price IDs in production)
 export const PLANS = {
@@ -70,7 +78,7 @@ export const billingService = {
         }
 
         // Create new Stripe customer
-        const customer = await stripe.customers.create({
+        const customer = await requireStripe().customers.create({
             email,
             name,
             metadata: {
@@ -107,7 +115,7 @@ export const billingService = {
         const customerId = await this.getOrCreateCustomer(tenantId, adminUser.email, tenant.name)
 
         // Create subscription
-        const subscription = await stripe.subscriptions.create({
+        const subscription = await requireStripe().subscriptions.create({
             customer: customerId,
             items: [{ price: priceId }],
             payment_behavior: 'default_incomplete',
@@ -179,7 +187,7 @@ export const billingService = {
         }
 
         // Cancel at period end
-        await stripe.subscriptions.update(config.stripeSubscriptionId, {
+        await requireStripe().subscriptions.update(config.stripeSubscriptionId, {
             cancel_at_period_end: true
         })
     },
@@ -194,7 +202,7 @@ export const billingService = {
         }
 
         // Resume subscription
-        await stripe.subscriptions.update(config.stripeSubscriptionId, {
+        await requireStripe().subscriptions.update(config.stripeSubscriptionId, {
             cancel_at_period_end: false
         })
     },
@@ -208,7 +216,7 @@ export const billingService = {
             return []
         }
 
-        const invoices = await stripe.invoices.list({
+        const invoices = await requireStripe().invoices.list({
             customer: config.stripeCustomerId,
             limit: 12
         })
@@ -231,7 +239,7 @@ export const billingService = {
             throw new BadRequestError('Aucun client Stripe associé')
         }
 
-        const setupIntent = await stripe.setupIntents.create({
+        const setupIntent = await requireStripe().setupIntents.create({
             customer: config.stripeCustomerId,
             payment_method_types: ['card']
         })
@@ -249,17 +257,17 @@ export const billingService = {
         }
 
         // Attach payment method to customer
-        await stripe.paymentMethods.attach(paymentMethodId, {
+        await requireStripe().paymentMethods.attach(paymentMethodId, {
             customer: config.stripeCustomerId
         })
 
         // Update default payment method
-        await stripe.customers.update(config.stripeCustomerId, {
+        await requireStripe().customers.update(config.stripeCustomerId, {
             invoice_settings: { default_payment_method: paymentMethodId }
         })
 
         // Update subscription payment method
-        await stripe.subscriptions.update(config.stripeSubscriptionId, {
+        await requireStripe().subscriptions.update(config.stripeSubscriptionId, {
             default_payment_method: paymentMethodId
         })
     },
@@ -348,7 +356,7 @@ export const billingService = {
             throw new BadRequestError('Aucun client Stripe associé')
         }
 
-        const session = await stripe.billingPortal.sessions.create({
+        const session = await requireStripe().billingPortal.sessions.create({
             customer: config.stripeCustomerId,
             return_url: `${process.env.FRONTEND_URL}/settings/billing`
         })
@@ -357,4 +365,4 @@ export const billingService = {
     }
 }
 
-export { stripe }
+export { stripe, requireStripe }
