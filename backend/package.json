@@ -27,7 +27,7 @@
     "node-cron": "^4.2.1",
     "nodemailer": "^8.0.5",
     "redis": "^4.6.12",
-    "stripe": "^14.25.0",
+    "stripe": "^22.0.2",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
     "zod": "^3.22.4"
