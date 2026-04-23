@@ -15,7 +15,7 @@
     "lint:fix": "npm -w frontend run lint -- --fix && npm -w backend run lint -- --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "prepare": "husky"
+    "prepare": "node -e \"if(process.env.NODE_ENV!=='production' && process.env.CI!=='true'){require('child_process').execSync('husky',{stdio:'inherit'})}\""
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^8.30.0",
