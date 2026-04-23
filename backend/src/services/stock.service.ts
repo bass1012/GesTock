@@ -25,11 +25,19 @@ export const stockService = {
         }
 
         const products = await prisma.$queryRawUnsafe(
-            `SELECT *, (SELECT name FROM "${schemaName}".categories WHERE id = p.category_id) as category_name
-       FROM "${schemaName}".products p
-       ${whereClause}
-       ORDER BY created_at DESC
-       LIMIT $1 OFFSET $2`,
+            `SELECT p.*,
+                    (SELECT name FROM "${schemaName}".categories WHERE id = p.category_id) as category_name,
+                    COALESCE(
+                        (SELECT json_agg(json_build_object('id', w.id, 'name', w.name, 'quantity', pw.quantity) ORDER BY w.name)
+                         FROM "${schemaName}".product_warehouses pw
+                         JOIN "${schemaName}".warehouses w ON pw.warehouse_id = w.id
+                         WHERE pw.product_id = p.id AND pw.quantity > 0),
+                        '[]'::json
+                    ) as warehouses
+             FROM "${schemaName}".products p
+             ${whereClause}
+             ORDER BY p.created_at DESC
+             LIMIT $1 OFFSET $2`,
             ...params
         ) as any[]
 
@@ -57,6 +65,7 @@ export const stockService = {
                 isActive: p.is_active,
                 createdAt: p.created_at,
                 updatedAt: p.updated_at,
+                warehouses: Array.isArray(p.warehouses) ? p.warehouses : [],
             })),
             total,
             page,
@@ -178,6 +187,19 @@ export const stockService = {
 
         if (!result.length) {
             throw new NotFoundError('Produit introuvable')
+        }
+
+        // Si un entrepôt est fourni, mettre à jour product_warehouses avec le stock actuel
+        if (data.warehouseId) {
+            const stockQty = data.currentStock !== undefined ? data.currentStock : result[0].current_stock
+            await prisma.$executeRawUnsafe(
+                `INSERT INTO "${schemaName}".product_warehouses (product_id, warehouse_id, quantity)
+                 VALUES ($1::uuid, $2::uuid, $3)
+                 ON CONFLICT (product_id, warehouse_id) DO UPDATE SET quantity = $3, updated_at = NOW()`,
+                id,
+                data.warehouseId,
+                stockQty
+            )
         }
 
         return result[0]
@@ -426,7 +448,28 @@ export const stockService = {
             productId, sourceWarehouseId
         ) as any[]
 
-        const currentSourceQty = sourceStock.length > 0 ? sourceStock[0].quantity : 0
+        let currentSourceQty: number
+        if (sourceStock.length > 0) {
+            currentSourceQty = Number(sourceStock[0].quantity)
+        } else {
+            // Pas d'entrée product_warehouses : utiliser current_stock global comme fallback
+            // (produit créé avant le système multi-entrepôts)
+            const prod = await prisma.$queryRawUnsafe(
+                `SELECT current_stock FROM "${schemaName}".products WHERE id = $1::uuid`,
+                productId
+            ) as any[]
+            currentSourceQty = prod.length > 0 ? Number(prod[0].current_stock) : 0
+            // Initialiser l'entrée product_warehouses pour la source
+            if (currentSourceQty > 0) {
+                await prisma.$executeRawUnsafe(
+                    `INSERT INTO "${schemaName}".product_warehouses (product_id, warehouse_id, quantity)
+                     VALUES ($1::uuid, $2::uuid, $3)
+                     ON CONFLICT (product_id, warehouse_id) DO NOTHING`,
+                    productId, sourceWarehouseId, currentSourceQty
+                )
+            }
+        }
+
         if (currentSourceQty < quantity) {
             throw new Error(`Stock insuffisant dans l'entrepôt source (Disponible: ${currentSourceQty})`)
         }

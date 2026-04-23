@@ -18,6 +18,7 @@ export interface Product {
     isActive: boolean
     createdAt: string
     updatedAt: string
+    warehouses: { id: string; name: string; quantity: number }[]
 }
 
 export interface ProductFormData {

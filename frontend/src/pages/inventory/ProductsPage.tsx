@@ -97,6 +97,7 @@ export default function ProductsPage() {
                                 <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Produit</th>
                                 <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">SKU</th>
                                 <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Stock</th>
+                                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Entrepôts</th>
                                 <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Expiration</th>
                                 <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Prix</th>
                                 <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Statut</th>
@@ -106,7 +107,7 @@ export default function ProductsPage() {
                         <tbody className="divide-y divide-gray-200">
                             {isLoading ? (
                                 <tr>
-                                    <td colSpan={6} className="px-6 py-12 text-center">
+                                    <td colSpan={8} className="px-6 py-12 text-center">
                                         <div className="flex items-center justify-center gap-2 text-gray-400">
                                             <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
                                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
@@ -150,6 +151,21 @@ export default function ProductsPage() {
                                                 )}
                                                 <Warehouse size={14} className="inline ml-1.5 text-gray-400 group-hover:text-primary-500 transition-colors" />
                                             </div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            {product.warehouses && product.warehouses.length > 0 ? (
+                                                <div className="flex flex-wrap gap-1">
+                                                    {product.warehouses.map(w => (
+                                                        <span key={w.id} className="inline-flex items-center gap-1 text-xs bg-blue-50 text-blue-700 border border-blue-200 rounded px-1.5 py-0.5 font-medium" title={`${w.name}: ${w.quantity} ${product.unit}`}>
+                                                            <Warehouse size={10} />
+                                                            {w.name}
+                                                            <span className="text-blue-500">·{w.quantity}</span>
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <span className="text-xs text-gray-400">—</span>
+                                            )}
                                         </td>
                                         <td className="px-6 py-4">
                                             {product.expiryDate ? (
@@ -217,7 +233,7 @@ export default function ProductsPage() {
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan={6} className="px-6 py-12 text-center">
+                                    <td colSpan={8} className="px-6 py-12 text-center">
                                         <Package size={40} className="mx-auto mb-3 text-gray-300" />
                                         <p className="text-gray-500 font-medium">Aucun produit</p>
                                         <p className="text-sm text-gray-400 mt-1">

@@ -1,8 +1,21 @@
 import { useState } from 'react'
-import { ArrowRightLeft, Package, Warehouse } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
+import { ArrowRightLeft, Package, Warehouse, Info } from 'lucide-react'
 import { useWarehouses } from '../../hooks/useWarehouses'
 import { useProducts } from '../../hooks/useProducts'
 import { useTransfers } from '../../hooks/useTransfers'
+import api from '../../services/api'
+
+function useProductWarehouseStock(productId: string | null) {
+    return useQuery({
+        queryKey: ['warehouse-stock', productId],
+        queryFn: async () => {
+            const { data } = await api.get(`/warehouses/product/${productId}`)
+            return data as { warehouse_id: string; warehouse_name: string; quantity: number }[]
+        },
+        enabled: !!productId,
+    })
+}
 
 export default function TransfersPage() {
     const [form, setForm] = useState({
@@ -17,9 +30,16 @@ export default function TransfersPage() {
     const { data: warehousesData, isLoading: loadingWarehouses } = useWarehouses()
     const { data: productsData, isLoading: loadingProducts } = useProducts(1, 100)
     const { createTransfer } = useTransfers()
+    const { data: warehouseStock } = useProductWarehouseStock(form.productId || null)
 
     const warehouses = warehousesData ?? []
     const products = productsData?.products ?? []
+
+    // Stock dispo par entrepôt pour le produit sélectionné
+    const stockByWarehouse = (warehouseStock ?? []).reduce((acc: Record<string, number>, s: any) => {
+        acc[s.warehouse_id] = Number(s.quantity)
+        return acc
+    }, {})
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -81,6 +101,12 @@ export default function TransfersPage() {
                             {submitted && !form.productId && (
                                 <p className="text-xs text-red-500 mt-1">Produit requis</p>
                             )}
+                            {form.productId && warehouseStock !== undefined && warehouseStock.length === 0 && (
+                                <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded px-2 py-1 mt-1 flex items-center gap-1">
+                                    <Info size={12} />
+                                    Stock non ventilé par entrepôt — le stock global sera utilisé lors du transfert.
+                                </p>
+                            )}
                         </div>
 
                         {/* Source & Destination */}
@@ -96,11 +122,17 @@ export default function TransfersPage() {
                                     onChange={e => setForm(f => ({ ...f, sourceWarehouseId: e.target.value }))}
                                 >
                                     <option value="">-- Depuis --</option>
-                                    {warehouses.map(w => (
-                                        <option key={w.id} value={w.id} disabled={w.id === form.destWarehouseId}>
-                                            {w.name}
-                                        </option>
-                                    ))}
+                                    {warehouses.map(w => {
+                                        const qty = stockByWarehouse[w.id]
+                                        const label = form.productId && qty !== undefined
+                                            ? `${w.name} (${qty} dispo)`
+                                            : w.name
+                                        return (
+                                            <option key={w.id} value={w.id} disabled={w.id === form.destWarehouseId}>
+                                                {label}
+                                            </option>
+                                        )
+                                    })}
                                 </select>
                                 {submitted && !form.sourceWarehouseId && (
                                     <p className="text-xs text-red-500 mt-1">Requis</p>
