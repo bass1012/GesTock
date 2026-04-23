@@ -19,6 +19,8 @@ const saleSchema = z.object({
   clientId: z.string().uuid().optional().nullable(),
   type: z.enum(['DEV', 'FAC']),
   taxRate: z.number().min(0).max(100).optional(),
+  warehouseId: z.string().uuid().optional().nullable(),
+  pointsToRedeem: z.number().int().min(0).optional().default(0),
   items: z.array(z.object({
     productId: z.string().uuid(),
     quantity: z.number().int().positive()

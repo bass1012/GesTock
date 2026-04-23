@@ -18,6 +18,7 @@ import {
     Boxes,
     CalendarClock,
     RotateCcw,
+    Users,
 } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { useAuthStore } from '../store/authStore'
@@ -34,6 +35,7 @@ const navItems = [
     { to: '/orders', icon: ShoppingCart, label: 'Commandes', adminOnly: false },
     { to: '/pos', icon: Monitor, label: 'Terminal Caisse', adminOnly: false },
     { to: '/sales', icon: FileText, label: 'Historique Ventes', adminOnly: false },
+    { to: '/clients', icon: Users, label: 'Clients & Fidélité', adminOnly: false },
     { to: '/reports', icon: BarChart3, label: 'Rapports', adminOnly: false },
     { to: '/users', icon: UserCog, label: 'Utilisateurs', adminOnly: true },
     { to: '/settings', icon: Settings, label: 'Paramètres', adminOnly: false },

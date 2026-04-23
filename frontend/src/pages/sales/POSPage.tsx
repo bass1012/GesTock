@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useProducts } from '../../hooks/useProducts';
 import { useSales } from '../../hooks/useSales';
+import { useClients } from '../../hooks/useClients';
+import { useClientLoyalty } from '../../hooks/useLoyalty';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { format } from 'date-fns';
-import { ShoppingCart, Plus, Minus, Printer, Trash2, Search, Warehouse } from 'lucide-react';
+import { ShoppingCart, Plus, Minus, Printer, Trash2, Search, Warehouse, Star, Gift } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useWarehouses } from '../../hooks/useWarehouses';
 
@@ -12,11 +14,16 @@ export default function POSPage() {
     const { data: productsData } = useProducts(1, 1000);
     const { data: warehouses } = useWarehouses();
     const { createSale, isCreating } = useSales();
+    const { clients } = useClients();
     const [selectedWarehouseId, setSelectedWarehouseId] = useState('');
     const [cart, setCart] = useState<{product: any, quantity: number}[]>([]);
     const [taxRate, setTaxRate] = useState<number>(0);
+    const [selectedClientId, setSelectedClientId] = useState('');
     const [clientName, setClientName] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
+    const [pointsToRedeem, setPointsToRedeem] = useState(0);
+
+    const { data: loyalty } = useClientLoyalty(selectedClientId || null);
 
     // Select default warehouse
     useEffect(() => {
@@ -25,9 +32,15 @@ export default function POSPage() {
         }
     }, [warehouses, selectedWarehouseId]);
 
+    // Reset points when client changes
+    useEffect(() => {
+        setPointsToRedeem(0);
+    }, [selectedClientId]);
+
     const subTotal = cart.reduce((acc, item) => acc + (item.product.price * item.quantity), 0);
     const taxAmount = subTotal * (taxRate / 100);
-    const superTotal = subTotal + taxAmount;
+    const loyaltyDiscount = pointsToRedeem * 50; // 50 F CFA par point
+    const superTotal = Math.max(0, subTotal + taxAmount - loyaltyDiscount);
 
     const filteredProducts = productsData?.products?.filter((p: any) => 
         p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -53,7 +66,7 @@ export default function POSPage() {
         }));
     };
 
-    const generateReceipt = (saleRef: string) => {
+    const generateReceipt = (saleRef: string, pointsEarned: number) => {
         const doc = new jsPDF();
         
         doc.setFontSize(22);
@@ -64,7 +77,8 @@ export default function POSPage() {
         doc.setTextColor(100);
         doc.text(`Reçu N° : ${saleRef}`, 14, 30);
         doc.text(`Date : ${format(new Date(), 'dd/MM/yyyy HH:mm')}`, 14, 36);
-        if (clientName) doc.text(`Client : ${clientName}`, 14, 42);
+        const displayName = selectedClientId ? clients.find(c => c.id === selectedClientId)?.name : clientName;
+        if (displayName) doc.text(`Client : ${displayName}`, 14, 42);
 
         const tableBody = cart.map((item) => ([
             item.product.name,
@@ -85,9 +99,16 @@ export default function POSPage() {
         const finalY = (doc as any).lastAutoTable.finalY + 10;
         doc.text(`Sous-total : ${subTotal.toLocaleString('fr-FR').replace(/\s/g, ' ')} F CFA`, 140, finalY);
         if (taxRate > 0) doc.text(`Taxe (${taxRate}%) : ${taxAmount.toLocaleString('fr-FR').replace(/\s/g, ' ')} F CFA`, 140, finalY + 6);
+        if (loyaltyDiscount > 0) doc.text(`Remise fidélité : -${loyaltyDiscount.toLocaleString('fr-FR').replace(/\s/g, ' ')} F CFA`, 140, finalY + 12);
         doc.setFontSize(12);
         doc.setFont('helvetica', 'bold');
-        doc.text(`TOTAL : ${superTotal.toLocaleString('fr-FR').replace(/\s/g, ' ')} F CFA`, 140, finalY + 14);
+        doc.text(`TOTAL : ${superTotal.toLocaleString('fr-FR').replace(/\s/g, ' ')} F CFA`, 140, finalY + 20);
+        if (pointsEarned > 0) {
+            doc.setFontSize(9);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(22, 163, 74);
+            doc.text(`★ Points fidélité gagnés : +${pointsEarned} pts`, 14, finalY + 28);
+        }
 
         doc.save(`Recu_${saleRef}.pdf`);
     };
@@ -95,21 +116,29 @@ export default function POSPage() {
     const handleCheckout = async () => {
         if (!selectedWarehouseId) return toast.error('Veuillez sélectionner un entrepôt de sortie');
         if (cart.length === 0) return toast.error('Le panier est vide');
+        if (pointsToRedeem > 0 && !selectedClientId) return toast.error('Sélectionnez un client pour utiliser les points fidélité');
+        if (pointsToRedeem > 0 && loyalty && pointsToRedeem > loyalty.loyaltyPoints) {
+            return toast.error(`Points insuffisants (disponible: ${loyalty.loyaltyPoints} pts)`);
+        }
         
         try {
             const sale = await createSale({
                 type: 'FAC',
                 taxRate: taxRate,
                 warehouseId: selectedWarehouseId,
+                clientId: selectedClientId || null,
+                pointsToRedeem: pointsToRedeem,
                 items: cart.map(item => ({
                     productId: item.product.id,
                     quantity: item.quantity
                 }))
             });
             
-            generateReceipt(sale.reference);
+            generateReceipt(sale.reference, sale.pointsEarned || 0);
             setCart([]);
             setClientName('');
+            setSelectedClientId('');
+            setPointsToRedeem(0);
             setTaxRate(0);
         } catch (error) {
             console.error(error);
@@ -207,14 +236,54 @@ export default function POSPage() {
                         </div>
                         <div>
                             <label className="text-xs font-semibold text-gray-500 uppercase">Nom du client (Optionnel)</label>
-                            <input 
-                                value={clientName} 
-                                onChange={(e) => setClientName(e.target.value)} 
-                                type="text" 
-                                placeholder="Client de passage..." 
-                                className="w-full mt-1 px-3 py-2 border rounded-lg text-sm bg-white" 
-                            />
+                            <select
+                                value={selectedClientId}
+                                onChange={(e) => setSelectedClientId(e.target.value)}
+                                className="w-full mt-1 px-3 py-2 border rounded-lg text-sm bg-white"
+                            >
+                                <option value="">— Client de passage —</option>
+                                {clients.map((c: any) => (
+                                    <option key={c.id} value={c.id}>{c.name} {c.loyaltyPoints > 0 ? `(${c.loyaltyPoints} pts)` : ''}</option>
+                                ))}
+                            </select>
+                            {!selectedClientId && (
+                                <input
+                                    value={clientName}
+                                    onChange={(e) => setClientName(e.target.value)}
+                                    type="text"
+                                    placeholder="Ou saisir le nom..."
+                                    className="w-full mt-1 px-3 py-2 border rounded-lg text-sm bg-white"
+                                />
+                            )}
                         </div>
+
+                        {/* Fidélité */}
+                        {selectedClientId && loyalty && (
+                            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 space-y-2">
+                                <div className="flex items-center gap-2 text-amber-700 font-semibold text-sm">
+                                    <Star size={14} className="fill-amber-400 text-amber-400" />
+                                    Fidélité — {loyalty.loyaltyPoints} pts disponibles
+                                </div>
+                                <p className="text-xs text-amber-600">= {(loyalty.loyaltyPoints * 50).toLocaleString('fr-FR')} F CFA de remise possible</p>
+                                {loyalty.loyaltyPoints > 0 && (
+                                    <div className="flex items-center gap-2">
+                                        <Gift size={13} className="text-amber-600 shrink-0" />
+                                        <input
+                                            type="number"
+                                            min={0}
+                                            max={loyalty.loyaltyPoints}
+                                            value={pointsToRedeem}
+                                            onChange={(e) => setPointsToRedeem(Math.min(Number(e.target.value) || 0, loyalty.loyaltyPoints))}
+                                            placeholder="pts à utiliser"
+                                            className="w-full px-2 py-1 border rounded text-sm bg-white"
+                                        />
+                                        <span className="text-xs text-amber-700 whitespace-nowrap font-medium">
+                                            -{(pointsToRedeem * 50).toLocaleString('fr-FR')} F
+                                        </span>
+                                    </div>
+                                )}
+                            </div>
+                        )}
                         <div className="flex items-center justify-between">
                             <label className="text-sm font-medium">TVA (Taxe) %</label>
                             <input 
@@ -235,6 +304,12 @@ export default function POSPage() {
                             <span>Taxe</span>
                             <span>{taxAmount.toLocaleString()} F</span>
                         </div>
+                        {loyaltyDiscount > 0 && (
+                            <div className="flex justify-between text-sm text-green-600 mb-2">
+                                <span className="flex items-center gap-1"><Gift size={13} />Remise fidélité</span>
+                                <span>-{loyaltyDiscount.toLocaleString()} F</span>
+                            </div>
+                        )}
                         <div className="flex justify-between items-end">
                             <span className="font-bold text-gray-900">Total à Payer</span>
                             <span className="text-2xl font-bold text-primary-600">{superTotal.toLocaleString('fr-FR')} F</span>

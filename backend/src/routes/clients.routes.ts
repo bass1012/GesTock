@@ -15,34 +15,41 @@ const clientSchema = z.object({
   address: z.string().optional().or(z.literal(''))
 })
 
-router.get('/', async (req, res, next) => {
+router.get('/', async (req: any, res, next) => {
   try {
-    const clients = await clientsService.getAllClients()
+    const clients = await clientsService.getAllClients(req.tenantSlug)
     res.json(clients)
   } catch (error) { next(error) }
 })
 
-router.get('/:id', async (req, res, next) => {
+router.get('/:id', async (req: any, res, next) => {
   try {
-    const client = await clientsService.getClientById(req.params.id)
+    const client = await clientsService.getClientById(req.params.id, req.tenantSlug)
     if (!client) return res.status(404).json({ error: 'Client non trouvé' })
     res.json(client)
   } catch (error) { next(error) }
 })
 
-router.post('/', async (req, res, next) => {
+router.post('/', async (req: any, res, next) => {
   try {
     const validatedData = clientSchema.parse(req.body)
-    const client = await clientsService.createClient(validatedData)
+    const client = await clientsService.createClient(validatedData, req.tenantSlug)
     res.status(201).json(client)
   } catch (error) { next(error) }
 })
 
-router.patch('/:id', async (req, res, next) => {
+router.patch('/:id', async (req: any, res, next) => {
   try {
     const validatedData = clientSchema.partial().parse(req.body)
-    const client = await clientsService.updateClient(req.params.id, validatedData)
+    const client = await clientsService.updateClient(req.params.id, validatedData, req.tenantSlug)
     res.json(client)
+  } catch (error) { next(error) }
+})
+
+router.delete('/:id', async (req: any, res, next) => {
+  try {
+    await clientsService.deleteClient(req.params.id, req.tenantSlug)
+    res.status(204).end()
   } catch (error) { next(error) }
 })
 

@@ -19,6 +19,7 @@ import apiKeyKeysRoutes from './routes/api-keys.routes'
 import transfersRoutes from './routes/transfers.routes'
 import lotsRoutes from './routes/lots.routes'
 import supplierReturnsRoutes from './routes/supplierReturns.routes'
+import loyaltyRoutes from './routes/loyalty.routes'
 import { apiKeyMiddleware } from './middleware/apiKey.middleware'
 import { startStockAlertJob } from './jobs/stockAlert.job'
 import { errorHandler } from './middleware/errorHandler'
@@ -81,6 +82,7 @@ app.use('/api/v1/api-keys', apiKeyKeysRoutes)
 app.use('/api/v1/stock/transfers', transfersRoutes)
 app.use('/api/v1/stock/lots', lotsRoutes)
 app.use('/api/v1/suppliers/returns', supplierReturnsRoutes)
+app.use('/api/v1/loyalty', loyaltyRoutes)
 
 // Error handler (must be last)
 app.use(errorHandler)

@@ -177,9 +177,30 @@
   - [x] Route `GET /api/v1/reports/forecasts` (Pro/Enterprise) avec doc Swagger
   - [x] Hook `useRestockForecasts` + type `RestockForecast` dans `useReports.ts`
   - [x] Onglet "Prévisions" dans `ReportsPage.tsx` — tableau trié par urgence avec badge coloré
-- [ ] **Gestion des lots & dates de péremption** (secteurs alimentaires / pharmaceutiques)
-- [ ] **Retours fournisseurs** — gestion des avoirs et retours marchandises
-- [ ] **Module fidélité clients POS** — points, remises, historique d'achat par client
+- [x] **Gestion des lots & dates de péremption** (secteurs alimentaires / pharmaceutiques)
+  - [x] Script migration `migrate_lots_fields.ts` — `batch_number VARCHAR` + `expiry_date TIMESTAMP` sur `stock_movements`
+  - [x] `createMovement` étendu avec `batchNumber` et `expiryDate`
+  - [x] Méthode `listLots` dans `stock.service.ts` — lots actifs avec `daysRemaining` et `expiryStatus` (expired/critical/warning/ok)
+  - [x] Route `GET /api/v1/stock/lots` + hook `useLots.ts`
+  - [x] Page `LotsPage.tsx` — tableau avec alertes visuelles, filtres, badges colorés
+  - [x] `NewMovementModal.tsx` — section N° lot + date péremption pour type IN
+  - [x] Route `/lots` dans App.tsx, item "Lots & Péremption" (CalendarClock) dans Sidebar
+- [x] **Retours fournisseurs** — gestion des avoirs et retours marchandises
+  - [x] Script migration `migrate_supplier_returns.ts` — tables `supplier_returns` + `supplier_return_items`
+  - [x] Service `supplierReturn.service.ts` — `list`, `get`, `create` (génère mouvements OUT automatiquement)
+  - [x] Route `GET/POST /api/v1/suppliers/returns` + hook `useSupplierReturns.ts`
+  - [x] Page `SupplierReturnsPage.tsx` — formulaire multi-articles, historique
+  - [x] Route `/supplier-returns` dans App.tsx, item "Retours fournisseurs" (RotateCcw) dans Sidebar
+- [x] **Module fidélité clients POS** — points, remises, historique d'achat par client
+  - [x] Script migration `migrate_loyalty.ts` — colonnes `loyalty_points` + `total_spent` sur `clients`, table `loyalty_transactions`
+  - [x] Service `loyalty.service.ts` — `earnPoints`, `redeemPoints`, `getClientLoyalty` (règles : 1 pt / 1 000 F CFA → 50 F / pt)
+  - [x] Route `GET /api/v1/loyalty/clients/:id` + `POST /api/v1/loyalty/redeem`
+  - [x] `clients.service.ts` refactorisé en raw SQL tenant (loyalty_points, total_spent inclus)
+  - [x] `sales.service.ts` : débit/crédit fidélité automatique sur chaque vente FAC
+  - [x] Hook `useClients.ts` + `useLoyalty.ts` (React Query)
+  - [x] `POSPage.tsx` — sélecteur client enregistré, affichage points dispo, champ remise fidélité
+  - [x] Page `ClientsPage.tsx` — tableau clients + points + remise dispo + historique modal
+  - [x] Route `/clients` dans App.tsx, item "Clients & Fidélité" (Users) dans Sidebar
 
 ## Phase 10 — Déploiement Production 🟠 (Court terme)
 
@@ -195,6 +216,7 @@
     - [x] `concurrency` guard (pas de déploiements parallèles)
     - [x] Secrets requis : `SSH_PRIVATE_KEY`, `SSH_HOST`, `SSH_USER` (à configurer sur GitHub)
   - [x] `deploy.sh` amélioré : `set -e`, git pull, `--remove-orphans`, health check exit 1 si KO
+  - [x] Fix `package.json` `prepare` script — skip husky en production/Docker (`NODE_ENV !== production`)
 - [ ] **Hébergement** — actuellement sur VPS Ubuntu `/home/ubuntu/GesTock` ✅ fonctionnel
   - [x] Variables d'environnement sécurisées (`.env` non commité, `.env.example` documenté)
   - [x] Health check endpoint `GET /api/health` ✅

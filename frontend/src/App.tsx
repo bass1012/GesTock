@@ -21,6 +21,7 @@ const WarehousesPage = lazy(() => import('./pages/inventory/WarehousesPage'))
 const TransfersPage = lazy(() => import('./pages/inventory/TransfersPage'))
 const LotsPage = lazy(() => import('./pages/inventory/LotsPage'))
 const SupplierReturnsPage = lazy(() => import('./pages/suppliers/SupplierReturnsPage'))
+const ClientsPage = lazy(() => import('./pages/clients/ClientsPage'))
 const SuperAdminLogin = lazy(() => import('./pages/superadmin/SuperAdminLogin'))
 const SuperAdminDashboard = lazy(() => import('./pages/superadmin/SuperAdminDashboard'))
 
@@ -66,6 +67,7 @@ export default function App() {
                         <Route path="/orders" element={<OrdersPage />} />
                         <Route path="/sales" element={<SalesPage />} />
                         <Route path="/pos" element={<POSPage />} />
+                        <Route path="/clients" element={<ClientsPage />} />
                         <Route path="/reports" element={<ReportsPage />} />
                         <Route path="/users" element={<UsersPage />} />
                         <Route path="/settings" element={<SettingsPage />} />

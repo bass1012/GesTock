@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client'
+import { loyaltyService } from './loyalty.service'
 
 const prisma = new PrismaClient()
 
@@ -88,7 +89,15 @@ export class SalesService {
     if (data.taxRate && data.taxRate > 0) {
         taxAmount = totalAmount * (data.taxRate / 100);
     }
-    const finalTotal = totalAmount + taxAmount;
+
+    // Remise fidélité (points utilisés)
+    let loyaltyDiscount = 0;
+    const pointsToRedeem = Number(data.pointsToRedeem) || 0;
+    if (pointsToRedeem > 0 && data.clientId) {
+        loyaltyDiscount = loyaltyService.calculateDiscount(pointsToRedeem);
+    }
+
+    const finalTotal = Math.max(0, totalAmount + taxAmount - loyaltyDiscount);
 
     // Create Sale Ticket
     const saleResult = await prisma.$queryRawUnsafe(`
@@ -119,6 +128,16 @@ export class SalesService {
               VALUES ($1::uuid, $2, $3, $4, $5, $6::uuid)
             `, it.productId, 'OUT', it.quantity, reference, `Vente Caisse ${reference}`, userId);
         }
+    }
+
+    // Fidélité : débit points utilisés, puis crédit points gagnés
+    if (data.type === 'FAC' && data.clientId) {
+        if (pointsToRedeem > 0) {
+            await loyaltyService.redeemPoints(data.clientId, sale.id, pointsToRedeem, tenantSlug);
+        }
+        const pointsEarned = await loyaltyService.earnPoints(data.clientId, sale.id, finalTotal, tenantSlug);
+        sale.pointsEarned = pointsEarned;
+        sale.loyaltyDiscount = loyaltyDiscount;
     }
 
     return sale;

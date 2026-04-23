@@ -77,3 +77,17 @@
 - **`jest.mock` factory et variables externes** | Les variables définies avant `jest.mock()` ne sont pas accessibles dans la factory (hoisting), sauf si elles commencent par `mock`. | **Règle** : Nommer les mocks Prisma `mockQueryRawUnsafe`, `mockPrismaClient`, etc. (préfixe `mock`) pour que Jest autorise la référence depuis la factory hoistée.
 
 - **Header component nécessite `QueryClientProvider`** | Le Header utilise `useStockAlerts` (React Query). Tester sans `QueryClientProvider` lève immédiatement « No QueryClient set ». | **Règle** : Wrapper systématiquement les composants qui utilisent React Query avec un `QueryClientProvider` dans les tests, et mocker les hooks réseau (`vi.mock('../hooks/useAlerts', ...)`) pour isoler le test.
+
+## 2026-04-23 — Module fidélité clients
+
+- **clients.service.ts utilisait le client ORM global** | Le service clients utilisait `prisma.client.findMany()` (schema public) au lieu du schema tenant. Les colonnes `loyalty_points` et `total_spent` n'existaient que dans le schéma tenant. | **Règle** : Tout service qui manipule des données métier (clients, produits, ventes...) doit utiliser `$queryRawUnsafe` avec le schéma tenant, pas le client Prisma ORM public. Vérifier systématiquement l'isolation multi-tenant dès la création d'un service.
+
+- **Règle prix fidélité XOF** | Les centimes n'existent pas en F CFA (XOF est une devise sans décimales). Les calculs de remise doivent rester en entiers arrondis. | **Règle** : Pour XOF, utiliser `Math.floor()` pour le calcul des points gagnés et des remises, pas `Math.round()`.
+
+- **Scripts TypeScript non disponibles dans le container de prod** | Le Dockerfile compile le TypeScript en `dist/` et n'y inclut pas les fichiers `.ts` sources. `npx tsx src/scripts/xxx.ts` dans le container échoue avec `ERR_MODULE_NOT_FOUND`. | **Règle** : Pour les migrations one-shot en production, passer par `psql` directement via `docker exec gestock-postgres psql ...` en SQL brut. Ou compiler les scripts dans le build Docker via un stage dédié.
+
+- **`husky` cassé en build Docker avec `--omit=dev`** | Le script `prepare: husky` dans `package.json` est exécuté par `npm install` même avec `--omit=dev`, car `prepare` tourne après l'install. Comme husky est une devDependency, il n'est pas installé, ce qui fait échouer le build. | **Règle** : Conditionner le script `prepare` à l'environnement : `node -e "if(process.env.NODE_ENV!=='production'){require('child_process').execSync('husky',{stdio:'inherit'})}"`.
+
+- **Cast de mock Vitest non typé** | `useAuthStore as ReturnType<typeof vi.fn>` provoque `TS2352` car les types ne se chevauchent pas. | **Règle** : Utiliser `vi.mocked(fn)` — l'API idiomatique Vitest qui infère correctement le type mock sans cast manuel.
+
+- **`jest.config.js` en erreur ESLint `no-undef`** | Un fichier `.js` CommonJS (`module.exports`) dans un projet configuré en ESM/TypeScript est analysé sans le contexte `node`, ce qui fait rater ESLint avec `'module' is not defined`. | **Règle** : Ajouter `/* eslint-env node */` en tête des fichiers de config CommonJS (`.js`) pour indiquer à ESLint que `module`, `require`, etc. sont disponibles.
