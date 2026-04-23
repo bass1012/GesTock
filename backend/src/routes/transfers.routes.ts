@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { authMiddleware } from '../middleware/auth.middleware'
 import { tenantMiddleware } from '../middleware/tenant.middleware'
 import { stockService } from '../services/stock.service'
+import { BadRequestError } from '../utils/errors'
 
 const router = Router()
 
@@ -82,7 +83,10 @@ router.post('/', async (req: any, res: any, next: any) => {
 
         const result = await stockService.createTransfer(data, tenantSlug, userId)
         res.status(201).json(result)
-    } catch (err) {
+    } catch (err: any) {
+        if (err.message?.includes('Stock insuffisant') || err.message?.includes('différents')) {
+            return next(new BadRequestError(err.message))
+        }
         next(err)
     }
 })

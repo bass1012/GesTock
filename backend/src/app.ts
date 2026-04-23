@@ -30,6 +30,9 @@ import { swaggerSpec } from './config/swagger'
 const app = express()
 const PORT = process.env.PORT || 3001
 
+// Trust Nginx reverse proxy (needed for rate-limiter X-Forwarded-For)
+app.set('trust proxy', 1)
+
 // Global middleware
 app.use(helmet())
 app.use(cors({
