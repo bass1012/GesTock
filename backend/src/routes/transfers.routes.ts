@@ -77,8 +77,8 @@ const transferSchema = z.object({
 router.post('/', async (req: any, res: any, next: any) => {
     try {
         const data = transferSchema.parse(req.body)
-        const tenantSlug = req.tenant?.slug
-        const userId = req.user?.id
+        const tenantSlug = req.tenantSlug
+        const userId = req.userId
 
         const result = await stockService.createTransfer(data, tenantSlug, userId)
         res.status(201).json(result)

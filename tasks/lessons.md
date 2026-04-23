@@ -78,7 +78,7 @@
 
 - **Header component nécessite `QueryClientProvider`** | Le Header utilise `useStockAlerts` (React Query). Tester sans `QueryClientProvider` lève immédiatement « No QueryClient set ». | **Règle** : Wrapper systématiquement les composants qui utilisent React Query avec un `QueryClientProvider` dans les tests, et mocker les hooks réseau (`vi.mock('../hooks/useAlerts', ...)`) pour isoler le test.
 
-## 2026-04-23 — Module fidélité clients
+- **`req.tenant?.slug` vs `req.tenantSlug`** | La route transfers utilisait `req.tenant?.slug` et `req.user?.id` au lieu de `req.tenantSlug` et `req.userId` (propriétés injectées par les middlewares). Le slug passait `undefined` → `tenant_undefined` → 500. | **Règle** : Toujours utiliser `req.tenantSlug` et `req.userId` dans les routes. Ne jamais accéder à `req.tenant?.slug` ou `req.user?.id` — ces chemins n'existent pas dans ce projet.
 
 - **clients.service.ts utilisait le client ORM global** | Le service clients utilisait `prisma.client.findMany()` (schema public) au lieu du schema tenant. Les colonnes `loyalty_points` et `total_spent` n'existaient que dans le schéma tenant. | **Règle** : Tout service qui manipule des données métier (clients, produits, ventes...) doit utiliser `$queryRawUnsafe` avec le schéma tenant, pas le client Prisma ORM public. Vérifier systématiquement l'isolation multi-tenant dès la création d'un service.
 
