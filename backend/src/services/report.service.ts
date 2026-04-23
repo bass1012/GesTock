@@ -459,5 +459,98 @@ export const reportService = {
         ])
 
         return [headers.join(','), ...rows.map(r => r.join(','))].join('\n')
+    },
+
+    /**
+     * Prévisions de réapprovisionnement :
+     * - Calcule la vélocité de sortie (quantité vendue/sortie par semaine sur les X derniers jours)
+     * - Estime la date de rupture de stock
+     * - Signale les produits nécessitant un réappro urgent (< 2 semaines)
+     */
+    async getRestockForecasts(tenantSlug: string, windowDays: number = 30): Promise<any[]> {
+        const cacheKey = cacheService.generateKey('restock-forecasts', { tenantSlug, windowDays })
+
+        return cacheService.wrap(async () => {
+            const schemaName = `tenant_${tenantSlug}`
+            const windowStart = new Date(Date.now() - windowDays * 24 * 60 * 60 * 1000).toISOString()
+
+            // Vélocité de sortie par produit (OUT + TRANSFER négatif) sur la fenêtre
+            const velocities = await prisma.$queryRawUnsafe(
+                `SELECT 
+                    p.id,
+                    p.name,
+                    p.sku,
+                    p.unit,
+                    p.current_stock,
+                    p.min_stock,
+                    p.price,
+                    COALESCE(SUM(ABS(m.quantity)) FILTER (
+                        WHERE m.type IN ('OUT') AND m.created_at >= $2::timestamp
+                    ), 0) AS total_out,
+                    COALESCE(SUM(ABS(m.quantity)) FILTER (
+                        WHERE m.type = 'TRANSFER' AND m.quantity < 0 AND m.created_at >= $2::timestamp
+                    ), 0) AS total_transfer_out
+                FROM "${schemaName}".products p
+                LEFT JOIN "${schemaName}".stock_movements m ON m.product_id = p.id
+                WHERE p.is_active = true AND p.is_deleted = false
+                GROUP BY p.id, p.name, p.sku, p.unit, p.current_stock, p.min_stock, p.price
+                ORDER BY p.name ASC`,
+                windowDays,
+                windowStart
+            ) as any[]
+
+            return velocities.map((r: any) => {
+                const totalConsumed = parseFloat(r.total_out) + parseFloat(r.total_transfer_out)
+                // Vélocité en unités/semaine
+                const weeklyVelocity = (totalConsumed / windowDays) * 7
+                const currentStock = parseFloat(r.current_stock)
+                const minStock = parseFloat(r.min_stock)
+
+                // Jours avant rupture (stock = 0)
+                const daysUntilStockout = weeklyVelocity > 0
+                    ? Math.floor((currentStock / weeklyVelocity) * 7)
+                    : null
+
+                // Date estimée de rupture
+                const estimatedStockoutDate = daysUntilStockout !== null
+                    ? new Date(Date.now() + daysUntilStockout * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+                    : null
+
+                // Statut urgence
+                let urgency: 'critical' | 'warning' | 'ok' | 'no_movement' = 'no_movement'
+                if (weeklyVelocity > 0) {
+                    if (daysUntilStockout !== null && daysUntilStockout <= 7) urgency = 'critical'
+                    else if (daysUntilStockout !== null && daysUntilStockout <= 14) urgency = 'warning'
+                    else urgency = 'ok'
+                }
+                if (currentStock <= 0) urgency = 'critical'
+
+                // Quantité recommandée à commander (4 semaines de stock)
+                const recommendedOrderQty = weeklyVelocity > 0
+                    ? Math.max(0, Math.ceil(weeklyVelocity * 4) - currentStock + minStock)
+                    : 0
+
+                return {
+                    id: r.id,
+                    name: r.name,
+                    sku: r.sku,
+                    unit: r.unit,
+                    currentStock,
+                    minStock,
+                    price: parseFloat(r.price),
+                    weeklyVelocity: Math.round(weeklyVelocity * 100) / 100,
+                    totalConsumedInWindow: totalConsumed,
+                    windowDays,
+                    daysUntilStockout,
+                    estimatedStockoutDate,
+                    recommendedOrderQty,
+                    urgency,
+                }
+            }).sort((a: any, b: any) => {
+                // Trier : critiques d'abord, puis warnings, puis ok, puis no_movement
+                const order: Record<string, number> = { critical: 0, warning: 1, ok: 2, no_movement: 3 }
+                return (order[a.urgency] ?? 4) - (order[b.urgency] ?? 4)
+            })
+        }, cacheKey, { ttl: CACHE_TTL_SHORT, tags: [`tenant:${tenantSlug}`, 'forecasts'] })
     }
 }

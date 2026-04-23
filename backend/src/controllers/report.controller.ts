@@ -100,5 +100,19 @@ export const reportController = {
         } catch (error) {
             next(error)
         }
+    },
+
+    async getRestockForecasts(req: Request, res: Response, next: NextFunction) {
+        try {
+            const tenantSlug = req.tenantSlug as string
+            const { days } = req.query
+            const report = await reportService.getRestockForecasts(
+                tenantSlug,
+                days ? parseInt(days as string, 10) : undefined
+            )
+            res.json({ success: true, data: report })
+        } catch (error) {
+            next(error)
+        }
     }
 }

@@ -38,9 +38,9 @@
 
 - **Erreur de référence `Building` (Lucide)** | L'icône `Building` n'était pas reconnue dans certains fichiers malgré l'import, causant des crashes `ReferenceError`. | **Règle** : Privilégier des noms d'icônes universels comme `Warehouse` ou `Home`. En cas d'erreur de référence sur un import valide, suspecter une version de bibliothèque incompatible ou un cache de build corrompu.
 
-- **Migration Multi-Entrepôts** | L'ajout d'une table `product_warehouses` rend les données existantes "orphelines" si elles ne sont pas rattachées à un entrepôt par défaut dès la migration. | **Règle** : Toujours accompagner un changement structurel de stock par un script de migration (`migrate_warehouses.ts`) qui initialise un "Dépôt Principal" et y transfère les stocks actuels.
+- **Migration Multi-Entrepôts** | L'ajout d'une table `product_warehouses` rend les données existantes "orphelines" si elles ne sont pas rattachées à un entrepôt par défaut dès la migration. | **Règle** : Toujours accompagner un changement structurel de stock par un script de migration (`migrate_warehouses.ts`) qui initialise un « Dépôt Principal » et y transfère les stocks actuels.
 
-- **Flux d'activation Manuel SaaS** | L'automatisation complète via Stripe peut être rigide pour certains marchés. Un dashboard "HQ" permettant l'activation manuelle offre plus de flexibilité pour les paiements hors-ligne (Mobile Money). | **Règle** : Toujours prévoir un "kill-switch" ou un mode manuel dans le Super-Admin pour outrepasser les automates de facturation en cas de besoin client spécifique.
+- **Flux d'activation Manuel SaaS** | L'automatisation complète via Stripe peut être rigide pour certains marchés. Un dashboard « HQ » permettant l'activation manuelle offre plus de flexibilité pour les paiements hors-ligne (Mobile Money). | **Règle** : Toujours prévoir un « kill-switch » ou un mode manuel dans le Super-Admin pour outrepasser les automates de facturation en cas de besoin client spécifique.
 
 - **Oubli d'imports dans App.tsx** | L'ajout de nouvelles routes sans import correspondant dans `App.tsx` bloque toute l'application. | **Règle** : Chaque nouvelle page créée doit être immédiatement importée et déclarée dans le routeur principal avant de passer à la suite.
 
@@ -50,4 +50,30 @@
 
 - **Notifications statiques vs dynamiques** | Une cloche de notification sans données réelles déçoit l'utilisateur. | **Règle** : Dès qu'une source de données critique (ex: alertes stock bas) existe, elle doit être connectée au Header via un hook dédié (`useAlerts`) avec rafraîchissement périodique.
 
-- **First Impression & Login UI** | La page de connexion est la première vitrine. Un design générique (gradients simples) peut sembler "amateur". | **Règle** : Investir dans des visuels 3D, du glassmorphism et des animations de flottaison (`animate-float`) dès le login pour instaurer une confiance "Premium" immédiate.
+- **First Impression & Login UI** | La page de connexion est la première vitrine. Un design générique (gradients simples) peut sembler « amateur ». | **Règle** : Investir dans des visuels 3D, du glassmorphism et des animations de flottaison (`animate-float`) dès le login pour instaurer une confiance « Premium » immédiate.
+
+## 2026-04-22 — Auth & Sessions (Production)
+
+- **Rate limiter appliqué deux fois** | Le middleware `authLimiter` était appliqué à la fois dans `app.ts` (global `/api/v1/auth`) et dans `auth.routes.ts` (`/login`, `/register`). Les tentatives étaient comptées en double, provoquant des `429` prématurés. | **Règle** : Appliquer un rate limiter d'authentification à un seul niveau (route ou groupe), jamais les deux.
+
+- **Blocage de session fantôme** | Le contrôle "compte déjà connecté" bloquait parfois un utilisateur alors qu'aucun navigateur n'était réellement actif (session Redis persistante après fermeture navigateur). | **Règle** : Pour une politique "session unique", remplacer automatiquement l'ancienne session au nouveau login (invalidate old refresh tokens + reset active session) au lieu de bloquer l'utilisateur.
+
+- **Config Vite non injectée au runtime** | Les variables `VITE_*` ne sont pas lues à l'exécution dans le conteneur Nginx, elles sont injectées au build. | **Règle** : Passer les variables frontend via `build.args` dans `docker-compose` et `ARG/ENV` dans le `Dockerfile` avant `npm run build`.
+
+- **Erreur PostgreSQL uuid/text en SQL brut** | Insertion dans `product_warehouses` avec `product_id` en texte causait `ERROR 42804` (uuid attendu). | **Règle** : Dans les requêtes SQL brutes Prisma, caster explicitement les UUID (`$1::uuid`, `$2::uuid`) pour éviter les erreurs de type.
+
+## 2026-04-23 — Frontend Perf & Ops
+
+- **Code splitting non activé malgré routeur complet** | Toutes les pages étaient importées statiquement dans `App.tsx`, ce qui augmentait le bundle initial. | **Règle** : Charger les pages via `React.lazy` + `Suspense` au niveau des routes pour réduire le temps de chargement initial.
+
+- **Contexte terminal local vs SSH** | Des commandes de validation ont échoué car le terminal actif était connecté au VPS (`/home/ubuntu`) et non au workspace local. | **Règle** : Vérifier systématiquement le contexte d'exécution (`pwd`) avant de lancer build/tests pour éviter les faux diagnostics.
+
+- **Activation outillage qualité sur base legacy** | L'introduction d'ESLint/Prettier sur un code existant a révélé de nombreuses alertes préexistantes et des divergences de formatage. | **Règle** : Déployer l'outillage en mode incrémental (bloquer sur erreurs, tolérer warnings au départ), puis réduire progressivement la dette technique.
+
+## 2026-04-23 — Tests unitaires (Suite)
+
+- **Seuil de couverture global vs services ciblés** | Configurer `coverageThreshold: { global: { lines: 70 } }` sur tout `src/services/**` échoue si la plupart des services n'ont pas de tests. | **Règle** : Restreindre `collectCoverageFrom` aux services effectivement testés pour que le seuil global reflète la réalité des services critiques (ex: `stock.service.ts`, `sales.service.ts`).
+
+- **`jest.mock` factory et variables externes** | Les variables définies avant `jest.mock()` ne sont pas accessibles dans la factory (hoisting), sauf si elles commencent par `mock`. | **Règle** : Nommer les mocks Prisma `mockQueryRawUnsafe`, `mockPrismaClient`, etc. (préfixe `mock`) pour que Jest autorise la référence depuis la factory hoistée.
+
+- **Header component nécessite `QueryClientProvider`** | Le Header utilise `useStockAlerts` (React Query). Tester sans `QueryClientProvider` lève immédiatement « No QueryClient set ». | **Règle** : Wrapper systématiquement les composants qui utilisent React Query avec un `QueryClientProvider` dans les tests, et mocker les hooks réseau (`vi.mock('../hooks/useAlerts', ...)`) pour isoler le test.

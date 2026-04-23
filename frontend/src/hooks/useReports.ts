@@ -147,3 +147,30 @@ export const useSlowRotationReport = (days: number = 90) => {
         },
     })
 }
+
+export interface RestockForecast {
+    id: string
+    name: string
+    sku: string
+    unit: string
+    currentStock: number
+    minStock: number
+    price: number
+    weeklyVelocity: number
+    totalConsumedInWindow: number
+    windowDays: number
+    daysUntilStockout: number | null
+    estimatedStockoutDate: string | null
+    recommendedOrderQty: number
+    urgency: 'critical' | 'warning' | 'ok' | 'no_movement'
+}
+
+export const useRestockForecasts = (days: number = 30) => {
+    return useQuery<RestockForecast[]>({
+        queryKey: ['restock-forecasts', days],
+        queryFn: async () => {
+            const { data } = await api.get('/reports/forecasts', { params: { days } })
+            return data.data
+        },
+    })
+}

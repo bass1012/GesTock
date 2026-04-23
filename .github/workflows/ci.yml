@@ -1,0 +1,100 @@
+name: CI — Lint & Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  backend:
+    name: Backend (lint + tests + coverage)
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: gestock_test
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: gestock_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    env:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://gestock_test:test_password@localhost:5432/gestock_test?schema=public
+      JWT_SECRET: ci-test-jwt-secret-not-used-in-prod
+      JWT_REFRESH_SECRET: ci-test-refresh-secret-not-used-in-prod
+      ENCRYPTION_KEY: ci-test-encryption-key-not-used-in-prod
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: backend
+
+      - name: TypeScript type check
+        run: npx tsc --noEmit
+        working-directory: backend
+
+      - name: Lint
+        run: npm run lint
+        working-directory: backend
+
+      - name: Run tests with coverage
+        run: npx jest --coverage --forceExit
+        working-directory: backend
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-coverage
+          path: backend/coverage/
+          retention-days: 7
+
+  frontend:
+    name: Frontend (lint + tests)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: frontend
+
+      - name: TypeScript type check
+        run: npx tsc --noEmit
+        working-directory: frontend
+
+      - name: Lint
+        run: npm run lint
+        working-directory: frontend
+
+      - name: Run tests
+        run: npx vitest run
+        working-directory: frontend

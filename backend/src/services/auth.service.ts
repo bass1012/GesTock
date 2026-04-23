@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcryptjs'
+import crypto from 'crypto'
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../utils/jwt'
 import { ConflictError, UnauthorizedError, NotFoundError } from '../utils/errors'
 import { tenantService } from './tenant.service'
@@ -129,10 +130,25 @@ export const authService = {
             throw new UnauthorizedError('Email ou mot de passe incorrect')
         }
 
+        const activeSessionId = await jwtBlacklistService.getActiveSession(user.id)
+        if (activeSessionId) {
+            // Replace any previous session to avoid locking the user out if
+            // the old device/browser was closed without explicit logout.
+            await prisma.refreshToken.deleteMany({ where: { userId: user.id } })
+            await jwtBlacklistService.removeActiveSession(user.id)
+        }
+
         // Generate tokens
-        const tokenPayload = { userId: user.id, tenantId: user.tenantId, role: user.role }
+        const sessionId = crypto.randomUUID()
+        const tokenPayload = { userId: user.id, tenantId: user.tenantId, role: user.role, sessionId }
         const accessToken = generateAccessToken(tokenPayload)
         const refreshToken = generateRefreshToken(tokenPayload)
+
+        // Invalidate all previous sessions: delete old refresh tokens
+        await prisma.refreshToken.deleteMany({ where: { userId: user.id } })
+
+        // Store active session ID in Redis
+        await jwtBlacklistService.setActiveSession(user.id, sessionId)
 
         // Save refresh token
         await prisma.refreshToken.create({
@@ -250,6 +266,18 @@ export const authService = {
                 // Ignore decode errors
             }
             await prisma.refreshToken.deleteMany({ where: { token: refreshToken } })
+        }
+
+        // Remove active session
+        if (accessToken) {
+            try {
+                const decoded = require('jsonwebtoken').decode(accessToken) as any
+                if (decoded?.userId) {
+                    await jwtBlacklistService.removeActiveSession(decoded.userId)
+                }
+            } catch (e) {
+                // Ignore
+            }
         }
     },
 

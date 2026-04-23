@@ -1,6 +1,7 @@
 import { useState, FormEvent } from 'react'
 import { X } from 'lucide-react'
 import { useCreateProduct, useUpdateProduct, Product, ProductFormData } from '../../hooks/useProducts'
+import { useWarehouses } from '../../hooks/useWarehouses'
 
 interface ProductModalProps {
     product: Product | null
@@ -20,10 +21,12 @@ export default function ProductModal({ product, onClose }: ProductModalProps) {
         batchNumber: product?.batchNumber || '',
         isActive: product?.isActive ?? true,
         categoryId: product?.categoryId || '',
+        warehouseId: '',
     })
 
     const createProduct = useCreateProduct()
     const updateProduct = useUpdateProduct()
+    const { data: warehouses } = useWarehouses()
     const isEditing = !!product
 
     const handleSubmit = async (e: FormEvent) => {
@@ -34,6 +37,7 @@ export default function ProductModal({ product, onClose }: ProductModalProps) {
             ...form,
             expiryDate: form.expiryDate === '' ? undefined : form.expiryDate,
             categoryId: form.categoryId === '' ? undefined : form.categoryId,
+            warehouseId: form.warehouseId === '' ? undefined : form.warehouseId,
             description: form.description === '' ? undefined : form.description,
             batchNumber: form.batchNumber === '' ? undefined : form.batchNumber,
         }
@@ -113,6 +117,16 @@ export default function ProductModal({ product, onClose }: ProductModalProps) {
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Stock actuel</label>
                             <input type="number" min="0" value={form.currentStock} onChange={(e) => updateField('currentStock', parseInt(e.target.value) || 0)} className="input" required />
+                        </div>
+
+                        <div className="col-span-2">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">🏭 Entrepôt</label>
+                            <select value={form.warehouseId || ''} onChange={(e) => updateField('warehouseId', e.target.value)} className="input">
+                                <option value="">Sélectionner un entrepôt...</option>
+                                {warehouses?.map((w) => (
+                                    <option key={w.id} value={w.id}>{w.name}</option>
+                                ))}
+                            </select>
                         </div>
 
                         <div className="col-span-2">

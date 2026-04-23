@@ -17,6 +17,8 @@ WORKDIR /app/frontend
 
 # Build Vite app
 # Note: VITE_ variables must be available at build time for Vite
+ARG VITE_INACTIVITY_TIMEOUT_MINUTES=120
+ENV VITE_INACTIVITY_TIMEOUT_MINUTES=$VITE_INACTIVITY_TIMEOUT_MINUTES
 RUN npm run build
 
 # Production stage

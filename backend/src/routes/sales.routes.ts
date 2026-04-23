@@ -8,6 +8,13 @@ const router = Router()
 router.use(authMiddleware)
 router.use(tenantMiddleware)
 
+/**
+ * @swagger
+ * tags:
+ *   name: Sales
+ *   description: Terminal de vente (POS) — ventes et devis
+ */
+
 const saleSchema = z.object({
   clientId: z.string().uuid().optional().nullable(),
   type: z.enum(['DEV', 'FAC']),
@@ -18,6 +25,52 @@ const saleSchema = z.object({
   })).min(1)
 })
 
+/**
+ * @swagger
+ * /sales:
+ *   get:
+ *     tags: [Sales]
+ *     summary: Lister toutes les ventes du tenant
+ *     responses:
+ *       200:
+ *         description: Liste des ventes
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Sale'
+ *   post:
+ *     tags: [Sales]
+ *     summary: Créer une vente (FAC) ou un devis (DEV)
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [type, items]
+ *             properties:
+ *               type:
+ *                 type: string
+ *                 enum: [FAC, DEV]
+ *                 description: FAC = Facture (déduit le stock), DEV = Devis (ne déduit pas)
+ *               clientId: { type: string, format: uuid, nullable: true }
+ *               taxRate: { type: number, minimum: 0, maximum: 100, example: 18 }
+ *               items:
+ *                 type: array
+ *                 items:
+ *                   $ref: '#/components/schemas/SaleItem'
+ *     responses:
+ *       201:
+ *         description: Vente créée
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Sale'
+ *       400:
+ *         description: Stock insuffisant ou produit introuvable
+ */
 router.get('/', async (req, res, next) => {
   try {
     const sales = await salesService.getAllSales(req.tenantSlug!)
@@ -25,6 +78,41 @@ router.get('/', async (req, res, next) => {
   } catch (error) { next(error) }
 })
 
+/**
+ * @swagger
+ * /sales/{id}:
+ *   get:
+ *     tags: [Sales]
+ *     summary: Obtenir une vente avec ses articles
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *     responses:
+ *       200:
+ *         description: Vente avec articles
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: '#/components/schemas/Sale'
+ *                 - type: object
+ *                   properties:
+ *                     items:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           quantity: { type: integer }
+ *                           unitPrice: { type: number }
+ *                           product:
+ *                             type: object
+ *                             properties:
+ *                               name: { type: string }
+ *       404:
+ *         description: Vente non trouvée
+ */
 router.get('/:id', async (req, res, next) => {
   try {
     const sale = await salesService.getSaleById(req.params.id, req.tenantSlug!)

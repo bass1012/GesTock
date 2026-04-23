@@ -19,6 +19,7 @@ export const useApiKeys = () => {
             const { data } = await api.get('/api-keys')
             return data.data
         },
+        retry: false,
     })
 
     const create = useMutation({

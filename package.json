@@ -11,10 +11,29 @@
     "dev:frontend": "npm -w frontend run dev",
     "dev:backend": "npm -w backend run dev",
     "build": "npm -w frontend run build && npm -w backend run build",
-    "lint": "npm -w frontend run lint && npm -w backend run lint"
+    "lint": "npm -w frontend run lint && npm -w backend run lint",
+    "lint:fix": "npm -w frontend run lint -- --fix && npm -w backend run lint -- --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "prepare": "husky"
   },
   "devDependencies": {
-    "concurrently": "^9.0.1"
+    "@typescript-eslint/eslint-plugin": "^8.30.0",
+    "@typescript-eslint/parser": "^8.30.0",
+    "concurrently": "^9.0.1",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^10.1.2",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.5.0",
+    "prettier": "^3.5.3"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "eslint --fix"
+    ],
+    "*.{json,md,css,scss,yml,yaml}": [
+      "prettier --write"
+    ]
   },
   "overrides": {
     "lru-cache": "10.2.0"

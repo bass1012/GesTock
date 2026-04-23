@@ -31,4 +31,14 @@ export const stockMovementsController = {
       next(error)
     }
   },
+
+  async listLots(req: Request, res: Response, next: NextFunction) {
+    try {
+      const productId = req.query.productId as string | undefined
+      const lots = await stockService.listLots(req.tenantSlug!, productId)
+      res.json({ lots })
+    } catch (error) {
+      next(error)
+    }
+  },
 }

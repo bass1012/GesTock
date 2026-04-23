@@ -9,12 +9,15 @@ import {
     ChevronLeft,
     Menu,
     ArrowRightLeft,
+    Shuffle,
     Truck,
     UserCog,
     Monitor,
     FileText,
     Warehouse,
     Boxes,
+    CalendarClock,
+    RotateCcw,
 } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { useAuthStore } from '../store/authStore'
@@ -24,7 +27,10 @@ const navItems = [
     { to: '/inventory', icon: Package, label: 'Inventaire', adminOnly: false },
     { to: '/warehouses', icon: Warehouse, label: 'Entrepôts', adminOnly: false },
     { to: '/movements', icon: ArrowRightLeft, label: 'Mouvements de stock', adminOnly: false },
+    { to: '/transfers', icon: Shuffle, label: 'Transferts', adminOnly: false },
+    { to: '/lots', icon: CalendarClock, label: 'Lots & Péremption', adminOnly: false },
     { to: '/suppliers', icon: Truck, label: 'Fournisseurs', adminOnly: false },
+    { to: '/supplier-returns', icon: RotateCcw, label: 'Retours fournisseurs', adminOnly: false },
     { to: '/orders', icon: ShoppingCart, label: 'Commandes', adminOnly: false },
     { to: '/pos', icon: Monitor, label: 'Terminal Caisse', adminOnly: false },
     { to: '/sales', icon: FileText, label: 'Historique Ventes', adminOnly: false },

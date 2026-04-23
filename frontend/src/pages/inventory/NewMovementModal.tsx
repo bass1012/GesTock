@@ -20,6 +20,8 @@ export default function NewMovementModal({ isOpen, onClose }: NewMovementModalPr
     quantity: 1,
     reference: '',
     note: '',
+    batchNumber: '',
+    expiryDate: '',
   })
 
   const { data: products } = useProducts()
@@ -50,7 +52,7 @@ export default function NewMovementModal({ isOpen, onClose }: NewMovementModalPr
 
     createMovement(dataToSend, {
       onSuccess: () => {
-        setFormData({ productId: '', warehouseId: '', type: 'IN', quantity: 1, reference: '', note: '' })
+        setFormData({ productId: '', warehouseId: '', type: 'IN', quantity: 1, reference: '', note: '', batchNumber: '', expiryDate: '' })
         onClose()
       }
     })
@@ -160,6 +162,34 @@ export default function NewMovementModal({ isOpen, onClose }: NewMovementModalPr
                 placeholder="Ex: LIV-2024-001"
               />
             </div>
+
+            {formData.type === 'IN' && (
+              <div className="grid grid-cols-2 gap-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
+                <div>
+                  <label className="block text-sm font-medium text-blue-800 mb-1">
+                    N° de lot (optionnel)
+                  </label>
+                  <input
+                    type="text"
+                    className="input"
+                    value={formData.batchNumber}
+                    onChange={(e) => setFormData({ ...formData, batchNumber: e.target.value })}
+                    placeholder="Ex: LOT-2024-001"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-blue-800 mb-1">
+                    Date de péremption (optionnel)
+                  </label>
+                  <input
+                    type="date"
+                    className="input"
+                    value={formData.expiryDate}
+                    onChange={(e) => setFormData({ ...formData, expiryDate: e.target.value })}
+                  />
+                </div>
+              </div>
+            )}
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">

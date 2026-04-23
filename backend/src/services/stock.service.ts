@@ -112,7 +112,21 @@ export const stockService = {
             data.batchNumber || null
         ) as any[]
 
-        return result[0]
+        const product = result[0]
+
+        // If warehouseId provided, create entry in product_warehouses
+        if (data.warehouseId) {
+            await prisma.$queryRawUnsafe(
+                `INSERT INTO "${schemaName}".product_warehouses (product_id, warehouse_id, quantity)
+                 VALUES ($1::uuid, $2::uuid, $3)
+                 ON CONFLICT (product_id, warehouse_id) DO UPDATE SET quantity = $3, updated_at = NOW()`,
+                product.id,
+                data.warehouseId,
+                data.currentStock || 0
+            )
+        }
+
+        return product
     },
 
     async updateProduct(id: string, data: any, tenantSlug: string) {
@@ -271,16 +285,18 @@ export const stockService = {
             newGlobalStock -= data.quantity
             newLocalStock -= data.quantity
         } else if (data.type === 'ADJUSTMENT') {
-            // Pour l'ajustement, on considère que la quantité envoyée est le nouveau stock local
-            // Ou on garde le delta ? Ici, par simplicité avec l'UI existante, on va traiter quantité comme delta.
             newGlobalStock += data.quantity 
             newLocalStock += data.quantity
         }
 
-        // 3. Exécuter les mises à jour
+        // 3. Préparer les champs optionnels lot
+        const batchNumber = data.batchNumber || null
+        const expiryDate = data.expiryDate ? new Date(data.expiryDate) : null
+
+        // 4. Exécuter les mises à jour
         const mov = await prisma.$queryRawUnsafe(
-            `INSERT INTO "${schemaName}".stock_movements (product_id, warehouse_id, type, quantity, reference, note, created_by)
-             VALUES ($1::uuid, $2::uuid, $3, $4, $5, $6, $7::uuid)
+            `INSERT INTO "${schemaName}".stock_movements (product_id, warehouse_id, type, quantity, reference, note, created_by, batch_number, expiry_date)
+             VALUES ($1::uuid, $2::uuid, $3, $4, $5, $6, $7::uuid, $8, $9)
              RETURNING *`,
              data.productId,
              warehouseId,
@@ -288,7 +304,9 @@ export const stockService = {
              data.quantity,
              data.reference || null,
              data.note || null,
-             userId || null
+             userId || null,
+             batchNumber,
+             expiryDate
         ) as any[]
 
         // Mise à jour stock global
@@ -318,6 +336,151 @@ export const stockService = {
             .catch(err => console.error('[Cache] Erreur lors de l\'invalidation:', err))
 
         return mov[0]
+    },
+
+    /**
+     * Liste les lots actifs par produit (entrées IN avec batch_number ou expiry_date).
+     * Un "lot" = un mouvement IN avec son batchNumber + expiryDate.
+     * La quantité restante est estimée à partir des sorties postérieures (même produit + entrepôt).
+     */
+    async listLots(tenantSlug: string, productId?: string) {
+        const schemaName = `tenant_${tenantSlug}`
+
+        const whereClause = productId
+            ? `WHERE m.type = 'IN' AND m.product_id = $1::uuid`
+            : `WHERE m.type = 'IN'`
+        const params: any[] = productId ? [productId] : []
+
+        const lots = await prisma.$queryRawUnsafe(
+            `SELECT
+                m.id,
+                m.product_id,
+                p.name  AS product_name,
+                p.sku   AS product_sku,
+                p.unit  AS product_unit,
+                m.warehouse_id,
+                w.name  AS warehouse_name,
+                m.batch_number,
+                m.expiry_date,
+                m.quantity,
+                m.created_at,
+                m.reference
+             FROM "${schemaName}".stock_movements m
+             JOIN "${schemaName}".products p ON p.id = m.product_id
+             LEFT JOIN "${schemaName}".warehouses w ON w.id = m.warehouse_id
+             ${whereClause}
+             AND (m.batch_number IS NOT NULL OR m.expiry_date IS NOT NULL)
+             ORDER BY m.expiry_date ASC NULLS LAST, m.created_at DESC`,
+            ...params
+        ) as any[]
+
+        return lots.map((l: any) => {
+            const now = new Date()
+            const expiry = l.expiry_date ? new Date(l.expiry_date) : null
+            const daysRemaining = expiry
+                ? Math.ceil((expiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+                : null
+            let expiryStatus: 'expired' | 'critical' | 'warning' | 'ok' | null = null
+            if (daysRemaining !== null) {
+                if (daysRemaining < 0) expiryStatus = 'expired'
+                else if (daysRemaining <= 7) expiryStatus = 'critical'
+                else if (daysRemaining <= 30) expiryStatus = 'warning'
+                else expiryStatus = 'ok'
+            }
+            return {
+                id: l.id,
+                productId: l.product_id,
+                productName: l.product_name,
+                productSku: l.product_sku,
+                productUnit: l.product_unit,
+                warehouseId: l.warehouse_id,
+                warehouseName: l.warehouse_name,
+                batchNumber: l.batch_number,
+                expiryDate: l.expiry_date,
+                daysRemaining,
+                expiryStatus,
+                quantity: l.quantity,
+                reference: l.reference,
+                receivedAt: l.created_at,
+            }
+        })
+    },
+
+    async createTransfer(data: {        productId: string
+        sourceWarehouseId: string
+        destWarehouseId: string
+        quantity: number
+        note?: string
+    }, tenantSlug: string, userId?: string) {
+        const schemaName = `tenant_${tenantSlug}`
+        const { productId, sourceWarehouseId, destWarehouseId, quantity, note } = data
+
+        if (sourceWarehouseId === destWarehouseId) {
+            throw new Error("L'entrepôt source et destination doivent être différents")
+        }
+
+        // 1. Vérifier stock disponible dans la source
+        const sourceStock = await prisma.$queryRawUnsafe(
+            `SELECT quantity FROM "${schemaName}".product_warehouses 
+             WHERE product_id = $1::uuid AND warehouse_id = $2::uuid`,
+            productId, sourceWarehouseId
+        ) as any[]
+
+        const currentSourceQty = sourceStock.length > 0 ? sourceStock[0].quantity : 0
+        if (currentSourceQty < quantity) {
+            throw new Error(`Stock insuffisant dans l'entrepôt source (Disponible: ${currentSourceQty})`)
+        }
+
+        // 2. Stock destination
+        const destStock = await prisma.$queryRawUnsafe(
+            `SELECT quantity FROM "${schemaName}".product_warehouses 
+             WHERE product_id = $1::uuid AND warehouse_id = $2::uuid`,
+            productId, destWarehouseId
+        ) as any[]
+        const currentDestQty = destStock.length > 0 ? destStock[0].quantity : 0
+
+        // 3. Insérer les 2 mouvements TRANSFER (OUT source, IN dest)
+        const reference = `TRF-${Date.now()}`
+
+        await prisma.$queryRawUnsafe(
+            `INSERT INTO "${schemaName}".stock_movements (product_id, warehouse_id, type, quantity, reference, note, created_by)
+             VALUES ($1::uuid, $2::uuid, 'TRANSFER', $3, $4, $5, $6::uuid)`,
+            productId, sourceWarehouseId, -quantity, reference, note || null, userId || null
+        )
+
+        await prisma.$queryRawUnsafe(
+            `INSERT INTO "${schemaName}".stock_movements (product_id, warehouse_id, type, quantity, reference, note, created_by)
+             VALUES ($1::uuid, $2::uuid, 'TRANSFER', $3, $4, $5, $6::uuid)`,
+            productId, destWarehouseId, quantity, reference, note || null, userId || null
+        )
+
+        // 4. Mise à jour stock source
+        await prisma.$queryRawUnsafe(
+            `UPDATE "${schemaName}".product_warehouses SET quantity = $1, updated_at = NOW()
+             WHERE product_id = $2::uuid AND warehouse_id = $3::uuid`,
+            currentSourceQty - quantity, productId, sourceWarehouseId
+        )
+
+        // 5. Mise à jour ou création stock destination
+        if (destStock.length > 0) {
+            await prisma.$queryRawUnsafe(
+                `UPDATE "${schemaName}".product_warehouses SET quantity = $1, updated_at = NOW()
+                 WHERE product_id = $2::uuid AND warehouse_id = $3::uuid`,
+                currentDestQty + quantity, productId, destWarehouseId
+            )
+        } else {
+            await prisma.$queryRawUnsafe(
+                `INSERT INTO "${schemaName}".product_warehouses (product_id, warehouse_id, quantity)
+                 VALUES ($1::uuid, $2::uuid, $3)`,
+                productId, destWarehouseId, quantity
+            )
+        }
+
+        // 6. Invalider cache
+        cacheService.invalidateTags([`tenant:${tenantSlug}`, 'dashboard', 'inventory', 'movements'])
+            .catch(err => console.error('[Cache] Erreur lors de l\'invalidation:', err))
+
+        return { reference, productId, sourceWarehouseId, destWarehouseId, quantity }
     }
 }
 

@@ -25,6 +25,7 @@ export interface ProductFormData {
     name: string
     description?: string | null
     categoryId?: string | null
+    warehouseId?: string | null
     unit: string
     minStock: number
     currentStock: number

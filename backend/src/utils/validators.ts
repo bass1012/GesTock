@@ -23,6 +23,7 @@ export const productSchema = z.object({
     name: z.string().min(1, 'Nom requis'),
     description: z.string().optional(),
     categoryId: z.string().uuid().optional().nullable(),
+    warehouseId: z.string().uuid().optional().nullable(),
     unit: z.string().default('unité'),
     minStock: z.number().int().min(0).default(0),
     currentStock: z.number().int().min(0).default(0),
@@ -36,10 +37,13 @@ export const productUpdateSchema = productSchema.partial()
 
 export const stockMovementSchema = z.object({
   productId: z.string().uuid('ID produit invalide'),
+  warehouseId: z.string().uuid('ID entrepôt invalide').optional(),
   type: z.enum(['IN', 'OUT', 'TRANSFER', 'ADJUSTMENT']),
   quantity: z.number().int().positive('La quantité doit être positive'),
   reference: z.string().optional(),
   note: z.string().optional(),
+  batchNumber: z.string().optional(),
+  expiryDate: z.string().optional(), // ISO date string
 })
 
 export const supplierSchema = z.object({

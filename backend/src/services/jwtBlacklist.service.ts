@@ -41,4 +41,29 @@ export const jwtBlacklistService = {
         const result = await redisClient.get(key)
         return result !== null
     },
+
+    /**
+     * Store the active session ID for a user
+     */
+    async setActiveSession(userId: string, sessionId: string): Promise<void> {
+        const key = `active_session:${userId}`
+        // 7 days TTL (same as refresh token)
+        await redisClient.setEx(key, 7 * 24 * 60 * 60, sessionId)
+    },
+
+    /**
+     * Get the active session ID for a user
+     */
+    async getActiveSession(userId: string): Promise<string | null> {
+        const key = `active_session:${userId}`
+        return await redisClient.get(key)
+    },
+
+    /**
+     * Remove active session on logout
+     */
+    async removeActiveSession(userId: string): Promise<void> {
+        const key = `active_session:${userId}`
+        await redisClient.del(key)
+    },
 }

@@ -11,7 +11,8 @@ import {
     FileText,
     TrendingDown,
     History,
-    Clock
+    Clock,
+    ShoppingBag
 } from 'lucide-react'
 import { 
     useDashboardStats, 
@@ -20,7 +21,8 @@ import {
     useInventoryReport, 
     useMovementReport,
     useExpiryAlerts,
-    useSlowRotationReport
+    useSlowRotationReport,
+    useRestockForecasts
 } from '../../hooks/useReports'
 import { useAuthStore } from '../../store/authStore'
 import { exportInventoryToPDF, exportMovementsToPDF } from '../../utils/pdfExport'
@@ -112,7 +114,7 @@ function StatCard({
 export default function ReportsPage() {
     const { tenant } = useAuthStore()
     const { data: statsResponse, isLoading: isLoadingStats } = useDashboardStats()
-    const [activeTab, setActiveTab] = useState<'overview' | 'inventory' | 'movements' | 'bi'>('overview')
+    const [activeTab, setActiveTab] = useState<'overview' | 'inventory' | 'movements' | 'bi' | 'forecasts'>('overview')
     const [dateRange, setDateRange] = useState<'7days' | '30days' | '90days'>('7days')
 
     const stats = statsResponse
@@ -129,8 +131,9 @@ export default function ReportsPage() {
     const isPro = tenant?.plan === 'pro' || tenant?.plan === 'enterprise'
     const { data: expiryResponse, isLoading: isLoadingExpiry } = useExpiryAlerts(30)
     const { data: slowRotationResponse, isLoading: isLoadingSlow } = useSlowRotationReport(90)
+    const { data: forecastsResponse, isLoading: isLoadingForecasts } = useRestockForecasts(30)
 
-    const isLoading = isLoadingStats || isLoadingMovements || isLoadingInventory || (isPro && (isLoadingExpiry || isLoadingSlow))
+    const isLoading = isLoadingStats || isLoadingMovements || isLoadingInventory || (isPro && (isLoadingExpiry || isLoadingSlow || isLoadingForecasts))
 
     const processChartData = () => {
         if (!movementsResponse?.movements) return []
@@ -245,7 +248,10 @@ export default function ReportsPage() {
                         { id: 'overview', label: 'Vue d\'ensemble', icon: BarChart3 },
                         { id: 'inventory', label: 'Inventaire', icon: Package },
                         { id: 'movements', label: 'Mouvements', icon: Activity },
-                        ...(isPro ? [{ id: 'bi', label: 'Analyses BI', icon: TrendingUp }] : []),
+                        ...(isPro ? [
+                        { id: 'bi', label: 'Analyses BI', icon: TrendingUp },
+                        { id: 'forecasts', label: 'Prévisions', icon: ShoppingBag },
+                    ] : []),
                     ].map((tab) => (
                         <button
                             key={tab.id}
@@ -555,6 +561,122 @@ export default function ReportsPage() {
                              <p className="text-xs text-emerald-700 mt-1">Stock idéal. Concentrez vos achats sur ces catégories à forte rotation.</p>
                          </div>
                     </div>
+                </div>
+            )}
+
+            {/* Forecasts Tab */}
+            {activeTab === 'forecasts' && isPro && (
+                <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                                <ShoppingBag className="text-emerald-500" size={20} />
+                                Prévisions de réapprovisionnement
+                            </h2>
+                            <p className="text-sm text-gray-500 mt-0.5">
+                                Basé sur la vélocité de sortie des 30 derniers jours
+                            </p>
+                        </div>
+                        <div className="flex gap-2 text-xs">
+                            <span className="px-2 py-1 bg-red-100 text-red-700 rounded-full font-medium">● Critique (&lt;7j)</span>
+                            <span className="px-2 py-1 bg-amber-100 text-amber-700 rounded-full font-medium">● Attention (&lt;14j)</span>
+                            <span className="px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full font-medium">● OK</span>
+                        </div>
+                    </div>
+
+                    {isLoadingForecasts ? (
+                        <div className="card p-8 text-center text-gray-500">Calcul des prévisions...</div>
+                    ) : (
+                        <div className="card overflow-hidden">
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left">
+                                    <thead>
+                                        <tr className="bg-gray-50 border-b border-gray-100">
+                                            <th className="px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Produit</th>
+                                            <th className="px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Stock actuel</th>
+                                            <th className="px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Vélocité/sem.</th>
+                                            <th className="px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date rupture est.</th>
+                                            <th className="px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Qté recommandée</th>
+                                            <th className="px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Statut</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-100">
+                                        {forecastsResponse?.length === 0 && (
+                                            <tr>
+                                                <td colSpan={6} className="px-5 py-8 text-center text-gray-400 italic text-sm">
+                                                    Aucune donnée disponible. Enregistrez des mouvements de stock pour générer des prévisions.
+                                                </td>
+                                            </tr>
+                                        )}
+                                        {forecastsResponse?.map((item) => {
+                                            const urgencyStyle = {
+                                                critical: 'bg-red-100 text-red-700',
+                                                warning: 'bg-amber-100 text-amber-700',
+                                                ok: 'bg-emerald-100 text-emerald-700',
+                                                no_movement: 'bg-gray-100 text-gray-500',
+                                            }[item.urgency]
+                                            const urgencyLabel = {
+                                                critical: 'Critique',
+                                                warning: 'Attention',
+                                                ok: 'OK',
+                                                no_movement: 'Inactif',
+                                            }[item.urgency]
+
+                                            return (
+                                                <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
+                                                    <td className="px-5 py-3">
+                                                        <p className="text-sm font-semibold text-gray-900">{item.name}</p>
+                                                        <p className="text-xs text-gray-400 font-mono">{item.sku}</p>
+                                                    </td>
+                                                    <td className="px-5 py-3 text-right">
+                                                        <span className={`text-sm font-bold ${item.currentStock <= item.minStock ? 'text-red-600' : 'text-gray-800'}`}>
+                                                            {item.currentStock}
+                                                        </span>
+                                                        <span className="text-xs text-gray-400 ml-1">{item.unit}</span>
+                                                    </td>
+                                                    <td className="px-5 py-3 text-right">
+                                                        <span className="text-sm text-gray-700">
+                                                            {item.weeklyVelocity > 0 ? item.weeklyVelocity : '—'}
+                                                        </span>
+                                                        {item.weeklyVelocity > 0 && (
+                                                            <span className="text-xs text-gray-400 ml-1">{item.unit}</span>
+                                                        )}
+                                                    </td>
+                                                    <td className="px-5 py-3">
+                                                        {item.estimatedStockoutDate ? (
+                                                            <div>
+                                                                <p className="text-sm font-medium text-gray-800">
+                                                                    {new Date(item.estimatedStockoutDate).toLocaleDateString('fr-FR')}
+                                                                </p>
+                                                                <p className="text-xs text-gray-400">
+                                                                    dans {item.daysUntilStockout} j
+                                                                </p>
+                                                            </div>
+                                                        ) : (
+                                                            <span className="text-sm text-gray-400">—</span>
+                                                        )}
+                                                    </td>
+                                                    <td className="px-5 py-3 text-right">
+                                                        <span className={`text-sm font-bold ${item.recommendedOrderQty > 0 ? 'text-blue-600' : 'text-gray-400'}`}>
+                                                            {item.recommendedOrderQty > 0 ? `+ ${item.recommendedOrderQty}` : '—'}
+                                                        </span>
+                                                        {item.recommendedOrderQty > 0 && (
+                                                            <span className="text-xs text-gray-400 ml-1">{item.unit}</span>
+                                                        )}
+                                                    </td>
+                                                    <td className="px-5 py-3">
+                                                        <span className={`text-xs font-semibold px-2 py-1 rounded-full ${urgencyStyle}`}>
+                                                            {urgencyLabel}
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            )
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    )}
                 </div>
             )}
         </div>

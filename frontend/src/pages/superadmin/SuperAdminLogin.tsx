@@ -13,7 +13,7 @@ export default function SuperAdminLogin() {
         e.preventDefault();
         setIsLoading(true);
         try {
-            await axios.post('http://localhost:3001/api/v1/superadmin/login', {}, {
+            await axios.post('/api/v1/superadmin/login', {}, {
                 headers: { Authorization: `Bearer ${secret}` }
             });
             localStorage.setItem('superadmin_secret', secret);

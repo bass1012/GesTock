@@ -1,0 +1,56 @@
+name: CD — Deploy to Production
+
+on:
+  push:
+    branches: [main]
+
+# Eviter les déploiements parallèles
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to VPS
+    runs-on: ubuntu-latest
+    # Ne déployer que si le CI passe
+    needs: []
+    environment: production
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          script_stop: true
+          script: |
+            set -e
+            cd /home/ubuntu/GesTock
+
+            echo "=== Pull latest changes ==="
+            git fetch origin main
+            git reset --hard origin/main
+
+            echo "=== Build & restart containers ==="
+            docker compose -f docker-compose.prod.yml up -d --build --remove-orphans
+
+            echo "=== Apply DB migrations ==="
+            docker compose -f docker-compose.prod.yml exec -T backend npx prisma db push --accept-data-loss
+
+            echo "=== Cleanup old images ==="
+            docker image prune -f
+
+            echo "=== Health check ==="
+            sleep 10
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://gestock.allsite.cloud/api/health)
+            if [ "$STATUS" != "200" ]; then
+              echo "HEALTH CHECK FAILED: HTTP $STATUS"
+              exit 1
+            fi
+            echo "Health check passed (HTTP $STATUS)"

@@ -39,6 +39,14 @@ export const authMiddleware = async (req: Request, _res: Response, next: NextFun
 
         const payload = verifyAccessToken(token)
 
+        // Check if this session is still the active one
+        if (payload.sessionId && payload.userId) {
+            const activeSession = await jwtBlacklistService.getActiveSession(payload.userId)
+            if (activeSession && activeSession !== payload.sessionId) {
+                throw new UnauthorizedError('Session expirée. Un autre appareil s\'est connecté avec ce compte.')
+            }
+        }
+
         req.userId = payload.userId
         req.tenantId = payload.tenantId
         req.userRole = payload.role

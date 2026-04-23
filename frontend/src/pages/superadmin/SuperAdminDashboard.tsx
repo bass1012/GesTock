@@ -21,7 +21,7 @@ export default function SuperAdminDashboard() {
 
     const fetchTenants = async () => {
         try {
-            const { data } = await axios.get('http://localhost:3001/api/v1/superadmin/tenants', {
+            const { data } = await axios.get('/api/v1/superadmin/tenants', {
                 headers: { Authorization: `Bearer ${secret}` }
             });
             setTenants(data);
@@ -98,7 +98,7 @@ export default function SuperAdminDashboard() {
         
         try {
             const loadToast = toast.loading('Mise à jour du contrat...');
-            await axios.put(`http://localhost:3001/api/v1/superadmin/tenants/${id}/plan`, {
+            await axios.put(`/api/v1/superadmin/tenants/${id}/plan`, {
                 plan,
                 durationMonths
             }, {
@@ -118,7 +118,7 @@ export default function SuperAdminDashboard() {
 
         try {
             const loadToast = toast.loading('Action disciplinaire...');
-            await axios.put(`http://localhost:3001/api/v1/superadmin/tenants/${id}/status`, {}, {
+            await axios.put(`/api/v1/superadmin/tenants/${id}/status`, {}, {
                 headers: { Authorization: `Bearer ${secret}` }
             });
             toast.dismiss(loadToast);
@@ -131,7 +131,7 @@ export default function SuperAdminDashboard() {
 
     const handleToggleApi = async (id: string, apiEnabled: boolean) => {
         try {
-            await axios.put(`http://localhost:3001/api/v1/superadmin/tenants/${id}/api`, {}, {
+            await axios.put(`/api/v1/superadmin/tenants/${id}/api`, {}, {
                 headers: { Authorization: `Bearer ${secret}` }
             });
             toast.success(`Flux API ${apiEnabled ? 'coupé' : 'restauré'}`);
@@ -508,7 +508,7 @@ function ApiLinkButton({
         red: 'hover:bg-red-500/10 hover:border-red-500/30'
     };
     
-    const fullUrl = `http://localhost:3001${path}`;
+    const fullUrl = `${window.location.origin}${path}`;
     
     const handleCopy = () => {
         navigator.clipboard.writeText(fullUrl);
@@ -548,7 +548,7 @@ function TenantUsers({ tenantId, secret }: { tenantId: string, secret: string | 
     const fetchUsers = async () => {
         setIsLoading(true);
         try {
-            const { data } = await axios.get(`http://localhost:3001/api/v1/superadmin/users-by-tenant/${tenantId}`, {
+            const { data } = await axios.get(`/api/v1/superadmin/users-by-tenant/${tenantId}`, {
                 headers: { Authorization: `Bearer ${secret}` }
             });
             setUsers(data);
@@ -568,7 +568,7 @@ function TenantUsers({ tenantId, secret }: { tenantId: string, secret: string | 
         if (!confirm) return;
 
         try {
-            const { data } = await axios.post(`http://localhost:3001/api/v1/superadmin/users-by-id/${userId}/reset-password`, {}, {
+            const { data } = await axios.post(`/api/v1/superadmin/users-by-id/${userId}/reset-password`, {}, {
                 headers: { Authorization: `Bearer ${secret}` }
             });
             
