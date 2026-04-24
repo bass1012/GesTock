@@ -5,11 +5,17 @@ import { useAuth } from '../hooks/useAuth'
 import { Link } from 'react-router-dom'
 import { useStockAlerts } from '../hooks/useAlerts'
 
+export const TENANT_PLANS = {
+    STARTER: 'starter',
+    PRO: 'pro',
+    ENTERPRISE: 'enterprise',
+} as const;
+
 export default function Header() {
     const user = useAuthStore((s) => s.user)
     const { tenant } = useAuth()
     const { data: alerts = [] } = useStockAlerts()
-    const plan = tenant?.plan || 'starter'
+    const plan = tenant?.plan || TENANT_PLANS.STARTER
     const [showNotifications, setShowNotifications] = useState(false)
     const [lastAlertCount, setLastAlertCount] = useState(0)
     const [hasUnread, setHasUnread] = useState(false)
@@ -110,11 +116,11 @@ export default function Header() {
                             {user?.firstName?.charAt(0)}{user?.lastName?.charAt(0)}
                         </span>
                         <div className="absolute -top-1 -right-1">
-                            {plan === 'enterprise' ? (
+                            {plan === TENANT_PLANS.ENTERPRISE ? (
                                 <div className="bg-amber-100 p-0.5 rounded-full border border-amber-300 shadow-sm animate-bounce">
                                     <Crown size={10} className="text-amber-600" />
                                 </div>
-                            ) : plan === 'pro' ? (
+                            ) : plan === TENANT_PLANS.PRO ? (
                                 <div className="bg-primary-100 p-0.5 rounded-full border border-primary-300 shadow-sm">
                                     <Star size={10} className="text-primary-600" fill="currentColor" />
                                 </div>

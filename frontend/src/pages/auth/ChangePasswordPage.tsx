@@ -18,8 +18,8 @@ export default function ChangePasswordPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         
-        if (password.length < 6) {
-            return toast.error('Le mot de passe doit faire au moins 6 caractères');
+        if (password.length < 8) {
+            return toast.error('Le mot de passe doit faire au moins 8 caractères');
         }
         
         if (password !== confirmPassword) {
@@ -40,8 +40,9 @@ export default function ChangePasswordPage() {
             setTimeout(() => {
                 navigate('/');
             }, 2000);
-        } catch (error: any) {
-            toast.error(error.response?.data?.message || 'Erreur lors de la mise à jour');
+        } catch (error: unknown) {
+            const err = error as any;
+            toast.error(err.response?.data?.message || 'Erreur lors de la mise à jour');
         } finally {
             setIsLoading(false);
         }
@@ -94,7 +95,7 @@ export default function ChangePasswordPage() {
                                     type={showPassword ? 'text' : 'password'}
                                     required
                                     className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-12 pr-12 text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50 transition-all"
-                                    placeholder="Minimum 6 caractères"
+                                    placeholder="Minimum 8 caractères"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                 />

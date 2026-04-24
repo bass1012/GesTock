@@ -11,7 +11,7 @@ COPY package.json package-lock.json ./
 COPY backend/package.json ./backend/
 
 # Install dependencies (using npm workspaces)
-RUN npm install
+RUN npm ci
 
 # Copy backend source
 COPY backend ./backend
@@ -37,7 +37,7 @@ COPY package.json package-lock.json ./
 COPY backend/package.json ./backend/
 
 # Install production dependencies only
-RUN npm install --omit=dev
+RUN npm ci --omit=dev
 
 # Copy built files and prisma
 COPY --from=builder /app/backend/dist ./backend/dist
@@ -49,4 +49,5 @@ WORKDIR /app/backend
 
 EXPOSE 3001
 
+USER node
 CMD ["node", "dist/app.js"]
