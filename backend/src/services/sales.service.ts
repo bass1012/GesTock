@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 import { loyaltyService } from './loyalty.service'
+import { auditService } from './audit.service'
 
 const prisma = new PrismaClient()
 
@@ -138,6 +139,23 @@ export class SalesService {
         const pointsEarned = await loyaltyService.earnPoints(data.clientId, sale.id, finalTotal, tenantSlug);
         sale.pointsEarned = pointsEarned;
         sale.loyaltyDiscount = loyaltyDiscount;
+    }
+
+    // Audit — uniquement pour les ventes finalisées (FAC)
+    if (data.type === 'FAC') {
+        auditService.log({
+            action: 'SALE_COMPLETED',
+            userId,
+            resource: 'sale',
+            resourceId: sale.id,
+            metadata: {
+                reference,
+                totalAmount: finalTotal,
+                itemCount: resolvedItems.length,
+                clientId: data.clientId || null,
+                loyaltyDiscount: loyaltyDiscount || 0,
+            },
+        }).catch(err => console.error('[Audit] createSale:', err))
     }
 
     return sale;

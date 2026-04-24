@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express'
+import * as Sentry from '@sentry/node'
 import { AppError } from '../utils/errors'
 import { ZodError } from 'zod'
 
@@ -28,7 +29,10 @@ export const errorHandler = (
         })
     }
 
-    // Unknown errors
+    // Unknown errors — report to Sentry in production
+    if (process.env.SENTRY_DSN) {
+        Sentry.captureException(err)
+    }
     console.error('Unhandled error:', err)
     return res.status(500).json({
         status: 500,

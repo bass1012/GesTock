@@ -1,6 +1,7 @@
 import { PrismaClient, Prisma } from '@prisma/client'
 import { NotFoundError } from '../utils/errors'
 import { cacheService } from './cache.service'
+import { auditService } from './audit.service'
 
 const prisma = new PrismaClient()
 
@@ -357,6 +358,26 @@ export const stockService = {
         cacheService.invalidateTags([`tenant:${tenantSlug}`, 'dashboard', 'inventory', 'movements'])
             .catch(err => console.error('[Cache] Erreur lors de l\'invalidation:', err))
 
+        // Audit
+        if (userId) {
+            const action = data.type === 'IN' ? 'STOCK_MOVEMENT_IN'
+                : data.type === 'OUT' ? 'STOCK_MOVEMENT_OUT'
+                : 'STOCK_ADJUSTED'
+            auditService.log({
+                action,
+                userId,
+                resource: 'stock_movement',
+                resourceId: mov[0].id,
+                metadata: {
+                    productId: data.productId,
+                    warehouseId,
+                    quantity: data.quantity,
+                    type: data.type,
+                    reference: data.reference || null,
+                },
+            }).catch(err => console.error('[Audit] createMovement:', err))
+        }
+
         return mov[0]
     },
 
@@ -522,6 +543,24 @@ export const stockService = {
         // 6. Invalider cache
         cacheService.invalidateTags([`tenant:${tenantSlug}`, 'dashboard', 'inventory', 'movements'])
             .catch(err => console.error('[Cache] Erreur lors de l\'invalidation:', err))
+
+        // Audit
+        if (userId) {
+            auditService.log({
+                action: 'STOCK_TRANSFER',
+                userId,
+                resource: 'stock_transfer',
+                resourceId: reference,
+                metadata: {
+                    productId,
+                    sourceWarehouseId,
+                    destWarehouseId,
+                    quantity,
+                    reference,
+                    note: note || null,
+                },
+            }).catch(err => console.error('[Audit] createTransfer:', err))
+        }
 
         return { reference, productId, sourceWarehouseId, destWarehouseId, quantity }
     }

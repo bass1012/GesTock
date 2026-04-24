@@ -37,5 +37,15 @@ if [ "$STATUS" != "200" ]; then
     exit 1
 fi
 
+# Configure backup cron (idempotent — skips if already present)
+CRON_JOB="0 2 * * * $APP_DIR/backup-postgres.sh >> /var/log/gestock-backup.log 2>&1"
+if ! crontab -l 2>/dev/null | grep -qF "backup-postgres.sh"; then
+    echo "⏰ Registering daily backup cron job..."
+    (crontab -l 2>/dev/null; echo "$CRON_JOB") | crontab -
+    echo "   Cron registered: $CRON_JOB"
+else
+    echo "⏰ Backup cron already configured — skipping."
+fi
+
 echo "✅ Deployment finished successfully! (HTTP $STATUS)"
 echo "Check logs with: docker compose -f docker-compose.prod.yml logs -f"

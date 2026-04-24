@@ -48,6 +48,7 @@ services:
       ENCRYPTION_KEY: ${ENCRYPTION_KEY}
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
       SUPER_ADMIN_SECRET: ${SUPER_ADMIN_SECRET}
+      SENTRY_DSN: ${SENTRY_DSN:-}
     depends_on:
       postgres:
         condition: service_healthy
@@ -60,6 +61,7 @@ services:
       dockerfile: frontend/Dockerfile
       args:
         VITE_INACTIVITY_TIMEOUT_MINUTES: ${VITE_INACTIVITY_TIMEOUT_MINUTES:-120}
+        VITE_SENTRY_DSN: ${VITE_SENTRY_DSN:-}
     container_name: gestock-frontend
     restart: unless-stopped
     ports:

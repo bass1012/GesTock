@@ -91,3 +91,13 @@
 - **Cast de mock Vitest non typé** | `useAuthStore as ReturnType<typeof vi.fn>` provoque `TS2352` car les types ne se chevauchent pas. | **Règle** : Utiliser `vi.mocked(fn)` — l'API idiomatique Vitest qui infère correctement le type mock sans cast manuel.
 
 - **`jest.config.js` en erreur ESLint `no-undef`** | Un fichier `.js` CommonJS (`module.exports`) dans un projet configuré en ESM/TypeScript est analysé sans le contexte `node`, ce qui fait rater ESLint avec `'module' is not defined`. | **Règle** : Ajouter `/* eslint-env node */` en tête des fichiers de config CommonJS (`.js`) pour indiquer à ESLint que `module`, `require`, etc. sont disponibles.
+
+## 2026-04-23 — Multi-entrepôts & Inventaire
+
+- **`updateProduct` n'écrivait pas dans `product_warehouses`** | La méthode `updateProduct` dans `stock.service.ts` mettait à jour la table `products` mais ignorait complètement `warehouseId`. L'utilisateur cochait un entrepôt, voyait la bannière succès, mais rien ne s'enregistrait dans `product_warehouses`. | **Règle** : Toute opération d'écriture sur un produit (create **et** update) doit propager le changement de stock vers `product_warehouses` via un `INSERT ... ON CONFLICT DO UPDATE` quand `warehouseId` est fourni.
+
+- **Transfert "Stock insuffisant (Disponible: 0)" sur des produits existants** | `createTransfer` vérifiait uniquement `product_warehouses`, mais les produits créés avant le système multi-entrepôts n'ont aucune entrée dans cette table. Stock global non nul, mais transfert bloqué à 0. | **Règle** : Quand `product_warehouses` n'a pas d'entrée pour la source, utiliser `products.current_stock` comme fallback et initialiser l'entrée manquante (`INSERT ... ON CONFLICT DO NOTHING`) avant de continuer.
+
+- **Sélecteur d'entrepôt source sans info de stock** | `TransfersPage` listait tous les entrepôts sans indiquer la quantité disponible par entrepôt pour le produit choisi, rendant le choix de la source aveugle. | **Règle** : Dès qu'un produit est sélectionné dans un formulaire de transfert, charger le stock par entrepôt via `GET /warehouses/product/:id` et l'afficher dans les options du sélecteur source (`Nom (X dispo)`).
+
+- **`listProducts` faisait N+1 pour les entrepôts** | Afficher les entrepôts d'un produit nécessitait une requête supplémentaire par produit, ce qui devient coûteux avec un catalogue important. | **Règle** : Utiliser `json_agg(json_build_object(...))` dans la requête principale `listProducts` pour agréger les entrepôts en une seule jointure SQL, sans aucune requête additionnelle côté service ou frontend.

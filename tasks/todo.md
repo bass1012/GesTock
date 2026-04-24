@@ -59,7 +59,7 @@
 - [x] Gestion Multi-Entrepôts
   - [x] Stock localisé : Suivi des quantités par entrepôt physique
   - [x] Migration : Initialisation automatique des dépôts pour les comptes existants
-  - [x] UI : Détails du stock par dépôt dans la liste des produits
+  - [x] UI : Détails du stock par dépôt dans la liste des produits (colonne Entrepôts avec badges nom·quantité via `json_agg` en une seule requête)
   - [x] Intégration : Sélection de l'entrepôt source en caisse et mouvements
 - [x] Super-Admin HQ
   - [x] Activation/Modération manuelle des abonnements via `/superadmin`
@@ -106,6 +106,11 @@
   - [x] Intégration audit dans `auth.controller.ts` (login, logout, register, password change)
   - [x] Intégration audit dans `users.controller.ts` (create, role change, delete)
   - [x] Intégration audit dans `superadmin.controller.ts` (tenant suspension, subscription changes, password reset)
+  - [x] Extension audit aux actions métier quotidiennes
+    - [x] `createMovement` (IN / OUT / ADJUSTMENT) dans `stock.service.ts`
+    - [x] `createTransfer` inter-entrepôts dans `stock.service.ts`
+    - [x] `createSale` (vente caisse FAC) dans `sales.service.ts`
+    - [x] Réception commande fournisseur (`RECEIVED`) dans `orders.controller.ts`
 - [x] **Chiffrement des données sensibles** en base via `crypto` (AES-256-GCM)
   - [x] Service `encryption.service.ts` : chiffrement/déchiffrement avec dérivation PBKDF2
 - [x] **2FA / TOTP** (Google Authenticator) pour les rôles Admin et Super-Admin
@@ -172,6 +177,8 @@
   - [x] Hook `useTransfers.ts` (React Query mutation)
   - [x] Page `TransfersPage.tsx` (form produit + source + destination + quantité + note)
   - [x] Route `/transfers` dans `App.tsx`, item "Transferts" dans `Sidebar.tsx`
+  - [x] Fix : fallback `current_stock` si `product_warehouses` vide pour la source (produits pré-multi-entrepôts)
+  - [x] Fix : `TransfersPage` affiche le stock dispo par entrepôt dans le sélecteur source (`warehouseStock` via `GET /warehouses/product/:id`)
 - [x] **Prévisions de réapprovisionnement**
   - [x] Méthode `getRestockForecasts` dans `report.service.ts` — vélocité OUT/TRANSFER par produit, jours avant rupture, date estimée, qté recommandée (4 semaines), niveau d'urgence (critical/warning/ok/no_movement)
   - [x] Route `GET /api/v1/reports/forecasts` (Pro/Enterprise) avec doc Swagger
@@ -201,6 +208,7 @@
   - [x] `POSPage.tsx` — sélecteur client enregistré, affichage points dispo, champ remise fidélité
   - [x] Page `ClientsPage.tsx` — tableau clients + points + remise dispo + historique modal
   - [x] Route `/clients` dans App.tsx, item "Clients & Fidélité" (Users) dans Sidebar
+  - [x] Fix : `updateProduct` met désormais à jour `product_warehouses` quand un entrepôt est sélectionné à la modification
 
 ## Phase 10 — Déploiement Production 🟠 (Court terme)
 
@@ -222,11 +230,11 @@
   - [x] Health check endpoint `GET /api/health` ✅
 - [x] **Backups PostgreSQL automatiques** quotidiens
   - [x] Script `backup-postgres.sh` : `pg_dump | gzip`, rétention 7 jours
-  - [ ] Configurer le cron sur le VPS : `0 2 * * * /home/ubuntu/GesTock/backup-postgres.sh`
+  - [x] Configurer le cron sur le VPS : `0 2 * * * /home/ubuntu/GesTock/backup-postgres.sh` (auto-enregistré par `deploy.sh` à chaque déploiement)
 - [x] **Redis persistance activée** (mode AOF, `appendfsync everysec`) dans `docker-compose.prod.yml`
 - [ ] **Monitoring & alertes**
-  - [ ] UptimeRobot sur `https://gestock.allsite.cloud/api/health`
-  - [ ] Sentry DSN (erreurs frontend + backend)
+  - [ ] UptimeRobot sur `https://gestock.allsite.cloud/api/health` _(configuration manuelle sur uptimerobot.com)_
+  - [x] Sentry DSN (erreurs frontend + backend) — `@sentry/node` + `@sentry/react` intégrés, activés via `SENTRY_DSN` / `VITE_SENTRY_DSN`
 
 ## Phase 11 — Expansion & Intégrations 🟢 (Long terme)
 
