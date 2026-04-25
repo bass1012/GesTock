@@ -111,28 +111,40 @@ export const auditService = {
                 orderBy: { createdAt: 'desc' },
                 skip: (page - 1) * limit,
                 take: limit,
-                include: {
-                    user: {
-                        select: {
-                            email: true,
-                            firstName: true,
-                            lastName: true,
-                            role: true,
-                        },
-                    },
-                    tenant: {
-                        select: {
-                            name: true,
-                            slug: true,
-                        },
-                    },
-                },
             }),
             (prisma as any).auditLog.count({ where }),
         ])
 
+        // Enrichissement manuel : AuditLog n'a pas de relation Prisma vers User/Tenant
+        const userIds   = [...new Set(logs.map((l: any) => l.userId).filter((id: any) => id && id !== 'superadmin'))]
+        const tenantIds = [...new Set(logs.map((l: any) => l.tenantId).filter(Boolean))]
+
+        const [users, tenants] = await Promise.all([
+            userIds.length
+                ? prisma.user.findMany({
+                    where: { id: { in: userIds as string[] } },
+                    select: { id: true, email: true, firstName: true, lastName: true, role: true },
+                  })
+                : [],
+            tenantIds.length
+                ? prisma.tenant.findMany({
+                    where: { id: { in: tenantIds as string[] } },
+                    select: { id: true, name: true, slug: true },
+                  })
+                : [],
+        ])
+
+        const userMap   = Object.fromEntries((users   as any[]).map(u => [u.id, u]))
+        const tenantMap = Object.fromEntries((tenants as any[]).map(t => [t.id, t]))
+
+        const enrichedLogs = logs.map((log: any) => ({
+            ...log,
+            user:   log.userId && log.userId !== 'superadmin' ? userMap[log.userId]   ?? null : null,
+            tenant: log.tenantId ? tenantMap[log.tenantId] ?? null : null,
+        }))
+
         return {
-            logs,
+            logs: enrichedLogs,
             pagination: {
                 page,
                 limit,
