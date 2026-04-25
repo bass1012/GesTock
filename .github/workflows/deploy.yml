@@ -24,6 +24,13 @@ jobs:
     needs: []
 
     steps:
+      - name: Verify Secrets Presence
+        run: |
+          if [ -z "${{ secrets.SSH_HOST }}" ]; then echo "❌ SSH_HOST est VIDE"; else echo "✅ SSH_HOST est présent"; fi
+          if [ -z "${{ secrets.SSH_USER }}" ]; then echo "❌ SSH_USER est VIDE"; else echo "✅ SSH_USER est présent"; fi
+          if [ -z "${{ secrets.SSH_PRIVATE_KEY }}" ]; then echo "❌ SSH_PRIVATE_KEY est VIDE"; else echo "✅ SSH_PRIVATE_KEY est présent"; fi
+          if [ -z "${{ secrets.SSH_PRIVATE_KEY }}" ]; then exit 1; fi
+
       - name: Checkout
         uses: actions/checkout@v4.2.2
 
