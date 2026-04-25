@@ -3,6 +3,10 @@ name: CD — Deploy to Production
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - 'tasks/**'
+      - '**.md'
+      - '.github/dependabot.yml'
   workflow_dispatch: # Permet le déclenchement manuel depuis GitHub UI
 
 # Eviter les déploiements parallèles
