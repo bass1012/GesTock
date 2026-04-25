@@ -18,5 +18,7 @@ router.post('/users-by-id/:userId/reset-password', superAdminController.resetUse
 
 // Audit logs
 router.get('/audit-logs', superAdminController.getAuditLogs);
+router.get('/audit-stats', superAdminController.getAuditStats);
+router.get('/audit-logs/export', superAdminController.exportAuditLogs);
 
 export default router;

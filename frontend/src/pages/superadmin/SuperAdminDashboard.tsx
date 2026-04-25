@@ -5,17 +5,19 @@ import {
     Ban, Key, Unlock, Globe, CreditCard, 
     AlertTriangle, LayoutDashboard, Search, RefreshCcw, 
     ChevronDown, ChevronUp, UserCircle, Plus, Calendar, Ban as BanIcon, Zap,
-    Terminal, ExternalLink
+    Terminal, ExternalLink, Activity
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import toast from 'react-hot-toast';
+import AuditLogPage from './AuditLogPage';
 
 export default function SuperAdminDashboard() {
     const [tenants, setTenants] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [activeFilter, setActiveFilter] = useState<'all' | 'recent' | 'expiring' | 'suspended'>('all');
+    const [activeTab, setActiveTab] = useState<'tenants' | 'audit'>('tenants');
     
     const secret = localStorage.getItem('superadmin_secret');
 
@@ -157,18 +159,43 @@ export default function SuperAdminDashboard() {
         <div className="min-h-screen bg-[#0B0F1A] text-gray-300 font-sans pb-20">
             {/* Header */}
             <header className="bg-gray-900/80 backdrop-blur-xl border-b border-gray-800 px-8 py-4 flex justify-between items-center sticky top-0 z-50 shadow-2xl">
-                <div className="flex items-center gap-4">
-                    <div className="bg-primary-600/20 p-2 rounded-xl border border-primary-500/30">
-                        <ShieldAlert className="text-primary-500" size={24} />
+                <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-4">
+                        <div className="bg-primary-600/20 p-2 rounded-xl border border-primary-500/30">
+                            <ShieldAlert className="text-primary-500" size={24} />
+                        </div>
+                        <div>
+                            <h1 className="text-xl font-black text-white tracking-tighter uppercase italic">Radar Admin <span className="text-primary-500">v2.0</span></h1>
+                            <p className="text-[10px] text-gray-500 font-mono">GESTOCK - QUARTIER GÉNÉRAL</p>
+                        </div>
                     </div>
-                    <div>
-                        <h1 className="text-xl font-black text-white tracking-tighter uppercase italic">Radar Admin <span className="text-primary-500">v2.0</span></h1>
-                        <p className="text-[10px] text-gray-500 font-mono">GESTOCK - QUARTIER GÉNÉRAL</p>
-                    </div>
+                    {/* Onglets navigation */}
+                    <nav className="hidden md:flex items-center gap-1 bg-gray-800/50 p-1 rounded-xl border border-gray-700">
+                        <button
+                            onClick={() => setActiveTab('tenants')}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all ${
+                                activeTab === 'tenants'
+                                    ? 'bg-primary-500 text-white shadow-lg shadow-primary-900/30'
+                                    : 'text-gray-400 hover:text-white'
+                            }`}
+                        >
+                            <Globe size={14} /> Tenants
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('audit')}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all ${
+                                activeTab === 'audit'
+                                    ? 'bg-primary-500 text-white shadow-lg shadow-primary-900/30'
+                                    : 'text-gray-400 hover:text-white'
+                            }`}
+                        >
+                            <Activity size={14} /> Audit Logs
+                        </button>
+                    </nav>
                 </div>
                 
                 <div className="flex items-center gap-6">
-                    <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-gray-800/50 rounded-full border border-gray-700">
+                    <div className="hidden lg:flex items-center gap-2 px-4 py-2 bg-gray-800/50 rounded-full border border-gray-700">
                         <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                         <span className="text-xs font-mono text-gray-400">SYSTÈME OPÉRATIONNEL</span>
                     </div>
@@ -180,6 +207,13 @@ export default function SuperAdminDashboard() {
             </header>
 
             <main className="p-8 max-w-7xl mx-auto space-y-10">
+
+                {/* ── Onglet Audit ── */}
+                {activeTab === 'audit' && (
+                    <AuditLogPage secret={secret} />
+                )}
+
+                {activeTab === 'tenants' && (<>
                 {/* Statistics Row */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <StatCard title="Total Clients" value={stats.total} icon={<Globe className="text-blue-500" />} color="blue" />
@@ -377,6 +411,7 @@ export default function SuperAdminDashboard() {
                         </div>
                     ))}
                 </div>
+                </>)}
             </main>
         </div>
     );

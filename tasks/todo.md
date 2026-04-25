@@ -243,7 +243,19 @@
 - [ ] **Intégration comptabilité** (export vers Wave, Sage, ou fichier FEC)
 - [ ] **Application mobile native** (React Native / Expo) en complément du PWA
 
----
+## Phase 12 — Système d'Audit du Site (QG) ✅
+
+- [x] **Backend — Nouvelles routes audit**
+  - [x] `GET /api/v1/superadmin/audit-stats` — KPIs : total 24h, connexions, suspensions, abonnements, répartition par catégorie (7j)
+  - [x] `GET /api/v1/superadmin/audit-logs/export` — Export CSV (BOM UTF-8, max 5 000 lignes, filtres compatibles)
+  - [x] Fix TypeScript : paramètre `v` typé `string` dans la lambda CSV
+- [x] **Frontend — Interface Audit dans le QG**
+  - [x] `AuditLogPage.tsx` — Page complète avec KPI cards, barre de catégories 7j, filtres avancés, timeline colorée, pagination, export CSV
+  - [x] `SuperAdminDashboard.tsx` — Navigation à onglets `🏢 Tenants` / `🔍 Audit Logs` dans le header
+  - [x] Timeline sémantique : icône + couleur par type d'action (auth, gestion, tenant, stock, ventes, API)
+  - [x] Filtres : tenant (dropdown), action (dropdown), période (preset 24h/7j/30j/tout), recherche libre
+  - [x] Pagination 30 logs/page
+  - [x] Actions QG identifiées avec badge distinct
 
 ## Tableau de Bord des Priorités
 

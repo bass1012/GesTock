@@ -273,5 +273,97 @@ export const superAdminController = {
         } catch (error) {
             next(error);
         }
+    },
+
+    async getAuditStats(req: Request, res: Response, next: NextFunction) {
+        try {
+            const now = new Date();
+            const last24h = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+            const last7d  = new Date(now.getTime() - 7  * 24 * 60 * 60 * 1000);
+
+            // Catégories d'actions
+            const authActions    = ['USER_LOGIN', 'USER_LOGOUT', 'PASSWORD_CHANGE', 'PASSWORD_RESET', 'FORCE_PASSWORD_RESET'];
+            const userActions    = ['USER_CREATED', 'USER_UPDATED', 'USER_DELETED', 'ROLE_CHANGED'];
+            const tenantActions  = ['TENANT_SUSPENDED', 'TENANT_ACTIVATED', 'SUBSCRIPTION_MODIFIED', 'QUOTA_MODIFIED'];
+            const stockActions   = ['STOCK_MOVEMENT_IN', 'STOCK_MOVEMENT_OUT', 'STOCK_TRANSFER', 'STOCK_ADJUSTED', 'PRODUCT_DELETED'];
+            const salesActions   = ['SALE_COMPLETED', 'SALE_CANCELLED', 'ORDER_RECEIVED', 'ORDER_CANCELLED'];
+            const apiActions     = ['API_KEY_GENERATED', 'API_KEY_REVOKED', 'AUDIT_LOG_VIEWED'];
+
+            const [total24h, logins24h, suspensions24h, subscriptions7d, totalLogs] = await Promise.all([
+                (prisma as any).auditLog.count({ where: { createdAt: { gte: last24h } } }),
+                (prisma as any).auditLog.count({ where: { action: 'USER_LOGIN', createdAt: { gte: last24h } } }),
+                (prisma as any).auditLog.count({ where: { action: 'TENANT_SUSPENDED', createdAt: { gte: last7d } } }),
+                (prisma as any).auditLog.count({ where: { action: 'SUBSCRIPTION_MODIFIED', createdAt: { gte: last7d } } }),
+                (prisma as any).auditLog.count(),
+            ]);
+
+            // Répartition par catégorie (7 derniers jours)
+            const [authCount, userCount, tenantCount, stockCount, salesCount, apiCount] = await Promise.all([
+                (prisma as any).auditLog.count({ where: { action: { in: authActions   }, createdAt: { gte: last7d } } }),
+                (prisma as any).auditLog.count({ where: { action: { in: userActions   }, createdAt: { gte: last7d } } }),
+                (prisma as any).auditLog.count({ where: { action: { in: tenantActions }, createdAt: { gte: last7d } } }),
+                (prisma as any).auditLog.count({ where: { action: { in: stockActions  }, createdAt: { gte: last7d } } }),
+                (prisma as any).auditLog.count({ where: { action: { in: salesActions  }, createdAt: { gte: last7d } } }),
+                (prisma as any).auditLog.count({ where: { action: { in: apiActions    }, createdAt: { gte: last7d } } }),
+            ]);
+
+            res.json({
+                summary: {
+                    total24h,
+                    logins24h,
+                    suspensions7d: suspensions24h,
+                    subscriptions7d,
+                    totalLogs,
+                },
+                categories7d: [
+                    { name: 'Auth & Sessions',      count: authCount,   color: 'blue'   },
+                    { name: 'Gestion Utilisateurs', count: userCount,   color: 'yellow' },
+                    { name: 'Tenants & Abonnements',count: tenantCount, color: 'red'    },
+                    { name: 'Stock & Produits',     count: stockCount,  color: 'orange' },
+                    { name: 'Ventes & Commandes',   count: salesCount,  color: 'green'  },
+                    { name: 'API & Système',         count: apiCount,    color: 'gray'   },
+                ],
+            });
+        } catch (error) {
+            next(error);
+        }
+    },
+
+    async exportAuditLogs(req: Request, res: Response, next: NextFunction) {
+        try {
+            const { tenantId, userId, action, startDate, endDate } = req.query;
+
+            const result = await auditService.getLogs({
+                tenantId: tenantId as string,
+                userId: userId as string,
+                action: action as any,
+                startDate: startDate ? new Date(startDate as string) : undefined,
+                endDate: endDate ? new Date(endDate as string) : undefined,
+                page: 1,
+                limit: 5000, // Cap à 5 000 lignes pour l'export
+            });
+
+            // Construire le CSV
+            const header = ['Date', 'Action', 'Tenant', 'Utilisateur', 'Email', 'Ressource', 'ID Ressource', 'IP', 'User-Agent'];
+            const rows = result.logs.map((log: any) => [
+                new Date(log.createdAt).toISOString(),
+                log.action,
+                log.tenant?.name || log.tenantId || '',
+                log.user ? `${log.user.firstName || ''} ${log.user.lastName || ''}`.trim() : log.userId,
+                log.user?.email || '',
+                log.resource || '',
+                log.resourceId || '',
+                log.ip || '',
+                (log.userAgent || '').replace(/,/g, ' '),
+            ]);
+
+            const csv = [header, ...rows].map(r => r.map((v: string) => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+
+            res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+            res.setHeader('Content-Disposition', `attachment; filename="audit-logs-${new Date().toISOString().slice(0, 10)}.csv"`);
+            res.send('\uFEFF' + csv); // BOM UTF-8 pour Excel
+        } catch (error) {
+            next(error);
+        }
     }
 };
