@@ -113,3 +113,9 @@
 - **Seuil de couverture `global` Jest cassé par un service peu couvert** | Le seuil `global: { lines: 70 }` calcule la moyenne sur tous les fichiers de `collectCoverageFrom`. Un seul service à 45% fait tomber la moyenne sous 70%, même si les autres sont bien couverts. | **Règle** : Utiliser des seuils **par fichier** (`'./src/services/sales.service.ts': { lines: 85 }`) pour que chaque service soit jugé indépendamment. Augmenter les seuils progressivement au fil des nouvelles suites de tests.
 
 - **`workflow_dispatch` absent du pipeline CD** | Sans ce trigger, le déploiement ne peut être déclenché que par un `git push`. Impossible de redéployer sans faire un commit factice. | **Règle** : Toujours ajouter `workflow_dispatch` dans les workflows de déploiement pour permettre le re-déploiement manuel depuis l'interface GitHub Actions sans commit.
+
+- **Warnings de dépréciation Node 20 sur GitHub Actions** | Les actions comme `actions/checkout@v4` tournent sur Node 20 qui sera obsolète. | **Règle** : Mettre à jour les actions (`v4.2.2`, `v4.6.0`) et ajouter `env: FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true` au workflow pour supprimer les warnings.
+
+- **`appleboy/ssh-action` échoue avec `ssh: no key found` (ED25519)** | L'action SSH buggue souvent avec les clés récentes au format `OPENSSH` (ex: `ed25519`). | **Règle** : Toujours générer et utiliser une clé classique RSA au format PEM pour GitHub Actions (`ssh-keygen -m PEM -t rsa -b 4096`).
+
+- **Secrets inaccessibles à cause de `environment: production`** | Si le workflow déclare `environment: production`, GitHub ignore les "Repository Secrets" si l'environnement "production" est configuré (même vide). | **Règle** : Pour un déploiement simple, supprimer `environment: production` du workflow afin de forcer la lecture des secrets globaux du dépôt.

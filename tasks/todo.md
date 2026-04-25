@@ -261,6 +261,9 @@
   - [x] Fix `deploy.yml` — ajout `--skip-generate` à `prisma db push` (client déjà généré au build Docker, `node_modules` en lecture seule en prod)
   - [x] Fix CI — remplacement seuil `global: { lines: 70 }` par seuils par fichier (`sales: 85%`, `stock: 40%`, `errors: 70%`, `jwt: 55%`)
   - [x] Fix pipeline — `workflow_dispatch` ajouté à `deploy.yml` pour déclenchement manuel depuis GitHub Actions sans commit
+  - [x] Fix GitHub Actions — suppression warnings Node 20 (`FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true` + upgrade actions v4.2.2/v4.6.0)
+  - [x] Fix CI cache — correction de `cache-dependency-path` pointant vers `package-lock.json` à la racine
+  - [x] Fix SSH Deploy — remplacement clé ED25519 par RSA PEM (`ssh: no key found`), suppression du scope `environment: production` bloquant les secrets globaux
 
 ## Tableau de Bord des Priorités
 
