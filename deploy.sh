@@ -21,7 +21,7 @@ docker compose -f docker-compose.prod.yml up -d --build --remove-orphans
 
 # Run database migrations
 echo "⚙️ Running database migrations..."
-docker compose -f docker-compose.prod.yml exec -T backend npx prisma db push --accept-data-loss
+docker compose -f docker-compose.prod.yml exec -T backend npx prisma db push --accept-data-loss --skip-generate
 
 # Prune old images to save space
 echo "🧹 Cleaning up old Docker images..."
