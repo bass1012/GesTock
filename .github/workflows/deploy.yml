@@ -35,7 +35,6 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
-          script_stop: true
           script: |
             set -e
             cd /home/ubuntu/GesTock
