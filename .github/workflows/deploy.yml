@@ -22,7 +22,6 @@ jobs:
     name: Deploy to VPS
     runs-on: ubuntu-latest
     needs: []
-    environment: production
 
     steps:
       - name: Checkout
