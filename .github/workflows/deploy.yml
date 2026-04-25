@@ -3,6 +3,7 @@ name: CD — Deploy to Production
 on:
   push:
     branches: [main]
+  workflow_dispatch: # Permet le déclenchement manuel depuis GitHub UI
 
 # Eviter les déploiements parallèles
 concurrency:
