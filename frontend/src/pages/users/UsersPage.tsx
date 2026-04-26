@@ -56,18 +56,13 @@ function RoleDropdown({
   current: TenantUser['role']
   disabled: boolean
 }) {
-  const [open, setOpen] = useState(false)
   const updateRole = useUpdateUserRole()
   const meta = roleMeta(current)
   const Icon = meta.icon
 
   return (
     <div className="relative inline-block">
-      <button
-        disabled={disabled || updateRole.isPending}
-        onClick={() => setOpen((o) => !o)}
-        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border transition-opacity ${meta.color} ${disabled || updateRole.isPending ? 'opacity-50 cursor-default' : 'hover:opacity-80 cursor-pointer'}`}
-      >
+      <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border transition-opacity ${meta.color} ${disabled || updateRole.isPending ? 'opacity-50' : 'hover:opacity-80'}`}>
         {updateRole.isPending ? (
           <Loader2 size={11} className="animate-spin" />
         ) : (
@@ -75,35 +70,21 @@ function RoleDropdown({
         )}
         {meta.label}
         {!disabled && !updateRole.isPending && <ChevronDown size={11} className="ml-0.5" />}
-      </button>
-
-      {open && (
-        <>
-          <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-          <div className="absolute left-0 mt-1 w-44 bg-white border border-gray-200 rounded-lg shadow-lg z-20 py-1 overflow-hidden">
-            {ROLES.map((r) => {
-              const RIcon = r.icon
-              return (
-                <button
-                  key={r.value}
-                  onClick={() => {
-                    setOpen(false)
-                    if (r.value !== current) updateRole.mutate({ userId, role: r.value })
-                  }}
-                  className={`w-full flex items-center gap-2 px-3 py-2 text-sm transition-colors ${
-                    r.value === current
-                      ? 'bg-gray-50 text-gray-500 cursor-default'
-                      : 'text-gray-700 hover:bg-gray-50'
-                  }`}
-                >
-                  <RIcon size={14} />
-                  {r.label}
-                  {r.value === current && <span className="ml-auto text-xs text-gray-400">actuel</span>}
-                </button>
-              )
-            })}
-          </div>
-        </>
+      </div>
+      
+      {!disabled && !updateRole.isPending && (
+        <select
+          value={current}
+          onChange={(e) => {
+            const val = e.target.value as TenantUser['role']
+            if (val !== current) updateRole.mutate({ userId, role: val })
+          }}
+          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+        >
+          {ROLES.map(r => (
+            <option key={r.value} value={r.value}>{r.label}</option>
+          ))}
+        </select>
       )}
     </div>
   )
