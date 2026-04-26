@@ -64,13 +64,17 @@ function RoleDropdown({
   return (
     <div className="relative inline-block">
       <button
-        disabled={disabled}
+        disabled={disabled || updateRole.isPending}
         onClick={() => setOpen((o) => !o)}
-        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border transition-opacity ${meta.color} ${disabled ? 'opacity-50 cursor-default' : 'hover:opacity-80 cursor-pointer'}`}
+        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border transition-opacity ${meta.color} ${disabled || updateRole.isPending ? 'opacity-50 cursor-default' : 'hover:opacity-80 cursor-pointer'}`}
       >
-        <Icon size={11} />
+        {updateRole.isPending ? (
+          <Loader2 size={11} className="animate-spin" />
+        ) : (
+          <Icon size={11} />
+        )}
         {meta.label}
-        {!disabled && <ChevronDown size={11} className="ml-0.5" />}
+        {!disabled && !updateRole.isPending && <ChevronDown size={11} className="ml-0.5" />}
       </button>
 
       {open && (

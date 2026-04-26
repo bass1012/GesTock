@@ -275,6 +275,40 @@ export const superAdminController = {
         }
     },
 
+    async updateUserRole(req: Request, res: Response, next: NextFunction) {
+        try {
+            const { userId } = req.params;
+            const { role } = req.body;
+            
+            const validRoles = ['admin', 'manager', 'lecteur'];
+            if (!validRoles.includes(role)) {
+                return res.status(400).json({ error: 'Rôle invalide' });
+            }
+
+            const updated = await prisma.user.update({
+                where: { id: userId },
+                data: { role },
+                select: { id: true, email: true, firstName: true, lastName: true, role: true, tenantId: true }
+            });
+
+            // Audit log
+            await auditService.log({
+                action: 'ROLE_CHANGED',
+                userId: 'superadmin',
+                tenantId: updated.tenantId,
+                resource: 'user',
+                resourceId: userId,
+                metadata: { newRole: role, changedBy: 'superadmin' },
+                ip: req.ip,
+                userAgent: req.headers['user-agent']
+            });
+
+            res.json(updated);
+        } catch (error) {
+            next(error);
+        }
+    },
+
     async getAuditStats(req: Request, res: Response, next: NextFunction) {
         try {
             const now = new Date();

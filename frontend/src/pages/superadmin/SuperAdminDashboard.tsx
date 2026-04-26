@@ -615,6 +615,20 @@ function TenantUsers({ tenantId, secret }: { tenantId: string, secret: string | 
         }
     };
 
+    const handleUpdateRole = async (userId: string, userName: string, newRole: string) => {
+        try {
+            const loadToast = toast.loading(`Mise à jour du rôle de ${userName}...`);
+            await axios.put(`/api/v1/superadmin/users-by-id/${userId}/role`, { role: newRole }, {
+                headers: { Authorization: `Bearer ${secret}` }
+            });
+            toast.dismiss(loadToast);
+            toast.success(`Rôle de ${userName} mis à jour en ${newRole.toUpperCase()}`);
+            fetchUsers();
+        } catch (error) {
+            toast.error('Erreur lors du changement de rôle');
+        }
+    };
+
     return (
         <div className="border-t border-gray-800">
             <button 
@@ -643,8 +657,16 @@ function TenantUsers({ tenantId, secret }: { tenantId: string, secret: string | 
                                         <div>
                                             <p className="text-sm font-bold text-white">{user.firstName} {user.lastName}</p>
                                             <p className="text-[10px] text-gray-500 font-mono">{user.email}</p>
-                                            <div className="mt-1 flex gap-2">
-                                                <span className="text-[9px] px-1.5 py-0.5 bg-gray-700 rounded text-gray-300 uppercase font-black">{user.role}</span>
+                                            <div className="mt-1 flex flex-wrap gap-2">
+                                                <select 
+                                                    value={user.role} 
+                                                    onChange={(e) => handleUpdateRole(user.id, user.firstName, e.target.value)}
+                                                    className="text-[9px] px-1.5 py-0.5 bg-gray-700 rounded text-gray-300 uppercase font-black border-none focus:ring-1 focus:ring-primary-500 outline-none cursor-pointer hover:bg-gray-600 transition-colors"
+                                                >
+                                                    <option value="admin">ADMIN</option>
+                                                    <option value="manager">MANAGER</option>
+                                                    <option value="lecteur">LECTEUR</option>
+                                                </select>
                                                 {user.mustChangePassword && (
                                                     <span className="text-[9px] px-1.5 py-0.5 bg-amber-500/10 text-amber-500 rounded border border-amber-500/20 font-black italic">CHANGEMENT REQUIS</span>
                                                 )}

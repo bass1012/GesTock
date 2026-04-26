@@ -15,6 +15,7 @@ router.put('/tenants/:id/api', superAdminController.toggleTenantApi);
 // Gestion des utilisateurs par tenant
 router.get('/users-by-tenant/:tenantId', superAdminController.listTenantUsers);
 router.post('/users-by-id/:userId/reset-password', superAdminController.resetUserPassword);
+router.put('/users-by-id/:userId/role', superAdminController.updateUserRole);
 
 // Audit logs
 router.get('/audit-logs', superAdminController.getAuditLogs);
