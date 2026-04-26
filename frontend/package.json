@@ -21,7 +21,7 @@
     "jspdf-autotable": "^5.0.7",
     "lucide-react": "^0.303.0",
     "node": "^25.9.0",
-    "react": "^18.2.0",
+    "react": "^19.2.5",
     "react-barcode": "^1.6.1",
     "react-dom": "^18.2.0",
     "react-hot-toast": "^2.4.1",
