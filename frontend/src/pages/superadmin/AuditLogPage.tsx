@@ -3,7 +3,7 @@ import axios from 'axios';
 import {
     Activity, ShieldAlert, LogIn, Ban, Package, ShoppingCart,
     Key, Search, Download, RefreshCcw, Filter, X, ChevronLeft,
-    ChevronRight, Users, CreditCard, Zap, Clock
+    ChevronRight, Users, CreditCard, Zap, Clock, Briefcase
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -63,6 +63,19 @@ const ACTION_META: Record<string, { label: string; color: string; bg: string; ic
     ORDER_CANCELLED:      { label: 'Commande annulée',    color: 'text-red-400',    bg: 'bg-red-500/10 border-red-500/20',     icon: Package },
     API_KEY_GENERATED:    { label: 'Clé API générée',     color: 'text-teal-400',   bg: 'bg-teal-500/10 border-teal-500/20',   icon: Key },
     API_KEY_REVOKED:      { label: 'Clé API révoquée',    color: 'text-red-400',    bg: 'bg-red-500/10 border-red-500/20',     icon: Key },
+    PRODUCT_CREATED:      { label: 'Produit créé',       color: 'text-green-400',  bg: 'bg-green-500/10 border-green-500/20', icon: Package },
+    PRODUCT_UPDATED:      { label: 'Produit modifié',    color: 'text-blue-400',   bg: 'bg-blue-500/10 border-blue-500/20',   icon: Package },
+    SUPPLIER_CREATED:     { label: 'Fournisseur créé',   color: 'text-green-400',  bg: 'bg-green-500/10 border-green-500/20', icon: Briefcase },
+    SUPPLIER_UPDATED:     { label: 'Fournisseur modifié',color: 'text-blue-400',   bg: 'bg-blue-500/10 border-blue-500/20',   icon: Briefcase },
+    SUPPLIER_DELETED:     { label: 'Fournisseur supprimé',color: 'text-red-400',    bg: 'bg-red-500/10 border-red-500/20',     icon: Briefcase },
+    CLIENT_CREATED:       { label: 'Client créé',        color: 'text-green-400',  bg: 'bg-green-500/10 border-green-500/20', icon: Users },
+    CLIENT_UPDATED:       { label: 'Client modifié',     color: 'text-blue-400',   bg: 'bg-blue-500/10 border-blue-500/20',   icon: Users },
+    CLIENT_DELETED:       { label: 'Client supprimé',    color: 'text-red-400',    bg: 'bg-red-500/10 border-red-500/20',     icon: Users },
+    ORDER_CREATED:        { label: 'Commande créée',     color: 'text-green-400',  bg: 'bg-green-500/10 border-green-500/20', icon: ShoppingCart },
+    ORDER_UPDATED:        { label: 'Commande modifiée',  color: 'text-blue-400',   bg: 'bg-blue-500/10 border-blue-500/20',   icon: ShoppingCart },
+    WAREHOUSE_CREATED:    { label: 'Entrepôt créé',      color: 'text-green-400',  bg: 'bg-green-500/10 border-green-500/20', icon: Package },
+    WAREHOUSE_UPDATED:    { label: 'Entrepôt modifié',   color: 'text-blue-400',   bg: 'bg-blue-500/10 border-blue-500/20',   icon: Package },
+    WAREHOUSE_DELETED:    { label: 'Entrepôt supprimé',  color: 'text-red-400',    bg: 'bg-red-500/10 border-red-500/20',     icon: Package },
     AUDIT_LOG_VIEWED:     { label: 'Audit consulté',      color: 'text-gray-400',   bg: 'bg-gray-500/10 border-gray-500/20',   icon: Activity },
 };
 

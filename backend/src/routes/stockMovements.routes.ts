@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import { stockMovementsController } from '../controllers/stockMovements.controller'
-import { authMiddleware } from '../middleware/auth.middleware'
+import { authMiddleware, requireRole } from '../middleware/auth.middleware'
 import { tenantMiddleware } from '../middleware/tenant.middleware'
 
 const router = Router()
@@ -74,6 +74,6 @@ router.use(tenantMiddleware)
  *         description: Stock insuffisant pour une sortie
  */
 router.get('/', stockMovementsController.list)
-router.post('/', stockMovementsController.create)
+router.post('/', requireRole('admin', 'manager'), stockMovementsController.create)
 
 export default router

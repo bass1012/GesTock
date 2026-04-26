@@ -1,6 +1,6 @@
 import { Router, Request } from 'express'
 import { salesService } from '../services/sales.service'
-import { authMiddleware } from '../middleware/auth.middleware'
+import { authMiddleware, requireRole } from '../middleware/auth.middleware'
 import { tenantMiddleware } from '../middleware/tenant.middleware'
 import { z } from 'zod'
 
@@ -123,7 +123,7 @@ router.get('/:id', async (req, res, next) => {
   } catch (error) { next(error) }
 })
 
-router.post('/', async (req: Request, res, next) => {
+router.post('/', requireRole('admin', 'manager'), async (req: Request, res, next) => {
   try {
     const validatedData = saleSchema.parse(req.body)
     const sale = await salesService.createSale(validatedData, req.userId!, req.tenantSlug!)

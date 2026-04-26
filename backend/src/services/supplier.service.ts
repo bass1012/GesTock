@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client'
-import { NotFoundError } from '../utils/errors'
+import { NotFoundError, BadRequestError } from '../utils/errors'
 
 const prisma = new PrismaClient()
 
@@ -75,9 +75,18 @@ export const supplierService = {
   async delete(id: string, tenantSlug: string) {
     const schemaName = `tenant_${tenantSlug}`
     
-    // Simplistic delete (could fail if FK constraints are violated instead of CASCADE)
+    // Check for linked purchase orders
+    const linkedOrders = await prisma.$queryRawUnsafe(
+      `SELECT id FROM "${schemaName}".purchase_orders WHERE supplier_id = $1::uuid LIMIT 1`,
+      id
+    ) as any[]
+
+    if (linkedOrders.length > 0) {
+      throw new BadRequestError('Impossible de supprimer ce fournisseur car il possède des bons de commande liés.')
+    }
+
     const result = await prisma.$queryRawUnsafe(
-      `DELETE FROM "${schemaName}".suppliers WHERE id = $1 RETURNING id`,
+      `DELETE FROM "${schemaName}".suppliers WHERE id = $1::uuid RETURNING id`,
       id
     ) as any[]
 

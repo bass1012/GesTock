@@ -52,7 +52,7 @@ export const superAdminController = {
             });
             
             // Format to return relevant stats
-            const result = tenants.map(t => {
+            const result = tenants.map((t: any) => {
                 const config = (t.config as any) || {};
                 return {
                     id: t.id,

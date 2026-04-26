@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import { productsController } from '../controllers/products.controller'
-import { authMiddleware } from '../middleware/auth.middleware'
+import { authMiddleware, requireRole } from '../middleware/auth.middleware'
 import { tenantMiddleware } from '../middleware/tenant.middleware'
 import { checkPlanLimit } from '../middleware/planLimit.middleware'
 
@@ -107,7 +107,7 @@ router.get('/:id', productsController.get)
  *             schema:
  *               $ref: '#/components/schemas/Product'
  */
-router.post('/', checkPlanLimit('products'), productsController.create)
+router.post('/', requireRole('admin', 'manager'), checkPlanLimit('products'), productsController.create)
 
 /**
  * @swagger
@@ -145,7 +145,7 @@ router.post('/', checkPlanLimit('products'), productsController.create)
  *       404:
  *         description: Produit introuvable
  */
-router.put('/:id', productsController.update)
-router.delete('/:id', productsController.delete)
+router.put('/:id', requireRole('admin', 'manager'), productsController.update)
+router.delete('/:id', requireRole('admin', 'manager'), productsController.delete)
 
 export default router

@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import { ordersController } from '../controllers/orders.controller'
-import { authMiddleware } from '../middleware/auth.middleware'
+import { authMiddleware, requireRole } from '../middleware/auth.middleware'
 import { tenantMiddleware } from '../middleware/tenant.middleware'
 
 const router = Router()
@@ -101,7 +101,7 @@ router.use(tenantMiddleware)
  */
 router.get('/', ordersController.list)
 router.get('/:id', ordersController.get)
-router.post('/', ordersController.create)
-router.put('/:id/status', ordersController.updateStatus)
+router.post('/', requireRole('admin', 'manager'), ordersController.create)
+router.put('/:id/status', requireRole('admin', 'manager'), ordersController.updateStatus)
 
 export default router

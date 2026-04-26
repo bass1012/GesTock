@@ -1,15 +1,4 @@
 import 'dotenv/config'
-import * as Sentry from '@sentry/node'
-
-// Initialize Sentry as early as possible (before express)
-if (process.env.SENTRY_DSN) {
-    Sentry.init({
-        dsn: process.env.SENTRY_DSN,
-        environment: process.env.NODE_ENV || 'development',
-        tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.2 : 1.0,
-    })
-}
-
 // v1.2.1 - Force reload for superadmin routes
 import express from 'express'
 import cors from 'cors'

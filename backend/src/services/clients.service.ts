@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client'
+import { BadRequestError } from '../utils/errors'
 
 const prisma = new PrismaClient()
 
@@ -87,6 +88,17 @@ export class ClientsService {
 
   async deleteClient(id: string, tenantSlug: string) {
     const schema = `tenant_${tenantSlug}`
+    
+    // Check for linked sales
+    const linkedSales = await prisma.$queryRawUnsafe(
+      `SELECT id FROM "${schema}".sales WHERE client_id = $1::uuid LIMIT 1`,
+      id
+    ) as any[]
+
+    if (linkedSales.length > 0) {
+      throw new BadRequestError('Impossible de supprimer ce client car il possède des ventes liées.')
+    }
+
     await prisma.$executeRawUnsafe(
       `DELETE FROM "${schema}".clients WHERE id = $1::uuid`, id
     )

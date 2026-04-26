@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import { clientsService } from '../services/clients.service'
-import { authMiddleware } from '../middleware/auth.middleware'
+import { auditService } from '../services/audit.service'
+import { authMiddleware, requireRole } from '../middleware/auth.middleware'
 import { tenantMiddleware } from '../middleware/tenant.middleware'
 import { z } from 'zod'
 
@@ -30,25 +31,64 @@ router.get('/:id', async (req: any, res, next) => {
   } catch (error) { next(error) }
 })
 
-router.post('/', async (req: any, res, next) => {
+router.post('/', requireRole('admin', 'manager'), async (req: any, res, next) => {
   try {
     const validatedData = clientSchema.parse(req.body)
     const client = await clientsService.createClient(validatedData, req.tenantSlug)
+
+    // Audit log client creation
+    await auditService.log({
+      action: 'CLIENT_CREATED',
+      userId: req.userId!,
+      tenantId: req.tenantId!,
+      resource: 'client',
+      resourceId: client.id,
+      metadata: { name: client.name },
+      ip: req.ip,
+      userAgent: req.headers['user-agent']
+    })
+
     res.status(201).json(client)
   } catch (error) { next(error) }
 })
 
-router.patch('/:id', async (req: any, res, next) => {
+router.patch('/:id', requireRole('admin', 'manager'), async (req: any, res, next) => {
   try {
     const validatedData = clientSchema.partial().parse(req.body)
     const client = await clientsService.updateClient(req.params.id, validatedData, req.tenantSlug)
+
+    // Audit log client update
+    await auditService.log({
+      action: 'CLIENT_UPDATED',
+      userId: req.userId!,
+      tenantId: req.tenantId!,
+      resource: 'client',
+      resourceId: client.id,
+      metadata: { name: client.name },
+      ip: req.ip,
+      userAgent: req.headers['user-agent']
+    })
+
     res.json(client)
   } catch (error) { next(error) }
 })
 
-router.delete('/:id', async (req: any, res, next) => {
+router.delete('/:id', requireRole('admin', 'manager'), async (req: any, res, next) => {
   try {
-    await clientsService.deleteClient(req.params.id, req.tenantSlug)
+    const clientId = req.params.id
+    await clientsService.deleteClient(clientId, req.tenantSlug)
+
+    // Audit log client deletion
+    await auditService.log({
+      action: 'CLIENT_DELETED',
+      userId: req.userId!,
+      tenantId: req.tenantId!,
+      resource: 'client',
+      resourceId: clientId,
+      ip: req.ip,
+      userAgent: req.headers['user-agent']
+    })
+
     res.status(204).end()
   } catch (error) { next(error) }
 })

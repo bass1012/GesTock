@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express'
 import { warehouseService } from '../services/warehouse.service'
+import { auditService } from '../services/audit.service'
 import { z } from 'zod'
 
 const warehouseSchema = z.object({
@@ -30,6 +31,19 @@ export const warehouseController = {
     try {
       const data = warehouseSchema.parse(req.body)
       const warehouse = await warehouseService.createWarehouse(data, req.tenantSlug!)
+
+      // Audit log warehouse creation
+      await auditService.log({
+        action: 'WAREHOUSE_CREATED',
+        userId: req.userId!,
+        tenantId: req.tenantId!,
+        resource: 'warehouse',
+        resourceId: warehouse.id,
+        metadata: { name: warehouse.name },
+        ip: req.ip,
+        userAgent: req.headers['user-agent']
+      })
+
       res.status(201).json(warehouse)
     } catch (error) {
       next(error)
@@ -40,6 +54,19 @@ export const warehouseController = {
     try {
       const data = warehouseSchema.partial().parse(req.body)
       const warehouse = await warehouseService.updateWarehouse(req.params.id, data, req.tenantSlug!)
+
+      // Audit log warehouse update
+      await auditService.log({
+        action: 'WAREHOUSE_UPDATED',
+        userId: req.userId!,
+        tenantId: req.tenantId!,
+        resource: 'warehouse',
+        resourceId: warehouse.id,
+        metadata: { name: warehouse.name },
+        ip: req.ip,
+        userAgent: req.headers['user-agent']
+      })
+
       res.json(warehouse)
     } catch (error) {
       next(error)
@@ -48,7 +75,20 @@ export const warehouseController = {
 
   async delete(req: Request, res: Response, next: NextFunction) {
     try {
-      await warehouseService.deleteWarehouse(req.params.id, req.tenantSlug!)
+      const warehouseId = req.params.id
+      await warehouseService.deleteWarehouse(warehouseId, req.tenantSlug!)
+
+      // Audit log warehouse deletion
+      await auditService.log({
+        action: 'WAREHOUSE_DELETED',
+        userId: req.userId!,
+        tenantId: req.tenantId!,
+        resource: 'warehouse',
+        resourceId: warehouseId,
+        ip: req.ip,
+        userAgent: req.headers['user-agent']
+      })
+
       res.json({ message: 'Entrepôt supprimé' })
     } catch (error) {
       next(error)
