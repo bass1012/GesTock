@@ -47,9 +47,9 @@ jobs:
           cache: 'npm'
           cache-dependency-path: package-lock.json
 
-      - name: Install dependencies
+      - name: Install dependencies (workspace root)
         run: npm ci
-        working-directory: backend
+        # Install from root to use the single monorepo lock file
 
       - name: TypeScript type check
         run: npx tsc --noEmit
@@ -86,9 +86,9 @@ jobs:
           cache: 'npm'
           cache-dependency-path: package-lock.json
 
-      - name: Install dependencies
+      - name: Install dependencies (workspace root)
         run: npm ci
-        working-directory: frontend
+        # Install from root to use the single monorepo lock file
 
       - name: TypeScript type check
         run: npx tsc --noEmit
