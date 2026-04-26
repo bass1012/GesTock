@@ -661,7 +661,14 @@ function TenantUsers({ tenantId, secret }: { tenantId: string, secret: string | 
                                                 <select 
                                                     value={user.role} 
                                                     onChange={(e) => handleUpdateRole(user.id, user.firstName, e.target.value)}
-                                                    className="text-[9px] px-1.5 py-0.5 bg-gray-700 rounded text-gray-300 uppercase font-black border-none focus:ring-1 focus:ring-primary-500 outline-none cursor-pointer hover:bg-gray-600 transition-colors"
+                                                    className="text-[9px] px-2 py-1 bg-gray-800 border border-gray-700 rounded text-gray-200 uppercase font-bold outline-none cursor-pointer hover:border-primary-500 transition-all appearance-none"
+                                                    style={{ 
+                                                        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
+                                                        backgroundPosition: 'right 0.4rem center',
+                                                        backgroundRepeat: 'no-repeat',
+                                                        backgroundSize: '0.6rem',
+                                                        paddingRight: '1.4rem'
+                                                    }}
                                                 >
                                                     <option value="admin">ADMIN</option>
                                                     <option value="manager">MANAGER</option>

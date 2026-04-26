@@ -309,7 +309,7 @@ export default function UsersPage() {
         </div>
 
         {/* Table */}
-        <div className="card overflow-hidden">
+        <div className="card">
           {isLoading ? (
             <div className="flex items-center justify-center py-16">
               <Loader2 className="animate-spin text-gray-400" size={28} />
