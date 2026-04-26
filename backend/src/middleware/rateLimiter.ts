@@ -7,7 +7,7 @@ const authMaxAttempts = Number(process.env.AUTH_RATE_LIMIT_MAX_ATTEMPTS || 10)
 
 export const apiLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: isDev ? 10000 : 100,
+    max: isDev ? 10000 : 1000,
     message: {
         status: 429,
         message: 'Trop de requêtes, veuillez réessayer plus tard.',
