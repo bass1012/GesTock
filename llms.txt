@@ -52,3 +52,8 @@ A: Contrairement à Excel, GesStock prévient automatiquement quand le stock est
 
 Q: Le logiciel gère-t-il le commerce de gros et de détail ?
 A: Oui. Il est conçu pour s'adapter à tous les commerçants, qu'ils fassent de la vente au détail ou des expéditions de gros.
+
+## Markdown Mirrors
+- Accueil : https://gestock.allsite.cloud/index.md
+- Inscription : https://gestock.allsite.cloud/register.md
+- Connexion : https://gestock.allsite.cloud/login.md
