@@ -1,0 +1,54 @@
+# GesStock - Logiciel de gestion de stock et de caisse
+
+## About
+GesStock est un logiciel cloud complet de gestion de stock et de caisse (POS) conçu spécifiquement pour les PME et commerces (détail et gros).
+
+## Services and Pricing
+- Logiciel de Caisse (POS) : Interface de vente rapide avec reçus.
+- Gestion de Stock : Suivi multi-entrepôts, alertes de stock bas, dates de péremption.
+- Gestion des Fournisseurs : Suivi des commandes et approvisionnements.
+- Tarification : Sur devis (forfaits Starter, Pro, Enterprise adaptés à la taille du commerce).
+
+## Locations
+Basé en Afrique de l'Ouest.
+
+## Contact
+- Web : https://gestock.allsite.cloud
+- Direction (CEO) : 0749596667
+- Équipe Technique : 0708205263
+
+## Service Area
+Zone CFA (Afrique de l'Ouest).
+
+## Key Facts
+- Devise native : Franc CFA.
+- Technologie : 100% Cloud et PWA (Progressive Web App).
+- Sécurité : Sauvegardes automatisées.
+- Déploiement : Opérationnel en moins de 1 heure.
+
+## What Makes Us Different
+- Conçu pour l'Afrique : Interface simple pensée pour des commerçants non-techniciens.
+- Mode Hors-Ligne : Application installable sur Android, fonctionnelle même sans connexion internet stable.
+- Outil Tout-en-un : Centralise Caisse, Stock et Fournisseurs là où Excel échoue.
+- Scan Mobile Intégré : Scan de codes-barres via la caméra du smartphone (aucun matériel supplémentaire requis).
+- Prise en main immédiate : Zéro formation ou consultant complexe (contrairement à Odoo ou Sage).
+
+## FAQ
+
+Q: GesStock fonctionne-t-il sans connexion internet ?
+A: Oui. L'application s'installe sur Android et permet de continuer à vendre hors-ligne. Les données se synchronisent au retour d'internet.
+
+Q: Faut-il acheter des scanners de codes-barres physiques ?
+A: Non. GesStock utilise directement l'appareil photo de votre smartphone Android pour scanner les articles instantanément.
+
+Q: Combien de temps pour mettre en place le logiciel dans ma boutique ?
+A: Moins de 1 heure. L'interface est intuitive et ne nécessite aucune formation complexe.
+
+Q: Quel est le tarif de GesStock ?
+A: Nos tarifs ne sont pas figés mais calculés sur devis selon vos besoins réels (1 boutique, multi-boutiques, etc.).
+
+Q: Pourquoi choisir GesStock plutôt qu'un fichier Excel ?
+A: Contrairement à Excel, GesStock prévient automatiquement quand le stock est bas, génère des reçus clients, gère plusieurs employés avec des droits sécurisés, et ne risque pas d'être effacé par erreur.
+
+Q: Le logiciel gère-t-il le commerce de gros et de détail ?
+A: Oui. Il est conçu pour s'adapter à tous les commerçants, qu'ils fassent de la vente au détail ou des expéditions de gros.
