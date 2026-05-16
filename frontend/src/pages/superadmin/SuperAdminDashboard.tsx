@@ -50,7 +50,7 @@ export default function SuperAdminDashboard() {
         headers: { Authorization: `Bearer ${secret}` },
       })
       setTenants(data)
-    } catch (error) {
+    } catch {
       toast.error('Session expirée')
       window.location.href = '/superadmin'
     } finally {
@@ -102,13 +102,14 @@ export default function SuperAdminDashboard() {
 
     // Apply quick access filter
     switch (activeFilter) {
-      case 'recent':
+      case 'recent': {
         // Derniers créés (7 derniers jours)
         const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000
         result = result
           .filter((t) => Date.parse(t.createdAt) >= oneWeekAgo)
           .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt))
         break
+      }
       case 'expiring':
         // Abonnements expirant dans les 7 jours
         result = result
@@ -154,7 +155,7 @@ export default function SuperAdminDashboard() {
           toast.dismiss(loadToast)
           toast.success('Bail commercial renouvelé !')
           fetchTenants()
-        } catch (error) {
+        } catch {
           toast.error('Échec de la mise à jour')
         }
       },
@@ -180,7 +181,7 @@ export default function SuperAdminDashboard() {
           toast.dismiss(loadToast)
           toast.success(`Compte ${isSuspended ? 'réactivé' : 'bloqué'}`)
           fetchTenants()
-        } catch (error) {
+        } catch {
           toast.error('Erreur système')
         }
       },
@@ -198,7 +199,7 @@ export default function SuperAdminDashboard() {
       )
       toast.success(`Flux API ${apiEnabled ? 'coupé' : 'restauré'}`)
       fetchTenants()
-    } catch (error) {
+    } catch {
       toast.error('Erreur API')
     }
   }
@@ -558,7 +559,7 @@ export default function SuperAdminDashboard() {
           message={confirmConfig.message}
           onClose={() => setConfirmConfig((c: any) => ({ ...c, isOpen: false }))}
           onConfirm={() => {
-            confirmConfig.onConfirm && confirmConfig.onConfirm()
+            if (confirmConfig.onConfirm) confirmConfig.onConfirm()
             setConfirmConfig((c: any) => ({ ...c, isOpen: false }))
           }}
         />
@@ -784,7 +785,7 @@ function TenantUsers({ tenantId, secret }: { tenantId: string; secret: string | 
         headers: { Authorization: `Bearer ${secret}` },
       })
       setUsers(data)
-    } catch (error) {
+    } catch {
       toast.error('Erreur chargement utilisateurs')
     } finally {
       setIsLoading(false)
@@ -813,7 +814,7 @@ function TenantUsers({ tenantId, secret }: { tenantId: string; secret: string | 
             `✅ MOT DE PASSE RÉINITIALISÉ\n\nNouveau code temporaire pour ${userName} :\n\n${data.tempPassword}\n\nNotez-le bien, il ne sera plus affiché !`,
           )
           fetchUsers()
-        } catch (error) {
+        } catch {
           toast.error('Erreur réinitialisation')
         }
       },
@@ -833,7 +834,7 @@ function TenantUsers({ tenantId, secret }: { tenantId: string; secret: string | 
       toast.dismiss(loadToast)
       toast.success(`Rôle de ${userName} mis à jour en ${newRole.toUpperCase()}`)
       fetchUsers()
-    } catch (error) {
+    } catch {
       toast.error('Erreur lors du changement de rôle')
     }
   }
@@ -919,7 +920,7 @@ function TenantUsers({ tenantId, secret }: { tenantId: string; secret: string | 
         message={confirmConfig.message}
         onClose={() => setConfirmConfig((c: any) => ({ ...c, isOpen: false }))}
         onConfirm={() => {
-          confirmConfig.onConfirm && confirmConfig.onConfirm()
+          if (confirmConfig.onConfirm) confirmConfig.onConfirm()
           setConfirmConfig((c: any) => ({ ...c, isOpen: false }))
         }}
       />

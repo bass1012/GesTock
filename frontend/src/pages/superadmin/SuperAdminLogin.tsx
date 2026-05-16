@@ -27,7 +27,7 @@ export default function SuperAdminLogin() {
       } else {
         window.location.href = '/superadmin/dashboard'
       }
-    } catch (error) {
+    } catch {
       toast.error('Code Maître invalide')
       setIsLoading(false)
     }

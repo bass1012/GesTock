@@ -22,7 +22,7 @@ export default function WarehousesPage() {
     try {
       const { data } = await api.get('/warehouses')
       setWarehouses(data)
-    } catch (error) {
+    } catch {
       toast.error('Erreur lors du chargement des entrepôts')
     } finally {
       setIsLoading(false)
@@ -216,7 +216,7 @@ export default function WarehousesPage() {
         message={confirmConfig.message}
         onClose={() => setConfirmConfig((c: any) => ({ ...c, isOpen: false }))}
         onConfirm={() => {
-          confirmConfig.onConfirm && confirmConfig.onConfirm()
+          if (confirmConfig.onConfirm) confirmConfig.onConfirm()
           setConfirmConfig((c: any) => ({ ...c, isOpen: false }))
         }}
       />

@@ -186,7 +186,7 @@ export default function OrdersPage() {
         message={confirmConfig.message}
         onClose={() => setConfirmConfig((c: any) => ({ ...c, isOpen: false }))}
         onConfirm={() => {
-          confirmConfig.onConfirm && confirmConfig.onConfirm()
+          if (confirmConfig.onConfirm) confirmConfig.onConfirm()
           setConfirmConfig((c: any) => ({ ...c, isOpen: false }))
         }}
       />
