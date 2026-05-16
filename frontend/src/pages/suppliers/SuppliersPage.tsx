@@ -2,11 +2,13 @@ import { useState } from 'react'
 import { Plus, Search, Edit2, Trash2 } from 'lucide-react'
 import { useSuppliers, useDeleteSupplier, Supplier } from '../../hooks/useSuppliers'
 import SupplierModal from './SupplierModal'
+import ConfirmModal from '../../components/ConfirmModal'
 
 export default function SuppliersPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null)
+  const [deleteId, setDeleteId] = useState<string | null>(null)
 
   const { data: suppliers, isLoading } = useSuppliers()
   const { mutate: deleteSupplier } = useDeleteSupplier()
@@ -17,15 +19,13 @@ export default function SuppliersPage() {
   }
 
   const handleDelete = (id: string) => {
-    if (window.confirm('Voulez-vous vraiment supprimer ce fournisseur ? Cette action désactivera potentiellement les historiques liés s\'ils ne sont pas protégés en CASCADE.')) {
-      deleteSupplier(id)
-    }
+    setDeleteId(id)
   }
 
   const filteredSuppliers = suppliers?.filter(
     (s) =>
       s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      s.email?.toLowerCase().includes(searchTerm.toLowerCase())
+      s.email?.toLowerCase().includes(searchTerm.toLowerCase()),
   )
 
   return (
@@ -54,7 +54,7 @@ export default function SuppliersPage() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
             <input
               type="text"
-              placeholder="Rechercher par nom, email..."
+              placeholder="Rechercher par nom, email…"
               className="input pl-10"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -85,7 +85,7 @@ export default function SuppliersPage() {
               {isLoading ? (
                 <tr>
                   <td colSpan={4} className="px-6 py-8 text-center text-gray-500">
-                    Chargement des fournisseurs...
+                    Chargement des fournisseurs…
                   </td>
                 </tr>
               ) : filteredSuppliers?.length === 0 ? (
@@ -99,11 +99,13 @@ export default function SuppliersPage() {
                   <tr key={supplier.id} className="hover:bg-gray-50/50 transition-colors">
                     <td className="px-6 py-4">
                       <div className="font-medium text-gray-900">{supplier.name}</div>
-                      <div className="text-xs text-gray-500 font-mono mt-0.5 mt-1">ID: {supplier.id.split('-')[0]}</div>
+                      <div className="text-xs text-gray-500 font-mono mt-0.5 mt-1">
+                        ID: {supplier.id.split('-')[0]}
+                      </div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="text-sm text-gray-900">{supplier.email || '—'}</div>
-                      <div className="text-sm text-gray-500">{supplier.phone || '—'}</div>
+                      <div className="text-sm text-gray-900">{supplier.email || '-'}</div>
+                      <div className="text-sm text-gray-500">{supplier.phone || '-'}</div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-sm text-gray-500 max-w-xs truncate">
@@ -121,7 +123,7 @@ export default function SuppliersPage() {
                         </button>
                         <button
                           onClick={() => handleDelete(supplier.id)}
-                          className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                          className="p-2 text-gray-500 hover:text-red-500 hover:bg-gray-100 rounded-lg transition-colors"
                           title="Supprimer"
                         >
                           <Trash2 size={18} />
@@ -140,6 +142,18 @@ export default function SuppliersPage() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         supplier={editingSupplier}
+      />
+
+      <ConfirmModal
+        isOpen={!!deleteId}
+        onClose={() => setDeleteId(null)}
+        onConfirm={() => {
+          deleteSupplier(deleteId!)
+          setDeleteId(null)
+        }}
+        title="Supprimer le fournisseur"
+        message="Voulez-vous vraiment supprimer ce fournisseur ? Cette action est irreversible."
+        confirmText="Supprimer"
       />
     </div>
   )

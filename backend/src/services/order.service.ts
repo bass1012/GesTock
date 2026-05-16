@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client'
-import { NotFoundError } from '../utils/errors'
+import { NotFoundError, BadRequestError } from '../utils/errors'
 import { stockService } from './stock.service'
 
 const prisma = new PrismaClient()
@@ -107,7 +107,7 @@ export const orderService = {
     const schemaName = `tenant_${tenantSlug}`
     const orderRaw = await this.get(id, tenantSlug)
     if (orderRaw.status === 'RECEIVED' || orderRaw.status === 'CANCELLED') {
-      throw new Error(`Impossible de modifier une commande au statut ${orderRaw.status}`)
+      throw new BadRequestError(`Impossible de modifier une commande au statut ${orderRaw.status}`)
     }
 
     const result = await prisma.$queryRawUnsafe(

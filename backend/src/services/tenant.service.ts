@@ -65,6 +65,8 @@ export const tenantService = {
                 warehouse_id UUID REFERENCES "${schemaName}".warehouses(id),
                 type VARCHAR NOT NULL,
                 quantity INT NOT NULL,
+                batch_number VARCHAR,
+                expiry_date TIMESTAMP,
                 reference VARCHAR,
                 note TEXT,
                 created_by UUID,

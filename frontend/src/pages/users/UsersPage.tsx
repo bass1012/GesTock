@@ -24,10 +24,30 @@ import {
 import { useAuthStore } from '../../store/authStore'
 
 // ─── Constantes rôles ────────────────────────────────────────────────────────
-const ROLES: { value: TenantUser['role']; label: string; icon: React.ElementType; color: string }[] = [
-  { value: 'admin',    label: 'Administrateur', icon: Shield,   color: 'text-red-600 bg-red-50 border-red-200' },
-  { value: 'manager',  label: 'Manager',        icon: Briefcase, color: 'text-blue-600 bg-blue-50 border-blue-200' },
-  { value: 'lecteur',  label: 'Lecteur',        icon: Eye,       color: 'text-gray-600 bg-gray-50 border-gray-200' },
+const ROLES: {
+  value: TenantUser['role']
+  label: string
+  icon: React.ElementType
+  color: string
+}[] = [
+  {
+    value: 'admin',
+    label: 'Administrateur',
+    icon: Shield,
+    color: 'text-red-600 bg-red-50 border-red-200',
+  },
+  {
+    value: 'manager',
+    label: 'Manager',
+    icon: Briefcase,
+    color: 'text-blue-600 bg-blue-50 border-blue-200',
+  },
+  {
+    value: 'lecteur',
+    label: 'Lecteur',
+    icon: Eye,
+    color: 'text-gray-600 bg-gray-50 border-gray-200',
+  },
 ]
 
 function roleMeta(role: TenantUser['role']) {
@@ -39,7 +59,9 @@ function RoleBadge({ role }: { role: TenantUser['role'] }) {
   const meta = roleMeta(role)
   const Icon = meta.icon
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${meta.color}`}>
+    <span
+      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${meta.color}`}
+    >
       <Icon size={11} />
       {meta.label}
     </span>
@@ -62,16 +84,14 @@ function RoleDropdown({
 
   return (
     <div className="relative inline-block">
-      <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border transition-opacity ${meta.color} ${disabled || updateRole.isPending ? 'opacity-50' : 'hover:opacity-80'}`}>
-        {updateRole.isPending ? (
-          <Loader2 size={11} className="animate-spin" />
-        ) : (
-          <Icon size={11} />
-        )}
+      <div
+        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border transition-opacity ${meta.color} ${disabled || updateRole.isPending ? 'opacity-50' : 'hover:opacity-80'}`}
+      >
+        {updateRole.isPending ? <Loader2 size={11} className="animate-spin" /> : <Icon size={11} />}
         {meta.label}
         {!disabled && !updateRole.isPending && <ChevronDown size={11} className="ml-0.5" />}
       </div>
-      
+
       {!disabled && !updateRole.isPending && (
         <select
           value={current}
@@ -81,8 +101,10 @@ function RoleDropdown({
           }}
           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
         >
-          {ROLES.map(r => (
-            <option key={r.value} value={r.value}>{r.label}</option>
+          {ROLES.map((r) => (
+            <option key={r.value} value={r.value}>
+              {r.label}
+            </option>
           ))}
         </select>
       )}
@@ -101,8 +123,9 @@ function InviteModal({ onClose }: { onClose: () => void }) {
     password: '',
   })
 
-  const set = (k: keyof InviteUserPayload) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
-    setForm((f) => ({ ...f, [k]: e.target.value }))
+  const set =
+    (k: keyof InviteUserPayload) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
+      setForm((f) => ({ ...f, [k]: e.target.value }))
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -116,12 +139,15 @@ function InviteModal({ onClose }: { onClose: () => void }) {
         {/* Header */}
         <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-gray-100">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center">
+            <div className="size-9 rounded-xl bg-blue-50 flex items-center justify-center">
               <UserPlus size={18} className="text-blue-600" />
             </div>
             <h2 className="text-base font-semibold text-gray-900">Inviter un utilisateur</h2>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors">
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+          >
             <X size={18} />
           </button>
         </div>
@@ -130,10 +156,19 @@ function InviteModal({ onClose }: { onClose: () => void }) {
         <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">Prénom</label>
+              <label
+                htmlFor="user-first-name"
+                className="block text-xs font-medium text-gray-700 mb-1"
+              >
+                Prénom
+              </label>
               <div className="relative">
-                <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <User
+                  size={14}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                />
                 <input
+                  id="user-first-name"
                   type="text"
                   required
                   value={form.firstName}
@@ -144,8 +179,14 @@ function InviteModal({ onClose }: { onClose: () => void }) {
               </div>
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">Nom</label>
+              <label
+                htmlFor="user-last-name"
+                className="block text-xs font-medium text-gray-700 mb-1"
+              >
+                Nom
+              </label>
               <input
+                id="user-last-name"
                 type="text"
                 required
                 value={form.lastName}
@@ -157,10 +198,13 @@ function InviteModal({ onClose }: { onClose: () => void }) {
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">Email</label>
+            <label htmlFor="user-email" className="block text-xs font-medium text-gray-700 mb-1">
+              Email
+            </label>
             <div className="relative">
               <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
+                id="user-email"
                 type="email"
                 required
                 value={form.email}
@@ -172,24 +216,39 @@ function InviteModal({ onClose }: { onClose: () => void }) {
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">Rôle</label>
-            <select value={form.role} onChange={set('role')} className="input w-full text-sm">
+            <label htmlFor="user-role" className="block text-xs font-medium text-gray-700 mb-1">
+              Rôle
+            </label>
+            <select
+              id="user-role"
+              value={form.role}
+              onChange={set('role')}
+              className="input w-full text-sm"
+            >
               {ROLES.map((r) => (
-                <option key={r.value} value={r.value}>{r.label}</option>
+                <option key={r.value} value={r.value}>
+                  {r.label}
+                </option>
               ))}
             </select>
             <p className="text-xs text-gray-400 mt-1">
-              {form.role === 'admin' && 'Accès total à toutes les fonctionnalités et à la gestion des utilisateurs.'}
-              {form.role === 'manager' && 'Peut gérer les stocks, fournisseurs et commandes. Ne peut pas modifier les utilisateurs.'}
-              {form.role === 'lecteur' && 'Accès en lecture seule. Ne peut pas créer ni modifier de données.'}
+              {form.role === 'admin' &&
+                'Accès total à toutes les fonctionnalités et à la gestion des utilisateurs.'}
+              {form.role === 'manager' &&
+                'Peut gérer les stocks, fournisseurs et commandes. Ne peut pas modifier les utilisateurs.'}
+              {form.role === 'lecteur' &&
+                'Accès en lecture seule. Ne peut pas créer ni modifier de données.'}
             </p>
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">Mot de passe temporaire</label>
+            <label htmlFor="user-password" className="block text-xs font-medium text-gray-700 mb-1">
+              Mot de passe temporaire
+            </label>
             <div className="relative">
               <Lock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
+                id="user-password"
                 type="text"
                 required
                 minLength={8}
@@ -199,7 +258,9 @@ function InviteModal({ onClose }: { onClose: () => void }) {
                 className="input w-full pl-8 text-sm font-mono"
               />
             </div>
-            <p className="text-xs text-gray-400 mt-1">L'utilisateur le recevra par email et devra le changer.</p>
+            <p className="text-xs text-gray-400 mt-1">
+              L'utilisateur le recevra par email et devra le changer.
+            </p>
           </div>
 
           <div className="flex gap-3 pt-2">
@@ -212,9 +273,13 @@ function InviteModal({ onClose }: { onClose: () => void }) {
               className="btn btn-primary flex-1 text-sm flex items-center justify-center gap-2"
             >
               {inviteUser.isPending ? (
-                <><Loader2 size={14} className="animate-spin" /> Envoi...</>
+                <>
+                  <Loader2 size={14} className="animate-spin" /> Envoi…
+                </>
               ) : (
-                <><UserPlus size={14} /> Inviter</>
+                <>
+                  <UserPlus size={14} /> Inviter
+                </>
               )}
             </button>
           </div>
@@ -277,12 +342,17 @@ export default function UsersPage() {
             const count = users.filter((u) => u.role === r.value).length
             return (
               <div key={r.value} className="card p-4 flex items-center gap-4">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${r.color}`}>
+                <div
+                  className={`size-10 rounded-xl flex items-center justify-center border ${r.color}`}
+                >
                   <Icon size={18} />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-gray-900">{count}</p>
-                  <p className="text-sm text-gray-500">{r.label}{count > 1 ? 's' : ''}</p>
+                  <p className="text-sm text-gray-500">
+                    {r.label}
+                    {count > 1 ? 's' : ''}
+                  </p>
                 </div>
               </div>
             )
@@ -305,12 +375,22 @@ export default function UsersPage() {
               <table className="w-full">
                 <thead className="bg-gray-50 border-b border-gray-100">
                   <tr>
-                    <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-6 py-3">Utilisateur</th>
-                    <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-6 py-3">Email</th>
-                    <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-6 py-3">Rôle</th>
-                    <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-6 py-3">Membre depuis</th>
+                    <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-6 py-3">
+                      Utilisateur
+                    </th>
+                    <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-6 py-3">
+                      Email
+                    </th>
+                    <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-6 py-3">
+                      Rôle
+                    </th>
+                    <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-6 py-3">
+                      Membre depuis
+                    </th>
                     {isAdmin && (
-                      <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-6 py-3">Actions</th>
+                      <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-6 py-3">
+                        Actions
+                      </th>
                     )}
                   </tr>
                 </thead>
@@ -322,14 +402,17 @@ export default function UsersPage() {
                         {/* Avatar + nom */}
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-sm font-semibold shrink-0">
-                              {u.firstName.charAt(0)}{u.lastName.charAt(0)}
+                            <div className="size-9 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-sm font-semibold shrink-0">
+                              {u.firstName.charAt(0)}
+                              {u.lastName.charAt(0)}
                             </div>
                             <div>
                               <p className="font-medium text-gray-900 text-sm">
                                 {u.firstName} {u.lastName}
                                 {isMe && (
-                                  <span className="ml-2 text-xs text-gray-400 font-normal">(vous)</span>
+                                  <span className="ml-2 text-xs text-gray-400 font-normal">
+                                    (vous)
+                                  </span>
                                 )}
                               </p>
                             </div>
@@ -349,7 +432,9 @@ export default function UsersPage() {
                         </td>
 
                         {/* Date */}
-                        <td className="px-6 py-4 text-sm text-gray-500">{formatDate(u.createdAt)}</td>
+                        <td className="px-6 py-4 text-sm text-gray-500">
+                          {formatDate(u.createdAt)}
+                        </td>
 
                         {/* Actions */}
                         {isAdmin && (
@@ -358,7 +443,7 @@ export default function UsersPage() {
                               <button
                                 onClick={() => handleRemove(u)}
                                 disabled={removing === u.id}
-                                className="p-2 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
+                                className="p-2 rounded-lg text-gray-500 hover:text-red-600 hover:bg-gray-100 transition-colors disabled:opacity-50"
                                 title="Révoquer l'accès"
                               >
                                 {removing === u.id ? (

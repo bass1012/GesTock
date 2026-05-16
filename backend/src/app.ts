@@ -3,6 +3,7 @@ import 'dotenv/config'
 import express from 'express'
 import cors from 'cors'
 import helmet from 'helmet'
+import compression from 'compression'
 import swaggerUi from 'swagger-ui-express'
 import authRoutes from './routes/auth.routes'
 import productsRoutes from './routes/products.routes'
@@ -20,6 +21,8 @@ import transfersRoutes from './routes/transfers.routes'
 import lotsRoutes from './routes/lots.routes'
 import supplierReturnsRoutes from './routes/supplierReturns.routes'
 import loyaltyRoutes from './routes/loyalty.routes'
+import clientsRoutes from './routes/clients.routes'
+import salesRoutes from './routes/sales.routes'
 import { apiKeyMiddleware } from './middleware/apiKey.middleware'
 import { startStockAlertJob } from './jobs/stockAlert.job'
 import { errorHandler } from './middleware/errorHandler'
@@ -35,6 +38,7 @@ app.set('trust proxy', 1)
 
 // Global middleware
 app.use(helmet())
+app.use(compression())
 app.use(cors({
     origin: process.env.FRONTEND_URL || 'http://localhost:5173',
     credentials: true,
@@ -69,8 +73,6 @@ app.use('/api/v1/auth', authRoutes)
 app.use('/api/v1/products', productsRoutes)
 app.use('/api/v1/stock/movements', stockMovementsRoutes)
 app.use('/api/v1/alerts', alertsRoutes)
-import clientsRoutes from './routes/clients.routes'
-import salesRoutes from './routes/sales.routes'
 
 app.use('/api/v1/suppliers', suppliersRoutes)
 app.use('/api/v1/orders', ordersRoutes)

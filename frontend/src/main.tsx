@@ -11,32 +11,32 @@ import './index.css'
 registerSW({ immediate: true })
 
 const queryClient = new QueryClient({
-    defaultOptions: {
-        queries: {
-            retry: 1,
-            refetchOnWindowFocus: false,
-            staleTime: 5 * 60 * 1000,
-        },
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+      staleTime: 5 * 60 * 1000,
     },
+  },
 })
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-    <React.StrictMode>
-        <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-            <QueryClientProvider client={queryClient}>
-                <App />
-                <Toaster
-                    position="top-right"
-                    toastOptions={{
-                        duration: 4000,
-                        style: {
-                            borderRadius: '12px',
-                            background: '#1e293b',
-                            color: '#f8fafc',
-                        },
-                    }}
-                />
-            </QueryClientProvider>
-        </BrowserRouter>
-    </React.StrictMode>,
+  <React.StrictMode>
+    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <QueryClientProvider client={queryClient}>
+        <App />
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            duration: 4000,
+            style: {
+              borderRadius: '12px',
+              background: '#1e293b',
+              color: '#f8fafc',
+            },
+          }}
+        />
+      </QueryClientProvider>
+    </BrowserRouter>
+  </React.StrictMode>,
 )

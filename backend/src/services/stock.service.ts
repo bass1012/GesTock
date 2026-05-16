@@ -1,5 +1,5 @@
 import { PrismaClient, Prisma } from '@prisma/client'
-import { NotFoundError } from '../utils/errors'
+import { NotFoundError, BadRequestError } from '../utils/errors'
 import { cacheService } from './cache.service'
 import { auditService } from './audit.service'
 
@@ -282,7 +282,7 @@ export const stockService = {
             if (defaultWarehouse.length > 0) {
                 warehouseId = defaultWarehouse[0].id
             } else {
-                throw new Error('Entrepôt par défaut introuvable. Veuillez spécifier un entrepôt.')
+                throw new NotFoundError('Entrepôt par défaut introuvable. Veuillez spécifier un entrepôt.')
             }
         }
 
@@ -303,7 +303,7 @@ export const stockService = {
             newLocalStock += data.quantity
         } else if (data.type === 'OUT') {
             if (newLocalStock < data.quantity) {
-                throw new Error(`Stock insuffisant dans cet entrepôt (Disponible: ${newLocalStock})`)
+                throw new BadRequestError(`Stock insuffisant dans cet entrepôt (Disponible: ${newLocalStock})`)
             }
             newGlobalStock -= data.quantity
             newLocalStock -= data.quantity
@@ -459,7 +459,7 @@ export const stockService = {
         const { productId, sourceWarehouseId, destWarehouseId, quantity, note } = data
 
         if (sourceWarehouseId === destWarehouseId) {
-            throw new Error("L'entrepôt source et destination doivent être différents")
+            throw new BadRequestError("L'entrepôt source et destination doivent être différents")
         }
 
         // 1. Vérifier stock disponible dans la source
@@ -492,7 +492,7 @@ export const stockService = {
         }
 
         if (currentSourceQty < quantity) {
-            throw new Error(`Stock insuffisant dans l'entrepôt source (Disponible: ${currentSourceQty})`)
+            throw new BadRequestError(`Stock insuffisant dans l'entrepôt source (Disponible: ${currentSourceQty})`)
         }
 
         // 2. Stock destination

@@ -43,7 +43,7 @@ export const useInviteUser = () => {
       toast.success('Utilisateur invité avec succès — un email de bienvenue a été envoyé')
     },
     onError: (err: any) => {
-      const msg = err?.response?.data?.message || 'Erreur lors de l\'invitation'
+      const msg = err?.response?.data?.message || "Erreur lors de l'invitation"
       toast.error(msg)
     },
   })

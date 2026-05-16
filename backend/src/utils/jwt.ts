@@ -1,5 +1,7 @@
 import jwt, { SignOptions } from 'jsonwebtoken'
 
+export { jwt }
+
 const JWT_SECRET = process.env.JWT_SECRET || (process.env.NODE_ENV === 'development' ? 'dev-secret-change-me' : (() => { throw new Error('JWT_SECRET environment variable is required') })())
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || (process.env.NODE_ENV === 'development' ? 'dev-refresh-secret-change-me' : (() => { throw new Error('JWT_REFRESH_SECRET environment variable is required') })())
 const ACCESS_EXPIRY = process.env.JWT_ACCESS_EXPIRY || '15m'

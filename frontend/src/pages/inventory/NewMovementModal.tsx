@@ -32,9 +32,11 @@ export default function NewMovementModal({ isOpen, onClose }: NewMovementModalPr
 
   const handleScan = (decodedText: string) => {
     if (!products?.products) return
-    const matchedProduct = products.products.find(p => p.sku === decodedText || p.id === decodedText)
+    const matchedProduct = products.products.find(
+      (p) => p.sku === decodedText || p.id === decodedText,
+    )
     if (matchedProduct) {
-      setFormData(prev => ({ ...prev, productId: matchedProduct.id }))
+      setFormData((prev) => ({ ...prev, productId: matchedProduct.id }))
       toast.success(`Produit détecté : ${matchedProduct.name}`)
     } else {
       toast.error(`Aucun produit avec le code : ${decodedText}`)
@@ -43,18 +45,27 @@ export default function NewMovementModal({ isOpen, onClose }: NewMovementModalPr
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     // Ensure quantity is positive
     const dataToSend = {
       ...formData,
-      quantity: Math.abs(formData.quantity)
+      quantity: Math.abs(formData.quantity),
     }
 
     createMovement(dataToSend, {
       onSuccess: () => {
-        setFormData({ productId: '', warehouseId: '', type: 'IN', quantity: 1, reference: '', note: '', batchNumber: '', expiryDate: '' })
+        setFormData({
+          productId: '',
+          warehouseId: '',
+          type: 'IN',
+          quantity: 1,
+          reference: '',
+          note: '',
+          batchNumber: '',
+          expiryDate: '',
+        })
         onClose()
-      }
+      },
     })
   }
 
@@ -71,16 +82,20 @@ export default function NewMovementModal({ isOpen, onClose }: NewMovementModalPr
         <form onSubmit={handleSubmit} className="p-6">
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="movement-warehouse"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Entrepôt source/destination *
               </label>
               <select
+                id="movement-warehouse"
                 required
                 className="input w-full"
                 value={formData.warehouseId}
-                onChange={(e) => setFormData({ ...formData, warehouseId: e.target.value })}
+                onChange={(e) => setFormData((prev) => ({ ...prev, warehouseId: e.target.value }))}
               >
-                <option value="">Sélectionner un entrepôt...</option>
+                <option value="">Sélectionner un entrepôt…</option>
                 {warehouses?.map((w) => (
                   <option key={w.id} value={w.id}>
                     {w.name}
@@ -90,18 +105,22 @@ export default function NewMovementModal({ isOpen, onClose }: NewMovementModalPr
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="movement-product"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Produit *
               </label>
 
               <div className="flex gap-2">
                 <select
+                  id="movement-product"
                   required
                   className="input flex-1"
                   value={formData.productId}
-                  onChange={(e) => setFormData({ ...formData, productId: e.target.value })}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, productId: e.target.value }))}
                 >
-                  <option value="">Sélectionner un produit...</option>
+                  <option value="">Sélectionner un produit…</option>
                   {products?.products.map((p) => (
                     <option key={p.id} value={p.id}>
                       {p.sku} - {p.name} (Stock actuel: {p.currentStock})
@@ -121,14 +140,20 @@ export default function NewMovementModal({ isOpen, onClose }: NewMovementModalPr
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="movement-type"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Type de mouvement *
                 </label>
                 <select
+                  id="movement-type"
                   required
                   className="input"
                   value={formData.type}
-                  onChange={(e) => setFormData({ ...formData, type: e.target.value as any })}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, type: e.target.value as any }))
+                  }
                 >
                   <option value="IN">Entrée (IN)</option>
                   <option value="OUT">Sortie (OUT)</option>
@@ -136,29 +161,39 @@ export default function NewMovementModal({ isOpen, onClose }: NewMovementModalPr
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="movement-quantity"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Quantité *
                 </label>
                 <input
+                  id="movement-quantity"
                   type="number"
                   min="1"
                   required
                   className="input"
                   value={formData.quantity}
-                  onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value) || 1 })}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, quantity: parseInt(e.target.value) || 1 }))
+                  }
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="movement-reference"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Référence (optionnel)
               </label>
               <input
+                id="movement-reference"
                 type="text"
                 className="input"
                 value={formData.reference}
-                onChange={(e) => setFormData({ ...formData, reference: e.target.value })}
+                onChange={(e) => setFormData((prev) => ({ ...prev, reference: e.target.value }))}
                 placeholder="Ex: LIV-2024-001"
               />
             </div>
@@ -166,59 +201,84 @@ export default function NewMovementModal({ isOpen, onClose }: NewMovementModalPr
             {formData.type === 'IN' && (
               <div className="grid grid-cols-2 gap-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
                 <div>
-                  <label className="block text-sm font-medium text-blue-800 mb-1">
+                  <label
+                    htmlFor="movement-batch"
+                    className="block text-sm font-medium text-blue-800 mb-1"
+                  >
                     N° de lot (optionnel)
                   </label>
                   <input
+                    id="movement-batch"
                     type="text"
                     className="input"
                     value={formData.batchNumber}
-                    onChange={(e) => setFormData({ ...formData, batchNumber: e.target.value })}
+                    onChange={(e) =>
+                      setFormData((prev) => ({ ...prev, batchNumber: e.target.value }))
+                    }
                     placeholder="Ex: LOT-2024-001"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-blue-800 mb-1">
+                  <label
+                    htmlFor="movement-expiry"
+                    className="block text-sm font-medium text-blue-800 mb-1"
+                  >
                     Date de péremption (optionnel)
                   </label>
                   <input
+                    id="movement-expiry"
                     type="date"
                     className="input"
                     value={formData.expiryDate}
-                    onChange={(e) => setFormData({ ...formData, expiryDate: e.target.value })}
+                    onChange={(e) =>
+                      setFormData((prev) => ({ ...prev, expiryDate: e.target.value }))
+                    }
                   />
                 </div>
               </div>
             )}
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="movement-note"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Note (optionnel)
               </label>
               <textarea
+                id="movement-note"
                 className="input min-h-[60px]"
                 value={formData.note}
-                onChange={(e) => setFormData({ ...formData, note: e.target.value })}
-                placeholder="Motif du mouvement..."
+                onChange={(e) => setFormData((prev) => ({ ...prev, note: e.target.value }))}
+                placeholder="Motif du mouvement…"
               />
             </div>
           </div>
 
           <div className="mt-8 flex justify-end gap-3">
-            <button type="button" onClick={onClose} className="btn btn-outline" disabled={isPending}>
+            <button
+              type="button"
+              onClick={onClose}
+              className="btn btn-outline"
+              disabled={isPending}
+            >
               Annuler
             </button>
-            <button type="submit" className="btn btn-primary" disabled={isPending || !formData.productId}>
-              {isPending ? 'Enregistrement...' : 'Valider'}
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={isPending || !formData.productId}
+            >
+              {isPending ? 'Enregistrement…' : 'Valider'}
             </button>
           </div>
         </form>
       </div>
-      
-      <BarcodeScannerModal 
-        isOpen={showScanner} 
-        onClose={() => setShowScanner(false)} 
-        onScan={handleScan} 
+
+      <BarcodeScannerModal
+        isOpen={showScanner}
+        onClose={() => setShowScanner(false)}
+        onScan={handleScan}
       />
     </div>
   )

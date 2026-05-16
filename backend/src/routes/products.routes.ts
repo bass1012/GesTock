@@ -3,6 +3,7 @@ import { productsController } from '../controllers/products.controller'
 import { authMiddleware, requireRole } from '../middleware/auth.middleware'
 import { tenantMiddleware } from '../middleware/tenant.middleware'
 import { checkPlanLimit } from '../middleware/planLimit.middleware'
+import { asyncHandler } from '../utils/asyncHandler'
 
 const router = Router()
 
@@ -50,7 +51,7 @@ router.use(tenantMiddleware)
  *                 page: { type: integer }
  *                 limit: { type: integer }
  */
-router.get('/', productsController.list)
+router.get('/', asyncHandler(productsController.list))
 /**
  * @swagger
  * /products/{id}:
@@ -72,7 +73,7 @@ router.get('/', productsController.list)
  *       404:
  *         description: Produit introuvable
  */
-router.get('/:id', productsController.get)
+router.get('/:id', asyncHandler(productsController.get))
 
 /**
  * @swagger
@@ -107,7 +108,7 @@ router.get('/:id', productsController.get)
  *             schema:
  *               $ref: '#/components/schemas/Product'
  */
-router.post('/', requireRole('admin', 'manager'), checkPlanLimit('products'), productsController.create)
+router.post('/', requireRole('admin', 'manager'), checkPlanLimit('products'), asyncHandler(productsController.create))
 
 /**
  * @swagger
@@ -145,7 +146,7 @@ router.post('/', requireRole('admin', 'manager'), checkPlanLimit('products'), pr
  *       404:
  *         description: Produit introuvable
  */
-router.put('/:id', requireRole('admin', 'manager'), productsController.update)
-router.delete('/:id', requireRole('admin', 'manager'), productsController.delete)
+router.put('/:id', requireRole('admin', 'manager'), asyncHandler(productsController.update))
+router.delete('/:id', requireRole('admin', 'manager'), asyncHandler(productsController.delete))
 
 export default router

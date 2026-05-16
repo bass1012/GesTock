@@ -26,54 +26,52 @@ const SuperAdminLogin = lazy(() => import('./pages/superadmin/SuperAdminLogin'))
 const SuperAdminDashboard = lazy(() => import('./pages/superadmin/SuperAdminDashboard'))
 
 function PageLoader() {
-    return (
-        <div className="min-h-screen flex items-center justify-center text-slate-500">
-            Chargement...
-        </div>
-    )
+  return (
+    <div className="min-h-screen flex items-center justify-center text-slate-500">Chargement…</div>
+  )
 }
 
 export default function App() {
-    return (
-        <>
-            <InactivityLogoutHandler />
-            <Suspense fallback={<PageLoader />}>
-                <Routes>
-                    {/* Auth routes (public) */}
-                    <Route path="/login" element={<LoginPage />} />
-                    <Route path="/register" element={<RegisterPage />} />
-                    <Route path="/change-password" element={<ChangePasswordPage />} />
+  return (
+    <>
+      <InactivityLogoutHandler />
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          {/* Auth routes (public) */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/change-password" element={<ChangePasswordPage />} />
 
-                    {/* Super Admin Routes */}
-                    <Route path="/superadmin" element={<SuperAdminLogin />} />
-                    <Route path="/superadmin/dashboard" element={<SuperAdminDashboard />} />
+          {/* Super Admin Routes */}
+          <Route path="/superadmin" element={<SuperAdminLogin />} />
+          <Route path="/superadmin/dashboard" element={<SuperAdminDashboard />} />
 
-                    {/* Protected routes */}
-                    <Route
-                        element={
-                            <ProtectedRoute>
-                                <Layout />
-                            </ProtectedRoute>
-                        }
-                    >
-                        <Route path="/" element={<DashboardPage />} />
-                        <Route path="/inventory" element={<ProductsPage />} />
-                        <Route path="/warehouses" element={<WarehousesPage />} />
-                        <Route path="/movements" element={<StockMovementsPage />} />
-                        <Route path="/transfers" element={<TransfersPage />} />
-                        <Route path="/lots" element={<LotsPage />} />
-                        <Route path="/supplier-returns" element={<SupplierReturnsPage />} />
-                        <Route path="/suppliers" element={<SuppliersPage />} />
-                        <Route path="/orders" element={<OrdersPage />} />
-                        <Route path="/sales" element={<SalesPage />} />
-                        <Route path="/pos" element={<POSPage />} />
-                        <Route path="/clients" element={<ClientsPage />} />
-                        <Route path="/reports" element={<ReportsPage />} />
-                        <Route path="/users" element={<UsersPage />} />
-                        <Route path="/settings" element={<SettingsPage />} />
-                    </Route>
-                </Routes>
-            </Suspense>
-        </>
-    )
+          {/* Protected routes */}
+          <Route
+            element={
+              <ProtectedRoute>
+                <Layout />
+              </ProtectedRoute>
+            }
+          >
+            <Route path="/" element={<DashboardPage />} />
+            <Route path="/inventory" element={<ProductsPage />} />
+            <Route path="/warehouses" element={<WarehousesPage />} />
+            <Route path="/movements" element={<StockMovementsPage />} />
+            <Route path="/transfers" element={<TransfersPage />} />
+            <Route path="/lots" element={<LotsPage />} />
+            <Route path="/supplier-returns" element={<SupplierReturnsPage />} />
+            <Route path="/suppliers" element={<SuppliersPage />} />
+            <Route path="/orders" element={<OrdersPage />} />
+            <Route path="/sales" element={<SalesPage />} />
+            <Route path="/pos" element={<POSPage />} />
+            <Route path="/clients" element={<ClientsPage />} />
+            <Route path="/reports" element={<ReportsPage />} />
+            <Route path="/users" element={<UsersPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
+          </Route>
+        </Routes>
+      </Suspense>
+    </>
+  )
 }

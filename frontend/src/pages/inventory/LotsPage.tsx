@@ -2,44 +2,43 @@ import { useState } from 'react'
 import { Package, AlertTriangle, Clock, CheckCircle, Search } from 'lucide-react'
 import { useLots, type ExpiryStatus } from '../../hooks/useLots'
 import { useProducts } from '../../hooks/useProducts'
+import { formatDate } from '../../lib/format'
 
-const statusConfig: Record<ExpiryStatus, { label: string; color: string; icon: React.ReactNode }> = {
-  expired: {
-    label: 'Périmé',
-    color: 'bg-red-100 text-red-800',
-    icon: <AlertTriangle size={12} />,
-  },
-  critical: {
-    label: '≤ 7 jours',
-    color: 'bg-orange-100 text-orange-800',
-    icon: <AlertTriangle size={12} />,
-  },
-  warning: {
-    label: '≤ 30 jours',
-    color: 'bg-amber-100 text-amber-800',
-    icon: <Clock size={12} />,
-  },
-  ok: {
-    label: 'OK',
-    color: 'bg-green-100 text-green-800',
-    icon: <CheckCircle size={12} />,
-  },
-}
+const statusConfig: Record<ExpiryStatus, { label: string; color: string; icon: React.ReactNode }> =
+  {
+    expired: {
+      label: 'Périmé',
+      color: 'bg-red-100 text-red-800',
+      icon: <AlertTriangle size={12} />,
+    },
+    critical: {
+      label: '≤ 7 jours',
+      color: 'bg-orange-100 text-orange-800',
+      icon: <AlertTriangle size={12} />,
+    },
+    warning: {
+      label: '≤ 30 jours',
+      color: 'bg-amber-100 text-amber-800',
+      icon: <Clock size={12} />,
+    },
+    ok: {
+      label: 'OK',
+      color: 'bg-green-100 text-green-800',
+      icon: <CheckCircle size={12} />,
+    },
+  }
 
 function ExpiryBadge({ status }: { status: ExpiryStatus | null }) {
-  if (!status) return <span className="text-gray-400 text-xs">—</span>
+  if (!status) return <span className="text-gray-400 text-xs">-</span>
   const cfg = statusConfig[status]
   return (
-    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${cfg.color}`}>
+    <span
+      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${cfg.color}`}
+    >
       {cfg.icon}
       {cfg.label}
     </span>
   )
-}
-
-function formatDate(dateStr: string | null) {
-  if (!dateStr) return '—'
-  return new Date(dateStr).toLocaleDateString('fr-FR')
 }
 
 export default function LotsPage() {
@@ -56,8 +55,7 @@ export default function LotsPage() {
       lot.productName.toLowerCase().includes(search.toLowerCase()) ||
       lot.productSku.toLowerCase().includes(search.toLowerCase()) ||
       (lot.batchNumber ?? '').toLowerCase().includes(search.toLowerCase())
-    const matchStatus =
-      statusFilter === 'all' || lot.expiryStatus === statusFilter
+    const matchStatus = statusFilter === 'all' || lot.expiryStatus === statusFilter
     return matchSearch && matchStatus
   })
 
@@ -83,7 +81,8 @@ export default function LotsPage() {
             <div className="flex items-center gap-2 px-4 py-2 bg-red-50 border border-red-200 rounded-lg">
               <AlertTriangle size={16} className="text-red-600" />
               <span className="text-sm font-medium text-red-800">
-                {counts.expired} lot{counts.expired > 1 ? 's' : ''} périmé{counts.expired > 1 ? 's' : ''}
+                {counts.expired} lot{counts.expired > 1 ? 's' : ''} périmé
+                {counts.expired > 1 ? 's' : ''}
               </span>
             </div>
           )}
@@ -104,7 +103,7 @@ export default function LotsPage() {
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
             type="text"
-            placeholder="Rechercher produit ou lot..."
+            placeholder="Rechercher produit ou lot…"
             className="input pl-9 w-full"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -138,13 +137,14 @@ export default function LotsPage() {
       {/* Table */}
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
         {isLoading ? (
-          <div className="p-12 text-center text-gray-400">Chargement...</div>
+          <div className="p-12 text-center text-gray-400">Chargement…</div>
         ) : filtered.length === 0 ? (
           <div className="p-12 text-center">
             <Package size={48} className="mx-auto text-gray-300 mb-3" />
             <p className="text-gray-500">Aucun lot trouvé.</p>
             <p className="text-sm text-gray-400 mt-1">
-              Les lots apparaissent lors d'entrées de stock avec un numéro de lot ou une date de péremption.
+              Les lots apparaissent lors d'entrées de stock avec un numéro de lot ou une date de
+              péremption.
             </p>
           </div>
         ) : (
@@ -170,8 +170,8 @@ export default function LotsPage() {
                       lot.expiryStatus === 'expired'
                         ? 'bg-red-50'
                         : lot.expiryStatus === 'critical'
-                        ? 'bg-orange-50'
-                        : ''
+                          ? 'bg-orange-50'
+                          : ''
                     }
                   >
                     <td className="px-4 py-3">
@@ -179,11 +179,9 @@ export default function LotsPage() {
                       <div className="text-gray-400 text-xs">{lot.productSku}</div>
                     </td>
                     <td className="px-4 py-3 font-mono text-gray-700">
-                      {lot.batchNumber ?? <span className="text-gray-400">—</span>}
+                      {lot.batchNumber ?? <span className="text-gray-400">-</span>}
                     </td>
-                    <td className="px-4 py-3 text-gray-600">
-                      {lot.warehouseName ?? '—'}
-                    </td>
+                    <td className="px-4 py-3 text-gray-600">{lot.warehouseName ?? '-'}</td>
                     <td className="px-4 py-3 text-right font-medium text-gray-900">
                       {lot.quantity} {lot.productUnit ?? ''}
                     </td>
@@ -196,8 +194,8 @@ export default function LotsPage() {
                             lot.daysRemaining < 0
                               ? 'text-red-600 font-semibold'
                               : lot.daysRemaining <= 7
-                              ? 'text-orange-600 font-semibold'
-                              : 'text-gray-700'
+                                ? 'text-orange-600 font-semibold'
+                                : 'text-gray-700'
                           }
                         >
                           {lot.daysRemaining < 0
@@ -205,7 +203,7 @@ export default function LotsPage() {
                             : `${lot.daysRemaining}j`}
                         </span>
                       ) : (
-                        <span className="text-gray-400">—</span>
+                        <span className="text-gray-400">-</span>
                       )}
                     </td>
                     <td className="px-4 py-3">

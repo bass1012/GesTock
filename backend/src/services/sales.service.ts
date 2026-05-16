@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 import { loyaltyService } from './loyalty.service'
 import { auditService } from './audit.service'
+import { NotFoundError, BadRequestError } from '../utils/errors'
 
 const prisma = new PrismaClient()
 
@@ -68,12 +69,12 @@ export class SalesService {
           item.productId
       ) as any[];
       
-      if (!prods.length) throw new Error(`Produit introuvable : ${item.productId}`);
+      if (!prods.length) throw new NotFoundError(`Produit introuvable : ${item.productId}`);
       const product = prods[0];
       
       if (data.type === 'FAC') {
           if (product.current_stock < item.quantity) {
-              throw new Error(`Stock insuffisant pour le produit: ${product.name}`);
+              throw new BadRequestError(`Stock insuffisant pour le produit: ${product.name}`);
           }
       }
       

@@ -7,11 +7,11 @@ const SALT_LENGTH = 64
 const KEY_LENGTH = 32
 const ITERATIONS = 100000
 
-// Get master key from environment
+// Get master key from environment (support both names)
 const getMasterKey = (): string => {
-    const key = process.env.ENCRYPTION_MASTER_KEY
+    const key = process.env.ENCRYPTION_KEY || process.env.ENCRYPTION_MASTER_KEY
     if (!key) {
-        throw new Error('ENCRYPTION_MASTER_KEY environment variable is required')
+        throw new Error('ENCRYPTION_KEY or ENCRYPTION_MASTER_KEY environment variable is required')
     }
     return key
 }

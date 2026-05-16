@@ -113,7 +113,12 @@ export const cacheService = {
   generateKey(prefix: string, params: Record<string, unknown>): string {
     const sortedParams = Object.keys(params)
       .sort()
-      .map(key => `${key}:${params[key]}`)
+      .map(key => {
+        const val = params[key]
+        if (val === null || val === undefined) return `${key}:null`
+        if (typeof val === 'object') return `${key}:${JSON.stringify(val)}`
+        return `${key}:${val}`
+      })
       .join(':')
     return `gestock:${prefix}:${sortedParams}`
   },

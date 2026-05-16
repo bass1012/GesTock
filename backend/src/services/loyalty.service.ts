@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client'
+import { NotFoundError, BadRequestError } from '../utils/errors'
 
 const prisma = new PrismaClient()
 
@@ -103,9 +104,9 @@ export const loyaltyService = {
             clientId
         ) as any[]
 
-        if (!clients.length) throw new Error('Client introuvable')
+        if (!clients.length) throw new NotFoundError('Client introuvable')
         const available = Number(clients[0].loyalty_points)
-        if (available < pointsToRedeem) throw new Error(`Points insuffisants (disponible: ${available}, demandé: ${pointsToRedeem})`)
+        if (available < pointsToRedeem) throw new BadRequestError(`Points insuffisants (disponible: ${available}, demandé: ${pointsToRedeem})`)
 
         const discount = this.calculateDiscount(pointsToRedeem)
 

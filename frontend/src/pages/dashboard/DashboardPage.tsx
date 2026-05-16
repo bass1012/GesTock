@@ -3,8 +3,13 @@ import { useDashboardStats } from '../../hooks/useReports'
 import { useStockMovements } from '../../hooks/useStockMovements'
 import { Link } from 'react-router-dom'
 
-const formatCFA = (amount: number) =>
-  new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF', maximumFractionDigits: 0 }).format(amount)
+const cfaFormatter = new Intl.NumberFormat('fr-FR', {
+  style: 'currency',
+  currency: 'XOF',
+  maximumFractionDigits: 0,
+})
+const formatCFA = (amount: number) => cfaFormatter.format(amount)
+const formatDate = (d: string) => new Date(d).toLocaleDateString('fr-FR')
 
 export default function DashboardPage() {
   const { data: statsResponse, isLoading } = useDashboardStats()
@@ -60,8 +65,8 @@ export default function DashboardPage() {
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {isLoading
-          ? [...Array(4)].map((_, i) => (
-              <div key={i} className="card p-6 animate-pulse">
+          ? ['sk-k1', 'sk-k2', 'sk-k3', 'sk-k4'].map((sk) => (
+              <div key={sk} className="card p-6 animate-pulse">
                 <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
                 <div className="h-8 bg-gray-200 rounded w-1/2 mb-2" />
                 <div className="h-3 bg-gray-100 rounded w-2/3" />
@@ -73,12 +78,12 @@ export default function DashboardPage() {
                 className={`card p-6 hover:shadow-md transition-shadow duration-200 ${card.alert ? 'border-l-4 border-amber-400' : ''}`}
               >
                 <div className="flex items-center justify-between mb-4">
-                  <div className={`w-10 h-10 rounded-lg ${card.color} flex items-center justify-center`}>
+                  <div
+                    className={`size-10 rounded-lg ${card.color} flex items-center justify-center`}
+                  >
                     <card.icon size={20} className="text-white" />
                   </div>
-                  {card.alert && (
-                    <AlertTriangle size={16} className="text-amber-500" />
-                  )}
+                  {card.alert && <AlertTriangle size={16} className="text-amber-500" />}
                 </div>
                 <p className="text-2xl font-bold text-gray-900 truncate">{card.value}</p>
                 <p className="text-sm font-medium text-gray-700 mt-1">{card.label}</p>
@@ -107,23 +112,38 @@ export default function DashboardPage() {
           ) : (
             <div className="space-y-3">
               {movementsData.movements.map((mov) => (
-                <div key={mov.id} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
+                <div
+                  key={mov.id}
+                  className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0"
+                >
                   <div className="flex items-center gap-3 min-w-0">
-                    <span className={`w-2 h-2 rounded-full shrink-0 ${
-                      mov.type === 'IN' ? 'bg-emerald-500' :
-                      mov.type === 'OUT' ? 'bg-rose-500' : 'bg-amber-500'
-                    }`} />
+                    <span
+                      className={`size-2 rounded-full shrink-0 ${
+                        mov.type === 'IN'
+                          ? 'bg-emerald-500'
+                          : mov.type === 'OUT'
+                            ? 'bg-rose-500'
+                            : 'bg-amber-500'
+                      }`}
+                    />
                     <div className="min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">{mov.product.name}</p>
+                      <p className="text-sm font-medium text-gray-900 truncate">
+                        {mov.product.name}
+                      </p>
                       <p className="text-xs text-gray-400">
-                        {new Date(mov.createdAt).toLocaleDateString('fr-FR')} · {mov.product.sku}
+                        {formatDate(mov.createdAt)} · {mov.product.sku}
                       </p>
                     </div>
                   </div>
-                  <span className={`text-sm font-semibold shrink-0 ml-2 ${
-                    mov.type === 'IN' || mov.type === 'ADJUSTMENT' ? 'text-emerald-600' : 'text-rose-600'
-                  }`}>
-                    {mov.type === 'OUT' ? '-' : '+'}{mov.quantity}
+                  <span
+                    className={`text-sm font-semibold shrink-0 ml-2 ${
+                      mov.type === 'IN' || mov.type === 'ADJUSTMENT'
+                        ? 'text-emerald-600'
+                        : 'text-rose-600'
+                    }`}
+                  >
+                    {mov.type === 'OUT' ? '-' : '+'}
+                    {mov.quantity}
                   </span>
                 </div>
               ))}
@@ -144,7 +164,9 @@ export default function DashboardPage() {
               <div className="text-center">
                 <AlertTriangle size={36} className="mx-auto mb-2 opacity-40" />
                 <p className="text-sm">Aucune alerte de stock</p>
-                <p className="text-xs text-gray-300 mt-1">Tous les stocks sont au-dessus du seuil</p>
+                <p className="text-xs text-gray-300 mt-1">
+                  Tous les stocks sont au-dessus du seuil
+                </p>
               </div>
             </div>
           ) : (
@@ -152,7 +174,8 @@ export default function DashboardPage() {
               <div className="flex items-center gap-2 p-3 bg-amber-50 rounded-lg border border-amber-200 mb-3">
                 <AlertTriangle size={16} className="text-amber-600 shrink-0" />
                 <p className="text-sm text-amber-800 font-medium">
-                  {stats.lowStockCount} produit{stats.lowStockCount > 1 ? 's sont' : ' est'} sous le seuil minimum
+                  {stats.lowStockCount} produit{stats.lowStockCount > 1 ? 's sont' : ' est'} sous le
+                  seuil minimum
                 </p>
               </div>
               {stats.topProducts

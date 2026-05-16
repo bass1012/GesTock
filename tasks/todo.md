@@ -225,7 +225,7 @@
     - [x] Secrets requis : `SSH_PRIVATE_KEY`, `SSH_HOST`, `SSH_USER` (à configurer sur GitHub)
   - [x] `deploy.sh` amélioré : `set -e`, git pull, `--remove-orphans`, health check exit 1 si KO
   - [x] Fix `package.json` `prepare` script — skip husky en production/Docker (`NODE_ENV !== production`)
-- [ ] **Hébergement** — actuellement sur VPS Ubuntu `/home/ubuntu/GesTock` ✅ fonctionnel
+- [x] **Hébergement** — actuellement sur VPS Ubuntu `/home/ubuntu/GesTock` ✅ fonctionnel
   - [x] Variables d'environnement sécurisées (`.env` non commité, `.env.example` documenté)
   - [x] Health check endpoint `GET /api/health` ✅
 - [x] **Backups PostgreSQL automatiques** quotidiens
@@ -265,11 +265,157 @@
   - [x] Fix CI cache — correction de `cache-dependency-path` pointant vers `package-lock.json` à la racine
   - [x] Fix SSH Deploy — remplacement clé ED25519 par RSA PEM (`ssh: no key found`), suppression du scope `environment: production` bloquant les secrets globaux
 
-## Tableau de Bord des Priorités
+## Phase 13 — Qualité Frontend (react-doctor) ✅
 
-| Priorité       | Phase        | Actions clés                                               |
-| -------------- | ------------ | ---------------------------------------------------------- |
-| 🔴 Immédiat    | Phase 7      | Rate limiting auth configurable, Helmet, Zod, logs d'audit |
-| 🟠 Court terme | Phase 8 & 10 | Index DB, cache Redis, CI/CD, backups                      |
-| 🟡 Moyen terme | Phase 9      | Transferts, prévisions, lots/péremption                    |
-| 🟢 Long terme  | Phase 11     | API publique, multi-devises, mobile natif                  |
+> Audit `react-doctor v0.1.6` — Score : **78/100** → **90/100** ✅ (11 mai 2026)
+
+- [x] **Correctness — Priorité haute**
+  - [x] Remplacer `setForm({...form, ...})` par `setForm(prev => ({...prev, ...}))` — 19 occurrences (ClientsPage, SupplierModal, WarehousesPage, NewMovementModal)
+  - [x] Corriger les `key={index}` sur listes filtrables — SupplierReturnsPage (id crypto), StockBreakdownModal (warehouse_name), NewOrderModal (id crypto)
+  - [x] Corriger l'input non-contrôlé dans `SettingsPage.tsx:165` (ajout `readOnly`)
+- [x] **Accessibilité — Priorité haute**
+  - [x] Ajouter `htmlFor` + `id` sur les labels non associés — 52 paires dans 12 fichiers
+  - [x] Corriger les `<div onClick>` — ajout `aria-hidden="true"` sur les backdrops (Header, ClientsPage ×2, ProductModal)
+- [x] **Performance**
+  - [x] `lastAlertCount` useState → useRef dans `Header.tsx` (valeur jamais lue en render)
+  - [x] `scannerInit` useState → useRef dans `BarcodeScannerModal.tsx` (valeur jamais lue en render)
+- [x] **Dead code**
+  - [x] `TENANT_PLANS` — retiré le `export` (inutile, jamais importé ailleurs)
+- [x] **Architecture / Design**
+  - [x] `w-N h-N` → `size-N` (Tailwind v3.4+) — 23 remplacements dans 12 fichiers
+  - [ ] Remplacer `gray/indigo/slate` par `zinc/neutral` ou tokens projet — 716 occurrences _(cosmétique — batch séparé)_
+  - _(font-black conservé : usage intentionnel sur dark pages auth/superadmin)_
+
+## Phase 14 — Corrections Issues Audit 🔴 (Priorité Immédiate)
+
+> Audit complet du 2026-05-11 — Voir `tasks/lessons.md` pour le détail des leçons apprises.
+
+### 🔴 Bloquant — à corriger avant toute mise en production
+
+- [x] **Vérifier que les `.env` ne sont pas trackés dans git** — fait le 2026-05-11
+  - [x] `backend/.env` est déjà dans `.gitignore` (pattern `.env` match tous les niveaux) ✅
+  - [x] Racine `.env` est aussi ignorée et non trackée ✅
+  - [x] Aucun fichier `.env` tracké dans le repo (`git ls-files | grep .env` → uniquement `.env.example` et `.env.prod.example`) ✅
+  - [x] Créer/compléter `.env.example` à la racine — SMTP, backup, rate limit, inactivity timeout ajoutés ✅ (11 mai 2026)
+- [x] **`tenant.service.ts` — schéma `stock_movements`** — `warehouse_id`, `batch_number`, `expiry_date` déjà présents ✅ (11 mai 2026)
+- [x] **Cast `::uuid` dans `supplierReturn.service.ts`** — casts déjà correctement placés dans le SQL, pas dans les paramètres ✅ (11 mai 2026)
+- [x] **`prisma db push`** — déjà remplacé par `prisma migrate deploy` dans `.github/workflows/deploy.yml` ✅ (11 mai 2026)
+- [x] **Configurer SSL/TLS + sécurité nginx** (fait le 2026-05-11)
+  - [x] Remplacer le nginx.conf complet : HTTP→HTTPS redirect + SSL + security headers + rate limiting + `client_max_body_size`
+  - [x] Créer `setup-ssl.sh` — script bootstrap Let's Encrypt pour le VPS
+  - [x] Ajouter `certbot renew` + `nginx reload` dans `deploy.yml`
+  - [ ] À faire sur le VPS : `bash setup-ssl.sh gestock.allsite.cloud` (une seule fois)
+
+### 🟠 Grave — corrections haute priorité
+
+- [x] **Appliquer le chiffrement des API Keys** (fait le 2026-05-11)
+  - [x] `api-key.controller.ts` : chiffrer la clé via `encryptionService.encryptForStorage()` avant stockage
+  - [x] `apiKey.middleware.ts` : lookup par déchiffrement itératif (compatible clés legacy en clair)
+  - [x] `encryption.service.ts` : fallback `ENCRYPTION_KEY` ← `ENCRYPTION_MASTER_KEY` (compatibilité docker-compose)
+- [x] **Normaliser les erreurs métier** — `throw new Error(...)` → `AppError` dans :
+  - [x] `stock.service.ts` : NotFoundError pour entrepôt, BadRequestError pour stock insuffisant + transfer invalide
+  - [x] `sales.service.ts` : NotFoundError pour produit introuvable, BadRequestError pour stock insuffisant
+  - [x] `loyalty.service.ts` : NotFoundError pour client introuvable, BadRequestError pour points insuffisants
+  - [x] `order.service.ts` : BadRequestError pour modification commande au statut invalide
+- [x] **Ne pas exposer les ports backend/frontend** dans `docker-compose.prod.yml` — `ports` → `expose` (déjà fait en 🔴)
+- [x] **Headers de sécurité dans `nginx/nginx.conf`** — HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, rate limiting, `client_max_body_size` (déjà fait en 🔴)
+- [x] **Remplacer `auth.service.ts` `require('jsonwebtoken').decode()`** par `jwt.decode()` (importé depuis `jwt.ts`)
+  - [x] Export `jwt` depuis `jwt.ts`: `export { jwt }`
+  - [x] Importer `jwt` dans `auth.service.ts` depuis la config locale
+- [x] **Nettoyer les imports en milieu de fichier dans `app.ts`** — déplacer `clientsRoutes` et `salesRoutes` en haut
+- [x] **Supprimer le dynamic import dans `billing.controller.ts:118`** — importer `requireStripe` statiquement en haut
+- [x] **Backups hors-site + chiffrement** dans `backup-postgres.sh` :
+  - [x] Chiffrement AES-256-CBC via `openssl enc` si `BACKUP_ENCRYPTION_KEY` est définie
+  - [x] Copie S3/rclone si `BACKUP_S3_DEST` est définie
+  - [x] Variables configurables : `BACKUP_DIR`, `BACKUP_ENCRYPTION_KEY`, `BACKUP_S3_DEST`, `RETENTION_DAYS`
+
+### 🟡 Modéré — corrections moyen terme
+
+#### Backend
+- [x] **Créer un utilitaire de mapping snake_case → camelCase** — `backend/src/utils/mapper.ts` avec `mapRow()`/`mapRows()`
+- [x] **Créer un wrapper `asyncHandler`** — `backend/src/utils/asyncHandler.ts` (appliqué sur products.routes.ts en exemple)
+- [x] **Vérifier `warehouse_id` dans `listMovements`** — déjà présent dans le LEFT JOIN et la table, OK ✅
+- [x] **Vérifier `cache.service.ts` `generateKey`** — fixé : cas `[object Object]` → `JSON.stringify` pour les objets
+- [x] **Ajouter un middleware de compression** — `compression` installé + ajouté dans `app.ts`
+- [x] **Plan limit null-check** — `planLimit.middleware.ts` : fallback `PLANS.starter` pour tout plan inconnu
+- [ ] **Ajouter une validation email (vérification)** — envoyer un email de confirmation après registration
+- [ ] **Bloquer les comptes après N échecs de login** (account lockout policy), pas seulement le rate limiter IP
+- [ ] **Supprimer les tables Prisma orphelines** qui ne sont plus utilisées par le code (SupplierReturn, SupplierReturnItem, loyalty_transactions ne sont pas dans le schéma tenant)
+- [x] **Fix `ConflictError` import manquant** dans `backend/src/tests/middleware.test.ts` — erreur TS2304, import ajouté ✅ (11 mai 2026)
+
+#### Frontend
+- [x] **Supprimer la dépendance `node: ^25.9.0`** du `package.json` frontend (accidentelle)
+- [x] **Extraire `formatDate` dans `lib/format.ts`** — éliminé 11 définitions inline, ajout `formatDateTime` pour les usages avec heure
+- [x] **Créer un composant `Modal` générique** — `components/Modal.tsx` avec focus trap, fermeture Escape, backdrop
+- [x] **Créer un composant `EmptyState` partagé** — `components/EmptyState.tsx` avec icône, titre, description, action
+- [x] **Refactor `WarehousesPage.tsx`** — `useWarehouses()` hook React Query au lieu de `useEffect` + `api.get()`, utilisation de `Modal` + `ConfirmModal`
+- [x] **Refactor `ConfirmModal.tsx`** — utilise désormais `Modal` générique (focus trap + Escape gratuits)
+- [ ] **Unifier les confirmations de suppression** — remplacer tous les `window.confirm()` par `ConfirmModal` (SuppliersPage, OrdersPage, SuperAdminDashboard)
+- [ ] **Ajouter `aria-label` sur tous les boutons à icône seule**
+- [ ] **Rendre le POS responsive** — remplacer `w-96` fixe
+- [ ] **Ajouter des `<caption>` ou `aria-label`** sur les tableaux de données
+- [ ] **Vérifier le contraste des couleurs** sur le thème dark superadmin
+
+#### Tests
+- [ ] **Ajouter `vitest.config.ts`** explicite dans le frontend avec `happy-dom` et résolution d'alias
+- [ ] **Ajouter des tests pour `auth.service.ts`** — le chemin critique le plus important (register, login, refresh, password change, 2FA)
+- [ ] **Ajouter des tests pour `api.ts`** (intercepteurs axios, logique de refresh token) et `authStore.ts` (Zustand persist)
+- [ ] **Ajouter des tests pour les pages critiques** : LoginPage, ProductsPage (lecture + écriture), DashboardPage, POSPage
+- [ ] **Ajouter des tests pour les middleware** : auth middleware, tenant middleware, error handler
+- [ ] **Ajouter des tests pour les contrôleurs** (intégration avec supertest)
+- [ ] **Atteindre 0% function coverage sur `jwt.ts`** — ajouter des appels directs aux fonctions JWT
+- [ ] **Atteindre 100% function coverage sur `errors.ts`** — tester BadRequestError, UnauthorizedError, ForbiddenError, ConflictError
+- [ ] **Étendre `auth.test.ts`** — ajouter login réussi, register, refresh token, logout, rate limiting
+
+#### Qualité & CI
+- [x] **Ajouter `.dockerignore`** pour exclure `node_modules/`, `.env`, `.git/` du build context Docker ✅ (11 mai 2026)
+- [x] **Remplacer `npm install` par `npm ci`** dans `frontend/Dockerfile` ✅ (11 mai 2026)
+- [x] **Ajouter `USER nginx`** dans `frontend/Dockerfile` (production stage) — port 8080, chown nginx:nginx ✅ (11 mai 2026)
+- [x] **Ajouter un `.nvmrc`** avec la version Node du projet — Node 20 ✅ (11 mai 2026)
+- [ ] **Ajouter `format:check` dans la CI** pour éviter la dérive de formatage
+- [ ] **Renforcer les règles ESLint** progressivement : activer `no-explicit-any`, `no-unused-vars` en error, ajouter plugin `sonarjs`
+- [ ] **Ajouter un step de build Docker dans la CI** — valider que les images se construisent correctement
+- [ ] **Ajouter un scan de vulnérabilités** (npm audit) dans la CI
+- [ ] **Intégrer un service de coverage** (Codecov ou Coveralls) pour suivre les tendances
+- [ ] **Faire échouer la CI si les seuils de coverage ne sont pas atteints** (`--coverageThreshold`)
+- [ ] **Ajouter des tests dans le hook pre-commit** — au minimum les tests des fichiers modifiés
+- [ ] **Ajouter une stratégie de rollback** dans `deploy.yml` (restaurer l'image précédente si health check échoue)
+
+#### Infrastructure & Monitoring
+- [x] **Ajouter `workflow_dispatch`** manquant — déjà présent dans `deploy.yml` ✅ (11 mai 2026)
+- [ ] **Configurer UptimeRobot** sur `https://gestock.allsite.cloud/api/health`
+- [ ] **Ajouter une alerte** sur échec de backup (Slack/email)
+- [ ] **Vérifier la restauration des backups** — tester au moins une restauration complète
+- [x] **Ajouter un rate limiting** au niveau nginx — déjà configuré (`limit_req_zone` 30r/s) ✅ (11 mai 2026)
+- [x] **Définir `client_max_body_size`** dans la config nginx — déjà à `10M` ✅ (11 mai 2026)
+- [x] **Configurer un réseau Docker isolé** (`internal: true`) pour les services backend (PostgreSQL, Redis) ✅ (11 mai 2026)
+
+#### Documentation
+- [x] **Compléter `.env.prod.example`** — REDIS_PASSWORD, STRIPE_SECRET_KEY, SENTRY_DSN, VITE_SENTRY_DSN, SUPER_ADMIN_SECRET, BACKUP_ENCRYPTION_KEY ajoutés ✅ (11 mai 2026)
+- [x] **Vérifier que `backend/.env` est bien documenté** dans `.env.example` — déjà documenté ✅ (11 mai 2026)
+- [ ] **Remplacer les mots de passe par défaut** dans `docker-compose.yml` (dev) — utiliser des valeurs factices évidentes mais différentes des exemples publics
+
+### 🟢 Secondaire — améliorations souhaitables
+
+#### Architecture & Refactoring
+- [ ] **Extraire un service de mapping `camelCase/snake_case`** — utilitaire central pour remplacer les remaps manuels dans tous les services
+- [ ] **Ajouter des types TypeScript stricts pour les résultats SQL** — remplacer `as any[]` par des types dédiés
+- [ ] **Ajouter une validation Zod au niveau service** (pas seulement au niveau route) — défense en profondeur
+- [ ] **Remplacer le Super Admin Bearer token** par un système d'auth plus robuste (utilisateur dédié en base + JWT + 2FA)
+- [ ] **Ajouter un système de search/build de requêtes dynamiques sécurisé** (query builder) — remplacer la concaténation de WHERE clauses
+- [ ] **Créer une véritable migration Prisma pour les schémas tenant** — synchroniser Prisma et le SQL brut
+- [ ] **Ajouter un endpoint d'export PDF mutualisé** (actuellement dupliqué entre POSPage, SalesPage, ReportsPage)
+- [ ] **Ajouter des tests e2e** (Playwright ou Cypress) pour les parcours critiques (login → achat → rapport)
+
+---
+
+| Priorité       | Phase         | Actions clés                                                              |
+| -------------- | ------------- | ------------------------------------------------------------------------- |
+| 🔴 Immédiat    | Phase 14 🔴   | Secrets git, schéma DB, cast SQL, migration destructive, SSL              |
+| 🔴 Immédiat    | Phase 7       | Rate limiting auth configurable, Helmet, Zod, logs d'audit ✅             |
+| 🟠 Court terme | Phase 14 🟠   | Chiffrement API keys, Error→AppError, port/hx sécurité, tests manquants   |
+| 🟠 Court terme | Phase 8 & 10  | Index DB, cache Redis, CI/CD, backups ✅                                  |
+| 🟡 Moyen terme | Phase 14 🟡   | Refactoring services, composants partagés, qualité CI, monitoring         |
+| 🟡 Moyen terme | Phase 9       | Transferts, prévisions, lots/péremption ✅                                |
+| 🟡 Court terme | Phase 13      | Correctness & accessibilité (react-doctor 78/100 → 90+)                  |
+| 🟢 Long terme  | Phase 11      | API publique, multi-devises, mobile natif                                 |

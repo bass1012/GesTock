@@ -12,7 +12,7 @@ const mockUseAuthStore = vi.mocked(useAuthStore)
 
 function renderWithRouter(
   isAuthenticated: boolean,
-  user?: Partial<{ mustChangePassword: boolean }> | null
+  user?: Partial<{ mustChangePassword: boolean }> | null,
 ) {
   mockUseAuthStore.mockReturnValue({
     isAuthenticated,
@@ -33,7 +33,7 @@ function renderWithRouter(
           }
         />
       </Routes>
-    </MemoryRouter>
+    </MemoryRouter>,
   )
 }
 
@@ -42,7 +42,7 @@ describe('ProtectedRoute', () => {
     mockUseAuthStore.mockReset()
   })
 
-  it('affiche le contenu si l\'utilisateur est authentifié', () => {
+  it("affiche le contenu si l'utilisateur est authentifié", () => {
     renderWithRouter(true, { mustChangePassword: false })
     expect(screen.getByText('Page Dashboard')).toBeInTheDocument()
   })

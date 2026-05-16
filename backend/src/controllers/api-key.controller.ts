@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express'
 import { PrismaClient } from '@prisma/client'
 import { randomBytes } from 'crypto'
 import { ForbiddenError, NotFoundError } from '../utils/errors'
+import { encryptionService } from '../services/encryption.service'
 
 const prisma = new PrismaClient()
 
@@ -50,7 +51,7 @@ export const apiKeyController = {
             const apiKey = await prisma.apiKey.create({
                 data: {
                     name,
-                    key: finalKey,
+                    key: encryptionService.encryptForStorage(finalKey),
                     tenantId
                 }
             })

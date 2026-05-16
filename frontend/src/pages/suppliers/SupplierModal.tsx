@@ -36,7 +36,7 @@ export default function SupplierModal({ isOpen, onClose, supplier }: SupplierMod
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     // Convert empty strings to null for optional fields
     const dataToSend = {
       name: formData.name,
@@ -46,10 +46,7 @@ export default function SupplierModal({ isOpen, onClose, supplier }: SupplierMod
     }
 
     if (supplier) {
-      updateSupplier(
-        { id: supplier.id, data: dataToSend },
-        { onSuccess: () => onClose() }
-      )
+      updateSupplier({ id: supplier.id, data: dataToSend }, { onSuccess: () => onClose() })
     } else {
       createSupplier(dataToSend, { onSuccess: () => onClose() })
     }
@@ -72,54 +69,70 @@ export default function SupplierModal({ isOpen, onClose, supplier }: SupplierMod
         <form onSubmit={handleSubmit} className="p-6">
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="supplier-name"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Nom de l'entreprise *
               </label>
               <input
+                id="supplier-name"
                 type="text"
                 required
                 className="input"
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
                 placeholder="Ex : Acme Corp"
               />
             </div>
-            
+
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="supplier-email"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Email
                 </label>
                 <input
+                  id="supplier-email"
                   type="email"
                   className="input"
                   value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
                   placeholder="contact@acme.com"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="supplier-phone"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Téléphone
                 </label>
                 <input
+                  id="supplier-phone"
                   type="tel"
                   className="input"
                   value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, phone: e.target.value }))}
                   placeholder="+33 1 23 45 67 89"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="supplier-address"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Adresse
               </label>
               <textarea
+                id="supplier-address"
                 className="input min-h-[80px]"
                 value={formData.address}
-                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                onChange={(e) => setFormData((prev) => ({ ...prev, address: e.target.value }))}
                 placeholder="Adresse complète"
               />
             </div>
@@ -135,7 +148,7 @@ export default function SupplierModal({ isOpen, onClose, supplier }: SupplierMod
               Annuler
             </button>
             <button type="submit" className="btn btn-primary" disabled={isPending}>
-              {isPending ? 'Enregistrement...' : supplier ? 'Mettre à jour' : 'Créer le fournisseur'}
+              {isPending ? 'Enregistrement…' : supplier ? 'Mettre à jour' : 'Créer le fournisseur'}
             </button>
           </div>
         </form>

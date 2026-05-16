@@ -19,8 +19,8 @@ export const checkPlanLimit = (resource: 'products' | 'users' | 'warehouses') =>
             const tenant = await prisma.tenant.findUnique({ where: { id: tenantId } })
             if (!tenant) return next()
 
-            const plan = (tenant.plan as keyof typeof PLANS) || 'starter'
-            const planConfig = PLANS[plan]
+            const planName = (tenant.plan as string) || 'starter'
+            const planConfig = PLANS[planName as keyof typeof PLANS] || PLANS.starter
 
             // 2. Vérifie selon le type de ressource
             if (resource === 'products') {
@@ -35,7 +35,7 @@ export const checkPlanLimit = (resource: 'products' | 'users' | 'warehouses') =>
 
                 if (count >= limit) {
                     throw new ForbiddenError(
-                        `Limite du plan ${plan.charAt(0).toUpperCase() + plan.slice(1)} atteinte (${limit} produits max). ` +
+                        `Limite du plan ${planName.charAt(0).toUpperCase() + planName.slice(1)} atteinte (${limit} produits max). ` +
                         `Passez au plan supérieur dans Paramètres > Facturation pour continuer.`
                     )
                 }
@@ -50,7 +50,7 @@ export const checkPlanLimit = (resource: 'products' | 'users' | 'warehouses') =>
 
                 if (count >= limit) {
                     throw new ForbiddenError(
-                        `Limite du plan ${plan.charAt(0).toUpperCase() + plan.slice(1)} atteinte (${limit} utilisateurs max). ` +
+                        `Limite du plan ${planName.charAt(0).toUpperCase() + planName.slice(1)} atteinte (${limit} utilisateurs max). ` +
                         `Passez au plan supérieur dans Paramètres > Facturation pour continuer.`
                     )
                 }
@@ -68,7 +68,7 @@ export const checkPlanLimit = (resource: 'products' | 'users' | 'warehouses') =>
 
                 if (count >= limit) {
                     throw new ForbiddenError(
-                        `Limite du plan ${plan.charAt(0).toUpperCase() + plan.slice(1)} atteinte (${limit} entrepôts max). ` +
+                        `Limite du plan ${planName.charAt(0).toUpperCase() + planName.slice(1)} atteinte (${limit} entrepôts max). ` +
                         `Passez au plan supérieur dans Paramètres > Facturation pour continuer.`
                     )
                 }

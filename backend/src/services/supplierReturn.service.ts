@@ -84,10 +84,10 @@ export const supplierReturnService = {
 
     const result = await prisma.$queryRawUnsafe(
       `INSERT INTO "${schemaName}".supplier_returns (supplier_id, warehouse_id, status, reason, reference, created_by)
-       VALUES ($1::uuid, $2, 'COMPLETED', $3, $4, $5)
+       VALUES ($1::uuid, $2::uuid, 'COMPLETED', $3, $4, $5)
        RETURNING *`,
       data.supplierId,
-      data.warehouseId ? `${data.warehouseId}::uuid` : null,
+      data.warehouseId || null,
       data.reason || null,
       refNumber,
       userId || null

@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express'
-import { billingService, PLANS } from '../services/billing.service'
+import { billingService, PLANS, requireStripe } from '../services/billing.service'
 
 export const billingController = {
     async getPlans(req: Request, res: Response, next: NextFunction) {
@@ -115,8 +115,6 @@ export const billingController = {
 
     async handleWebhook(req: Request, res: Response, next: NextFunction) {
         try {
-            const { billingService, requireStripe } = await import('../services/billing.service')
-
             const signature = req.headers['stripe-signature'] as string
             if (!signature) {
                 return res.status(400).send('Missing stripe-signature header')

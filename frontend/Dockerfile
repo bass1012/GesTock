@@ -7,8 +7,8 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 COPY frontend/package.json ./frontend/
 
-# Install dependencies
-RUN npm install
+# Install dependencies (ci = reproducible, uses package-lock.json)
+RUN npm ci
 
 # Copy frontend source
 COPY frontend ./frontend
@@ -23,8 +23,15 @@ ARG VITE_SENTRY_DSN=""
 ENV VITE_SENTRY_DSN=$VITE_SENTRY_DSN
 RUN npm run build
 
-# Production stage
+# Production stage — rootless nginx
 FROM nginx:stable-alpine
+
+# Fix permissions for non-root nginx user (port 8080, no CAP_NET_BIND_SERVICE needed)
+RUN mkdir -p /var/run && \
+    touch /var/run/nginx.pid && \
+    chown -R nginx:nginx /var/run/nginx.pid && \
+    chown -R nginx:nginx /var/cache/nginx && \
+    chown -R nginx:nginx /var/log/nginx
 
 # Copy built files
 COPY --from=builder /app/frontend/dist /usr/share/nginx/html
@@ -32,6 +39,9 @@ COPY --from=builder /app/frontend/dist /usr/share/nginx/html
 # Copy nginx configuration for SPA
 COPY frontend/nginx.conf /etc/nginx/conf.d/default.conf
 
-EXPOSE 80
+RUN chown -R nginx:nginx /usr/share/nginx/html /etc/nginx/conf.d
+
+USER nginx
+EXPOSE 8080
 
 CMD ["nginx", "-g", "daemon off;"]

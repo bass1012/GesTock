@@ -15,6 +15,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - internal
 
   redis:
     image: redis:7-alpine
@@ -32,6 +34,8 @@ services:
       resources:
         limits:
           memory: 256M
+    networks:
+      - internal
 
   backend:
     build:
@@ -39,8 +43,8 @@ services:
       dockerfile: backend/Dockerfile
     container_name: gestock-backend
     restart: unless-stopped
-    ports:
-      - '3001:3001'
+    expose:
+      - '3001'
     environment:
       DATABASE_URL: postgresql://${DB_USER:-gestock}:${DB_PASSWORD}@postgres:5432/${DB_NAME:-gestock_db}?schema=public
       REDIS_URL: redis://:${REDIS_PASSWORD:-gestock_redis_secret}@redis:6379
@@ -62,6 +66,9 @@ services:
       resources:
         limits:
           memory: 512M
+    networks:
+      - internal
+      - web
 
   frontend:
     build:
@@ -72,11 +79,20 @@ services:
         VITE_SENTRY_DSN: ${VITE_SENTRY_DSN:-}
     container_name: gestock-frontend
     restart: unless-stopped
-    ports:
-      - '3000:80'
+    expose:
+      - '8080'
     depends_on:
       - backend
+    networks:
+      - web
 
 volumes:
   postgres_data:
   redis_data:
+
+networks:
+  internal:
+    internal: true   # postgres + redis : aucun accès internet direct
+  web:
+    driver: bridge   # backend + frontend : accès nginx système
+

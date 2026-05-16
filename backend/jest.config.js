@@ -7,18 +7,19 @@ module.exports = {
   verbose: true,
   forceExit: true,
   clearMocks: true,
+  setupFiles: ['./jest.setup.ts'],
   collectCoverageFrom: [
     'src/services/stock.service.ts',
     'src/services/sales.service.ts',
+    'src/services/auth.service.ts',
     'src/utils/errors.ts',
     'src/utils/jwt.ts',
   ],
   coverageThreshold: {
-    // Seuils par fichier — reflètent le niveau de test actuel
-    // Augmenter progressivement au fur et à mesure que la couverture monte
     './src/services/sales.service.ts': { lines: 85 },
     './src/services/stock.service.ts': { lines: 40 },
-    './src/utils/errors.ts':           { lines: 70 },
-    './src/utils/jwt.ts':              { lines: 55 },
+    './src/services/auth.service.ts':  { lines: 60 },
+    './src/utils/errors.ts':           { lines: 100 },
+    './src/utils/jwt.ts':              { lines: 80 },
   },
 };

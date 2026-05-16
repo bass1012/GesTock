@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 import crypto from 'crypto'
-import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../utils/jwt'
+import { generateAccessToken, generateRefreshToken, verifyRefreshToken, jwt } from '../utils/jwt'
 import { ConflictError, UnauthorizedError, NotFoundError } from '../utils/errors'
 import { tenantService } from './tenant.service'
 import { jwtBlacklistService } from './jwtBlacklist.service'
@@ -241,7 +241,7 @@ export const authService = {
     async logout(accessToken: string, refreshToken?: string) {
         // Blacklist the access token (remaining TTL)
         try {
-            const decoded = require('jsonwebtoken').decode(accessToken) as any
+                const decoded = jwt.decode(accessToken) as any
             if (decoded && decoded.exp) {
                 const remaining = decoded.exp - Math.floor(Date.now() / 1000)
                 if (remaining > 0) {
@@ -255,7 +255,7 @@ export const authService = {
         // Blacklist and delete refresh token if provided
         if (refreshToken) {
             try {
-                const decoded = require('jsonwebtoken').decode(refreshToken) as any
+                const decoded = jwt.decode(refreshToken) as any
                 if (decoded && decoded.exp) {
                     const remaining = decoded.exp - Math.floor(Date.now() / 1000)
                     if (remaining > 0) {
@@ -271,7 +271,7 @@ export const authService = {
         // Remove active session
         if (accessToken) {
             try {
-                const decoded = require('jsonwebtoken').decode(accessToken) as any
+            const decoded = jwt.decode(accessToken) as any
                 if (decoded?.userId) {
                     await jwtBlacklistService.removeActiveSession(decoded.userId)
                 }

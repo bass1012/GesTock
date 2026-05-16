@@ -53,10 +53,16 @@ jobs:
             docker compose -f docker-compose.prod.yml up -d --build --remove-orphans
 
             echo "=== Apply DB migrations ==="
-            docker compose -f docker-compose.prod.yml exec -T backend npx prisma db push --accept-data-loss --skip-generate
+            docker compose -f docker-compose.prod.yml exec -T backend npx prisma migrate deploy
 
             echo "=== Cleanup old images ==="
             docker image prune -f
+
+            echo "=== SSL renewal (if due) ==="
+            sudo certbot renew --non-interactive --quiet || echo "Certbot non installé ou pas dû"
+
+            echo "=== Reload nginx ==="
+            sudo nginx -t && sudo systemctl reload nginx || echo "nginx reload skipped (SSL not configured yet)"
 
             echo "=== Health check ==="
             sleep 10

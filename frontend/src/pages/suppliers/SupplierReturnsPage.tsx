@@ -6,6 +6,7 @@ import { useProducts } from '../../hooks/useProducts'
 import { useWarehouses, type Warehouse } from '../../hooks/useWarehouses'
 
 interface ReturnItem {
+  id: string
   productId: string
   quantity: number
   unitPrice: number
@@ -20,7 +21,9 @@ export default function SupplierReturnsPage() {
   const [supplierId, setSupplierId] = useState('')
   const [warehouseId, setWarehouseId] = useState('')
   const [reason, setReason] = useState('')
-  const [items, setItems] = useState<ReturnItem[]>([{ productId: '', quantity: 1, unitPrice: 0 }])
+  const [items, setItems] = useState<ReturnItem[]>([
+    { id: crypto.randomUUID(), productId: '', quantity: 1, unitPrice: 0 },
+  ])
 
   const { data: returns = [], isLoading } = useSupplierReturns()
   const { data: suppliers = [] } = useSuppliers()
@@ -28,7 +31,11 @@ export default function SupplierReturnsPage() {
   const { data: warehouses = [] } = useWarehouses()
   const { mutate: createReturn, isPending } = useCreateSupplierReturn()
 
-  const addItem = () => setItems([...items, { productId: '', quantity: 1, unitPrice: 0 }])
+  const addItem = () =>
+    setItems((prev) => [
+      ...prev,
+      { id: crypto.randomUUID(), productId: '', quantity: 1, unitPrice: 0 },
+    ])
   const removeItem = (idx: number) => setItems(items.filter((_, i) => i !== idx))
   const updateItem = (idx: number, field: keyof ReturnItem, value: string | number) => {
     setItems(items.map((item, i) => (i === idx ? { ...item, [field]: value } : item)))
@@ -54,10 +61,10 @@ export default function SupplierReturnsPage() {
           setSupplierId('')
           setWarehouseId('')
           setReason('')
-          setItems([{ productId: '', quantity: 1, unitPrice: 0 }])
+          setItems([{ id: crypto.randomUUID(), productId: '', quantity: 1, unitPrice: 0 }])
           setShowForm(false)
         },
-      }
+      },
     )
   }
 
@@ -66,7 +73,9 @@ export default function SupplierReturnsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Retours Fournisseurs</h1>
-          <p className="text-sm text-gray-500 mt-1">Gérer les retours de marchandises vers les fournisseurs</p>
+          <p className="text-sm text-gray-500 mt-1">
+            Gérer les retours de marchandises vers les fournisseurs
+          </p>
         </div>
         <button
           onClick={() => setShowForm(!showForm)}
@@ -87,14 +96,20 @@ export default function SupplierReturnsPage() {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Fournisseur *</label>
+              <label
+                htmlFor="return-supplier"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Fournisseur *
+              </label>
               <select
+                id="return-supplier"
                 required
                 className="input w-full"
                 value={supplierId}
                 onChange={(e) => setSupplierId(e.target.value)}
               >
-                <option value="">Sélectionner...</option>
+                <option value="">Sélectionner…</option>
                 {suppliers.map((s: Supplier) => (
                   <option key={s.id} value={s.id}>
                     {s.name}
@@ -103,10 +118,14 @@ export default function SupplierReturnsPage() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="return-warehouse"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Entrepôt source (optionnel)
               </label>
               <select
+                id="return-warehouse"
                 className="input w-full"
                 value={warehouseId}
                 onChange={(e) => setWarehouseId(e.target.value)}
@@ -122,22 +141,23 @@ export default function SupplierReturnsPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="return-reason" className="block text-sm font-medium text-gray-700 mb-1">
               Motif du retour (optionnel)
             </label>
             <input
+              id="return-reason"
               type="text"
               className="input w-full"
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              placeholder="Ex: Produit défectueux, non-conforme..."
+              placeholder="Ex: Produit défectueux, non-conforme…"
             />
           </div>
 
           {/* Articles à retourner */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <label className="text-sm font-medium text-gray-700">Articles *</label>
+              <p className="text-sm font-medium text-gray-700">Articles *</p>
               <button
                 type="button"
                 onClick={addItem}
@@ -147,14 +167,14 @@ export default function SupplierReturnsPage() {
               </button>
             </div>
             {items.map((item, idx) => (
-              <div key={idx} className="flex gap-3 items-start">
+              <div key={item.id} className="flex gap-3 items-start">
                 <select
                   required
                   className="input flex-1"
                   value={item.productId}
                   onChange={(e) => updateItem(idx, 'productId', e.target.value)}
                 >
-                  <option value="">Sélectionner un produit...</option>
+                  <option value="">Sélectionner un produit…</option>
                   {products?.products.map((p) => (
                     <option key={p.id} value={p.id}>
                       {p.sku} – {p.name} (Stock: {p.currentStock})
@@ -206,7 +226,7 @@ export default function SupplierReturnsPage() {
               Annuler
             </button>
             <button type="submit" className="btn btn-primary" disabled={isPending || !supplierId}>
-              {isPending ? 'Enregistrement...' : 'Valider le retour'}
+              {isPending ? 'Enregistrement…' : 'Valider le retour'}
             </button>
           </div>
         </form>
@@ -215,7 +235,7 @@ export default function SupplierReturnsPage() {
       {/* Table des retours */}
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
         {isLoading ? (
-          <div className="p-12 text-center text-gray-400">Chargement...</div>
+          <div className="p-12 text-center text-gray-400">Chargement…</div>
         ) : returns.length === 0 ? (
           <div className="p-12 text-center">
             <RotateCcw size={48} className="mx-auto text-gray-300 mb-3" />
@@ -238,7 +258,7 @@ export default function SupplierReturnsPage() {
                   <tr key={ret.id} className="hover:bg-gray-50">
                     <td className="px-4 py-3 font-mono text-gray-700">{ret.reference}</td>
                     <td className="px-4 py-3 font-medium text-gray-900">{ret.supplierName}</td>
-                    <td className="px-4 py-3 text-gray-600">{ret.reason ?? '—'}</td>
+                    <td className="px-4 py-3 text-gray-600">{ret.reason ?? '-'}</td>
                     <td className="px-4 py-3">
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                         <Package size={10} />

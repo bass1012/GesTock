@@ -4,18 +4,17 @@ import Sidebar from './Sidebar'
 import Header from './Header'
 
 export default function Layout() {
-    const [collapsed, setCollapsed] = useState(false)
+  const [collapsed, setCollapsed] = useState(false)
 
-    return (
-        <div className="min-h-screen bg-gray-50">
-            <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
-            <div className={`${collapsed ? 'ml-[72px]' : 'ml-64'} transition-all duration-300`}>
-                <Header />
-                <main className="p-6">
-                    <Outlet />
-                </main>
-            </div>
-        </div>
-    )
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
+      <div className={`${collapsed ? 'ml-[72px]' : 'ml-64'} transition-all duration-300`}>
+        <Header />
+        <main className="p-6">
+          <Outlet />
+        </main>
+      </div>
+    </div>
+  )
 }
-

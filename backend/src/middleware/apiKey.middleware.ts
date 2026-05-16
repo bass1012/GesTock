@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express'
 import { PrismaClient } from '@prisma/client'
 import { UnauthorizedError } from '../utils/errors'
+import { encryptionService } from '../services/encryption.service'
 
 const prisma = new PrismaClient()
 
@@ -17,11 +18,28 @@ export const apiKeyMiddleware = async (req: Request, _res: Response, next: NextF
             return next()
         }
 
-        // Rechercher la clé dans la table globale (schema public)
-        const keyRecord = await prisma.apiKey.findUnique({
-            where: { key: apiKey },
+        // Rechercher la clé — déchiffrer toutes les clés et comparer
+        // (nécessaire car les clés sont stockées chiffrées depuis le fix Phase 14)
+        const allKeys = await prisma.apiKey.findMany({
             include: { tenant: true }
         })
+
+        let keyRecord = null
+        for (const k of allKeys) {
+            try {
+                const decrypted = encryptionService.decryptFromStorage(k.key)
+                if (decrypted === apiKey) {
+                    keyRecord = k
+                    break
+                }
+            } catch {
+                // Format legacy (clé en clair, avant le fix Phase 14)
+                if (k.key === apiKey) {
+                    keyRecord = k
+                    break
+                }
+            }
+        }
 
         if (!keyRecord) {
             throw new UnauthorizedError('Clé API invalide')
