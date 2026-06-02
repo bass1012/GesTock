@@ -24,7 +24,7 @@
     "react-barcode": "^1.6.1",
     "react-dom": "^18.2.0",
     "react-hot-toast": "^2.4.1",
-    "react-router-dom": "^6.21.3",
+    "react-router-dom": "^7.16.0",
     "recharts": "^3.8.1",
     "zustand": "^4.4.7"
   },
