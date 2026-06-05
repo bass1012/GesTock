@@ -9,9 +9,9 @@ export interface TenantConfig {
 
 export const tenantService = {
   async createTenantSchema(slug: string) {
-    if (!/^[a-z0-9_]+$/.test(slug)) {
+    if (!/^[a-z0-9_-]+$/.test(slug)) {
       throw new Error(
-        'Invalid tenant slug format. Only lowercase letters, numbers, and underscores are allowed.',
+        'Invalid tenant slug format. Only lowercase letters, numbers, hyphens, and underscores are allowed.',
       )
     }
 
