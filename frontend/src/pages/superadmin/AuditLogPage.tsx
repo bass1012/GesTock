@@ -496,7 +496,7 @@ export default function AuditLogPage({ secret }: { secret: string | null }) {
         <div className="flex flex-wrap gap-3 items-center justify-between">
           {/* Recherche libre */}
           <div className="relative flex-1 min-w-[220px]">
-            <Search className="absolute left-3 top-1/2 -tranzinc-y-1/2 text-zinc-500" size={15} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={15} />
             <input
               type="text"
               placeholder="Rechercher email, tenant, action…"

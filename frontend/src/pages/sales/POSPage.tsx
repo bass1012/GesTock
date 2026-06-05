@@ -138,7 +138,7 @@ export default function POSPage() {
           <h1 className="text-2xl font-bold text-zinc-900">Catalogue Caisse</h1>
           <div className="flex gap-2 w-full sm:w-auto">
             <div className="relative flex-1 sm:w-64 sm:flex-initial">
-              <Search className="absolute left-3 top-1/2 -tranzinc-y-1/2 text-zinc-400" size={18} />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
               <input
                 type="text"
                 placeholder="Rechercher par nom, SKU…"

@@ -39,7 +39,7 @@ export default function LoginPage() {
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-[-20%] left-[-10%] size-[80%] rounded-full bg-primary-900/40 blur-[150px]"></div>
           <div className="absolute bottom-[-20%] right-[-10%] size-[70%] rounded-full bg-blue-950/50 blur-[120px]"></div>
-          <div className="absolute top-1/2 left-1/2 -tranzinc-x-1/2 -tranzinc-y-1/2 w-full h-full bg-[radial-gradient(circle_at_center,transparent_0%,#09090b_100%)]"></div>
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle_at_center,transparent_0%,#09090b_100%)]"></div>
         </div>
 
         {/* Top: Logo */}
@@ -158,7 +158,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -tranzinc-y-1/2 text-zinc-400 hover:text-primary-600 transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-primary-600 transition-colors"
                 >
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>

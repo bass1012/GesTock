@@ -89,7 +89,7 @@ export default function OrdersPage() {
       <div className="card">
         <div className="p-4 border-b border-zinc-100 flex gap-4">
           <div className="relative max-w-sm flex-1">
-            <Search className="absolute left-3 top-1/2 -tranzinc-y-1/2 text-zinc-400" size={20} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={20} />
             <input
               type="text"
               placeholder="Rechercher par fournisseur ou numéro de bon…"

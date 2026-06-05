@@ -392,7 +392,7 @@ export default function SuperAdminDashboard() {
             <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-zinc-900/50 p-6 rounded-2xl border border-zinc-800 shadow-xl">
               <div className="relative w-full md:w-96">
                 <Search
-                  className="absolute left-4 top-1/2 -tranzinc-y-1/2 text-zinc-500"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500"
                   size={18}
                 />
                 <input
@@ -580,7 +580,7 @@ function StatCard({
   color: string
 }) {
   return (
-    <div className="bg-zinc-900/50 p-6 rounded-3xl border border-zinc-800 shadow-lg hover:border-zinc-700 transition-all hover:-tranzinc-y-1">
+    <div className="bg-zinc-900/50 p-6 rounded-3xl border border-zinc-800 shadow-lg hover:border-zinc-700 transition-all hover:-translate-y-1">
       <div className="flex justify-between items-start mb-4">
         <div className={`p-2 rounded-xl bg-${color}-500/10 border border-${color}-500/20`}>
           {icon}

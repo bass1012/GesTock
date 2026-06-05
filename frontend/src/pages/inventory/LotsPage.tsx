@@ -100,7 +100,7 @@ export default function LotsPage() {
       {/* Filtres */}
       <div className="flex flex-wrap gap-3">
         <div className="relative flex-1 min-w-[200px]">
-          <Search size={16} className="absolute left-3 top-1/2 -tranzinc-y-1/2 text-zinc-400" />
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
           <input
             type="text"
             placeholder="Rechercher produit ou lot…"

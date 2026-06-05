@@ -51,7 +51,7 @@ export default function SuppliersPage() {
         {/* Filtres alignés comme dans ProductsPage */}
         <div className="p-4 border-b border-zinc-100">
           <div className="relative max-w-sm">
-            <Search className="absolute left-3 top-1/2 -tranzinc-y-1/2 text-zinc-400" size={20} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={20} />
             <input
               type="text"
               placeholder="Rechercher par nom, email…"

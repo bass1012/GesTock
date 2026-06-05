@@ -168,7 +168,7 @@ function InviteModal({ onClose }: { onClose: () => void }) {
               <div className="relative">
                 <User
                   size={14}
-                  className="absolute left-3 top-1/2 -tranzinc-y-1/2 text-zinc-400"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400"
                 />
                 <input
                   id="user-first-name"
@@ -205,7 +205,7 @@ function InviteModal({ onClose }: { onClose: () => void }) {
               Email
             </label>
             <div className="relative">
-              <Mail size={14} className="absolute left-3 top-1/2 -tranzinc-y-1/2 text-zinc-400" />
+              <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
               <input
                 id="user-email"
                 type="email"
@@ -249,7 +249,7 @@ function InviteModal({ onClose }: { onClose: () => void }) {
               Mot de passe temporaire
             </label>
             <div className="relative">
-              <Lock size={14} className="absolute left-3 top-1/2 -tranzinc-y-1/2 text-zinc-400" />
+              <Lock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
               <input
                 id="user-password"
                 type="text"
