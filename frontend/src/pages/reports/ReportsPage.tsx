@@ -39,6 +39,7 @@ import {
 import { format, subDays, startOfDay, isSameDay } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import toast from 'react-hot-toast'
+import { formatDate } from '../../lib/format'
 
 // Donut Chart Component
 function DonutChart({ segments }: { segments: { label: string; value: number; color: string }[] }) {
