@@ -43,8 +43,8 @@ services:
       dockerfile: backend/Dockerfile
     container_name: gestock-backend
     restart: unless-stopped
-    expose:
-      - '3001'
+    ports:
+      - '127.0.0.1:3001:3001'
     environment:
       DATABASE_URL: postgresql://${DB_USER:-gestock}:${DB_PASSWORD}@postgres:5432/${DB_NAME:-gestock_db}?schema=public
       REDIS_URL: redis://:${REDIS_PASSWORD:-gestock_redis_secret}@redis:6379
@@ -79,8 +79,8 @@ services:
         VITE_SENTRY_DSN: ${VITE_SENTRY_DSN:-}
     container_name: gestock-frontend
     restart: unless-stopped
-    expose:
-      - '8080'
+    ports:
+      - '127.0.0.1:3000:8080'
     depends_on:
       - backend
     networks:
