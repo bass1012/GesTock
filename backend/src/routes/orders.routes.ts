@@ -78,7 +78,7 @@ router.use(tenantMiddleware)
  * /orders/{id}/status:
  *   put:
  *     tags: [Orders]
- *     summary: Mettre à jour le statut (ex: RECEIVED déclenche une entrée stock)
+ *     summary: "Mettre à jour le statut (ex: RECEIVED déclenche une entrée stock)"
  *     parameters:
  *       - in: path
  *         name: id
@@ -97,7 +97,7 @@ router.use(tenantMiddleware)
  *                 enum: [PENDING, CONFIRMED, RECEIVED, CANCELLED]
  *     responses:
  *       200:
- *         description: Statut mis à jour. Si RECEIVED, entrée de stock générée automatiquement.
+ *         description: "Statut mis à jour. Si RECEIVED, entrée de stock générée automatiquement."
  */
 router.get('/', ordersController.list)
 router.get('/:id', ordersController.get)

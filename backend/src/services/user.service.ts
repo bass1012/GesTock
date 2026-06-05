@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 import { NotFoundError, ForbiddenError } from '../utils/errors'
 import { emailService } from './notification.service'
+import { userInviteSchema, userRoleSchema } from '../utils/validators'
 
 const prisma = new PrismaClient()
 
@@ -10,7 +11,7 @@ export const userService = {
    * Liste tous les utilisateurs du tenant courant
    */
   async listUsers(tenantId: string) {
-    const users = await prisma.user.findMany({
+    return await prisma.user.findMany({
       where: { tenantId },
       select: {
         id: true,
@@ -23,47 +24,45 @@ export const userService = {
       },
       orderBy: { createdAt: 'asc' },
     })
-    return users
   },
 
   /**
    * Inviter (créer) un utilisateur dans le tenant sans passer par le register public
    */
   async inviteUser(
-    data: { email: string; firstName: string; lastName: string; role: string; password: string },
+    data: any,
     tenantId: string,
-    invitedByRole: string
+    invitedByRole: string,
   ) {
     // Seul un admin peut inviter
     if (invitedByRole !== 'admin') {
       throw new ForbiddenError('Seul un administrateur peut inviter des utilisateurs')
     }
 
-    // Vérifier que le rôle est valide
-    const validRoles = ['admin', 'manager', 'lecteur']
-    if (!validRoles.includes(data.role)) {
-      throw new Error('Rôle invalide. Valeurs acceptées : admin, manager, lecteur')
-    }
+    const validatedData = userInviteSchema.parse(data)
 
     // Vérifier si l'email est déjà utilisé dans ce tenant
     const existing = await prisma.user.findUnique({
-      where: { email_tenantId: { email: data.email, tenantId } },
+      where: { email_tenantId: { email: validatedData.email, tenantId } },
     })
     if (existing) {
       throw new Error('Un utilisateur avec cet email existe déjà dans ce tenant')
     }
 
-    const hashedPassword = await bcrypt.hash(data.password, 12)
+    const hashedPassword = await bcrypt.hash(validatedData.password, 12)
 
     // Récupérer le nom du tenant pour l'email
-    const tenant = await prisma.tenant.findUnique({ where: { id: tenantId }, select: { name: true } })
+    const tenant = await prisma.tenant.findUnique({
+      where: { id: tenantId },
+      select: { name: true },
+    })
 
     const user = await prisma.user.create({
       data: {
-        email: data.email,
-        firstName: data.firstName,
-        lastName: data.lastName,
-        role: data.role,
+        email: validatedData.email,
+        firstName: validatedData.firstName,
+        lastName: validatedData.lastName,
+        role: validatedData.role,
         password: hashedPassword,
         tenantId,
       },
@@ -78,16 +77,18 @@ export const userService = {
     })
 
     // Envoyer l'email de bienvenue avec les identifiants temporaires
-    await emailService.sendWelcomeEmail({
-      to: data.email,
-      firstName: data.firstName,
-      tenantName: tenant?.name || 'GesStock',
-      role: data.role,
-      password: data.password,
-    }).catch((err) => {
-      // Ne pas bloquer la création si l'email échoue
-      console.warn('[UserService] Email de bienvenue non envoyé :', err.message)
-    })
+    await emailService
+      .sendWelcomeEmail({
+        to: validatedData.email,
+        firstName: validatedData.firstName,
+        tenantName: tenant?.name || 'GesStock',
+        role: validatedData.role,
+        password: validatedData.password,
+      })
+      .catch((err) => {
+        // Ne pas bloquer la création si l'email échoue
+        console.warn('[UserService] Email de bienvenue non envoyé :', err.message)
+      })
 
     return user
   },
@@ -100,7 +101,7 @@ export const userService = {
     newRole: string,
     tenantId: string,
     requesterId: string,
-    requesterRole: string
+    requesterRole: string,
   ) {
     if (requesterRole !== 'admin') {
       throw new ForbiddenError('Seul un administrateur peut modifier les rôles')
@@ -111,10 +112,7 @@ export const userService = {
       throw new Error('Vous ne pouvez pas modifier votre propre rôle')
     }
 
-    const validRoles = ['admin', 'manager', 'lecteur']
-    if (!validRoles.includes(newRole)) {
-      throw new Error('Rôle invalide')
-    }
+    const validatedData = userRoleSchema.parse({ role: newRole })
 
     const user = await prisma.user.findFirst({
       where: { id: userId, tenantId },
@@ -123,7 +121,7 @@ export const userService = {
 
     return prisma.user.update({
       where: { id: userId },
-      data: { role: newRole },
+      data: { role: validatedData.role },
       select: { id: true, email: true, firstName: true, lastName: true, role: true },
     })
   },

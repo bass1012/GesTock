@@ -108,7 +108,12 @@ router.get('/:id', asyncHandler(productsController.get))
  *             schema:
  *               $ref: '#/components/schemas/Product'
  */
-router.post('/', requireRole('admin', 'manager'), checkPlanLimit('products'), asyncHandler(productsController.create))
+router.post(
+  '/',
+  requireRole('admin', 'manager'),
+  checkPlanLimit('products'),
+  asyncHandler(productsController.create),
+)
 
 /**
  * @swagger

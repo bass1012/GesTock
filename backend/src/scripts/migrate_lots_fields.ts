@@ -10,25 +10,25 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 async function migrate() {
-    const tenants = await prisma.tenant.findMany()
-    console.log(`Migrating ${tenants.length} tenant schema(s)...`)
+  const tenants = await prisma.tenant.findMany()
+  console.log(`Migrating ${tenants.length} tenant schema(s)...`)
 
-    for (const tenant of tenants) {
-        const schema = `tenant_${tenant.slug}`
-        console.log(`  → ${schema}`)
+  for (const tenant of tenants) {
+    const schema = `tenant_${tenant.slug}`
+    console.log(`  → ${schema}`)
 
-        await prisma.$executeRawUnsafe(`
+    await prisma.$executeRawUnsafe(`
             ALTER TABLE "${schema}".stock_movements
             ADD COLUMN IF NOT EXISTS batch_number VARCHAR,
             ADD COLUMN IF NOT EXISTS expiry_date TIMESTAMP
         `)
-    }
+  }
 
-    console.log('Migration completed.')
-    process.exit(0)
+  console.log('Migration completed.')
+  process.exit(0)
 }
 
 migrate().catch((err) => {
-    console.error('Migration failed:', err)
-    process.exit(1)
+  console.error('Migration failed:', err)
+  process.exit(1)
 })

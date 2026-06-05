@@ -13,6 +13,8 @@
     "seed": "tsx src/prisma/seed.ts",
     "migrate:warehouses": "tsx src/scripts/migrate_warehouses.ts",
     "migrate:expiry": "tsx src/scripts/migrate_expiry_fields.ts",
+    "migrate:tenants": "tsx src/scripts/migrate-tenants.ts",
+    "migrate:auth-lockout": "tsx src/scripts/migrate_account_lockout.ts",
     "test": "jest"
   },
   "dependencies": {
@@ -28,6 +30,7 @@
     "jsonwebtoken": "^9.0.2",
     "node-cron": "^4.2.1",
     "nodemailer": "^8.0.5",
+    "pdfkit": "^0.18.0",
     "redis": "^4.6.12",
     "stripe": "^14.25.0",
     "swagger-jsdoc": "^6.2.8",
@@ -44,6 +47,7 @@
     "@types/node": "^20.11.5",
     "@types/node-cron": "^3.0.11",
     "@types/nodemailer": "^8.0.0",
+    "@types/pdfkit": "^0.17.6",
     "@types/supertest": "^7.2.0",
     "@types/swagger-jsdoc": "^6.0.4",
     "@types/swagger-ui-express": "^4.1.8",

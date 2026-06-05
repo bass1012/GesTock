@@ -13,14 +13,16 @@ const clientSchema = z.object({
   name: z.string().min(2),
   email: z.string().email().optional().or(z.literal('')),
   phone: z.string().optional().or(z.literal('')),
-  address: z.string().optional().or(z.literal(''))
+  address: z.string().optional().or(z.literal('')),
 })
 
 router.get('/', async (req: any, res, next) => {
   try {
     const clients = await clientsService.getAllClients(req.tenantSlug)
     res.json(clients)
-  } catch (error) { next(error) }
+  } catch (error) {
+    next(error)
+  }
 })
 
 router.get('/:id', async (req: any, res, next) => {
@@ -28,7 +30,9 @@ router.get('/:id', async (req: any, res, next) => {
     const client = await clientsService.getClientById(req.params.id, req.tenantSlug)
     if (!client) return res.status(404).json({ error: 'Client non trouvé' })
     res.json(client)
-  } catch (error) { next(error) }
+  } catch (error) {
+    next(error)
+  }
 })
 
 router.post('/', requireRole('admin', 'manager'), async (req: any, res, next) => {
@@ -45,11 +49,13 @@ router.post('/', requireRole('admin', 'manager'), async (req: any, res, next) =>
       resourceId: client.id,
       metadata: { name: client.name },
       ip: req.ip,
-      userAgent: req.headers['user-agent']
+      userAgent: req.headers['user-agent'],
     })
 
     res.status(201).json(client)
-  } catch (error) { next(error) }
+  } catch (error) {
+    next(error)
+  }
 })
 
 router.patch('/:id', requireRole('admin', 'manager'), async (req: any, res, next) => {
@@ -66,11 +72,13 @@ router.patch('/:id', requireRole('admin', 'manager'), async (req: any, res, next
       resourceId: client.id,
       metadata: { name: client.name },
       ip: req.ip,
-      userAgent: req.headers['user-agent']
+      userAgent: req.headers['user-agent'],
     })
 
     res.json(client)
-  } catch (error) { next(error) }
+  } catch (error) {
+    next(error)
+  }
 })
 
 router.delete('/:id', requireRole('admin', 'manager'), async (req: any, res, next) => {
@@ -86,11 +94,13 @@ router.delete('/:id', requireRole('admin', 'manager'), async (req: any, res, nex
       resource: 'client',
       resourceId: clientId,
       ip: req.ip,
-      userAgent: req.headers['user-agent']
+      userAgent: req.headers['user-agent'],
     })
 
     res.status(204).end()
-  } catch (error) { next(error) }
+  } catch (error) {
+    next(error)
+  }
 })
 
 export default router

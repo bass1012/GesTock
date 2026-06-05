@@ -105,7 +105,11 @@ router.get('/movements', reportController.getMovementReport)
 
 // Advanced Business Intelligence (Pro/Enterprise only)
 router.get('/alerts/expiry', requirePlan(['pro', 'enterprise']), reportController.getExpiryAlerts)
-router.get('/rotation/slow', requirePlan(['pro', 'enterprise']), reportController.getSlowRotationReport)
+router.get(
+  '/rotation/slow',
+  requirePlan(['pro', 'enterprise']),
+  reportController.getSlowRotationReport,
+)
 
 /**
  * @swagger
@@ -152,5 +156,7 @@ router.get('/forecasts', requirePlan(['pro', 'enterprise']), reportController.ge
 // Export endpoints
 router.get('/export/inventory', reportController.exportInventoryCSV)
 router.get('/export/movements', reportController.exportMovementsCSV)
+router.get('/export/inventory/pdf', reportController.exportInventoryPDF)
+router.get('/export/movements/pdf', reportController.exportMovementsPDF)
 
 export default router

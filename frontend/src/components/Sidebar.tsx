@@ -55,7 +55,7 @@ export default function Sidebar({
 
   return (
     <aside
-      className={`fixed left-0 top-0 z-40 h-screen bg-gradient-to-b from-gray-900 to-gray-950 text-white transition-all duration-300 ${
+      className={`fixed left-0 top-0 z-40 h-screen bg-gradient-to-b from-zinc-900 to-zinc-950 text-white transition-all duration-300 ${
         collapsed ? 'w-[72px]' : 'w-64'
       }`}
     >
@@ -80,7 +80,7 @@ export default function Sidebar({
       {/* Tenant info */}
       {!collapsed && tenant && (
         <div className="px-4 py-3 border-b border-white/10">
-          <p className="text-xs text-gray-400">Espace de travail</p>
+          <p className="text-xs text-zinc-400">Espace de travail</p>
           <p className="text-sm font-medium truncate">{tenant.name}</p>
           <span className="badge bg-primary-500/20 text-primary-300 text-[10px] mt-1">
             {tenant.plan}
@@ -100,7 +100,7 @@ export default function Sidebar({
                 `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
                   isActive
                     ? 'bg-primary-600 text-white shadow-lg shadow-primary-600/30'
-                    : 'text-gray-400 hover:text-white hover:bg-white/5'
+                    : 'text-zinc-400 hover:text-white hover:bg-white/5'
                 } ${collapsed ? 'justify-center' : ''}`
               }
             >
@@ -116,7 +116,7 @@ export default function Sidebar({
       <div className="px-3 pb-4">
         <button
           onClick={logout}
-          className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:text-red-400 hover:bg-red-500/10 transition-all duration-200 ${
+          className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-zinc-400 hover:text-red-400 hover:bg-red-500/10 transition-all duration-200 ${
             collapsed ? 'justify-center' : ''
           }`}
         >

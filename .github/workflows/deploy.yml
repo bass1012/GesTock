@@ -34,7 +34,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4.2.2
 
-      - name: Deploy via SSH
+      - name: Deploy via SSH (with rollback on failure)
         uses: appleboy/ssh-action@v1.2.5
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -45,30 +45,70 @@ jobs:
             set -e
             cd /home/ubuntu/GesTock
 
-            echo "=== Pull latest changes ==="
-            git fetch origin main
-            git reset --hard origin/main
+            # ── Snapshot de l'état actuel pour rollback ───────────────────────
+            PREVIOUS_COMMIT=$(git rev-parse HEAD)
+            echo "=== Commit actuel (rollback cible) : $PREVIOUS_COMMIT ==="
 
-            echo "=== Build & restart containers ==="
-            docker compose -f docker-compose.prod.yml up -d --build --remove-orphans
+            # Sauvegarder les IDs des images en cours (pour rollback docker)
+            BACKEND_IMAGE_BEFORE=$(docker compose -f docker-compose.prod.yml images -q backend 2>/dev/null || echo "none")
+            FRONTEND_IMAGE_BEFORE=$(docker compose -f docker-compose.prod.yml images -q frontend 2>/dev/null || echo "none")
 
-            echo "=== Apply DB migrations ==="
-            docker compose -f docker-compose.prod.yml exec -T backend npx prisma migrate deploy
+            # ── Déploiement ───────────────────────────────────────────────────
+            deploy() {
+              echo "=== Pull latest changes ==="
+              git fetch origin main
+              git reset --hard origin/main
 
-            echo "=== Cleanup old images ==="
-            docker image prune -f
+              echo "=== Build & restart containers ==="
+              docker compose -f docker-compose.prod.yml up -d --build --remove-orphans
 
-            echo "=== SSL renewal (if due) ==="
-            sudo certbot renew --non-interactive --quiet || echo "Certbot non installé ou pas dû"
+              echo "=== Apply DB migrations ==="
+              docker compose -f docker-compose.prod.yml exec -T backend npx prisma migrate deploy --skip-generate
 
-            echo "=== Reload nginx ==="
-            sudo nginx -t && sudo systemctl reload nginx || echo "nginx reload skipped (SSL not configured yet)"
+              echo "=== Cleanup old images ==="
+              docker image prune -f
 
-            echo "=== Health check ==="
-            sleep 10
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://gestock.allsite.cloud/api/health)
-            if [ "$STATUS" != "200" ]; then
-              echo "HEALTH CHECK FAILED: HTTP $STATUS"
-              exit 1
+              echo "=== SSL renewal (if due) ==="
+              sudo certbot renew --non-interactive --quiet || echo "Certbot non installé ou pas dû"
+
+              echo "=== Reload nginx ==="
+              sudo nginx -t && sudo systemctl reload nginx || echo "nginx reload skipped (SSL not configured yet)"
+
+              echo "=== Health check ==="
+              sleep 10
+              STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://gestock.allsite.cloud/api/health)
+              if [ "$STATUS" != "200" ]; then
+                echo "❌ HEALTH CHECK FAILED: HTTP $STATUS"
+                return 1
+              fi
+              echo "✅ Health check passed (HTTP $STATUS)"
+            }
+
+            # ── Rollback ──────────────────────────────────────────────────────
+            rollback() {
+              echo ""
+              echo "🔄 ===== ROLLBACK EN COURS ====="
+              echo "🔄 Retour au commit : $PREVIOUS_COMMIT"
+
+              git reset --hard "$PREVIOUS_COMMIT"
+
+              echo "🔄 Rebuild de l'ancienne version..."
+              docker compose -f docker-compose.prod.yml up -d --build --remove-orphans || true
+
+              echo "🔄 Health check post-rollback..."
+              sleep 10
+              ROLLBACK_STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://gestock.allsite.cloud/api/health)
+              if [ "$ROLLBACK_STATUS" = "200" ]; then
+                echo "✅ Rollback réussi (HTTP $ROLLBACK_STATUS)"
+              else
+                echo "❌ Rollback échoué aussi (HTTP $ROLLBACK_STATUS) — intervention manuelle requise"
+              fi
+
+              echo "🔄 ============================="
+              exit 1   # Signaler l'échec au CI même après rollback
+            }
+
+            # ── Exécution avec trap rollback ──────────────────────────────────
+            if ! deploy; then
+              rollback
             fi
-            echo "Health check passed (HTTP $STATUS)"

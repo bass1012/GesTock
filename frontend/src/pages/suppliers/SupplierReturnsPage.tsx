@@ -72,8 +72,8 @@ export default function SupplierReturnsPage() {
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Retours Fournisseurs</h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <h1 className="text-2xl font-bold text-zinc-900">Retours Fournisseurs</h1>
+          <p className="text-sm text-zinc-500 mt-1">
             Gérer les retours de marchandises vers les fournisseurs
           </p>
         </div>
@@ -90,15 +90,15 @@ export default function SupplierReturnsPage() {
       {showForm && (
         <form
           onSubmit={handleSubmit}
-          className="bg-white rounded-xl border border-gray-200 p-6 space-y-4"
+          className="bg-white rounded-xl border border-zinc-200 p-6 space-y-4"
         >
-          <h2 className="text-lg font-semibold text-gray-900">Nouveau retour fournisseur</h2>
+          <h2 className="text-lg font-semibold text-zinc-900">Nouveau retour fournisseur</h2>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label
                 htmlFor="return-supplier"
-                className="block text-sm font-medium text-gray-700 mb-1"
+                className="block text-sm font-medium text-zinc-700 mb-1"
               >
                 Fournisseur *
               </label>
@@ -120,7 +120,7 @@ export default function SupplierReturnsPage() {
             <div>
               <label
                 htmlFor="return-warehouse"
-                className="block text-sm font-medium text-gray-700 mb-1"
+                className="block text-sm font-medium text-zinc-700 mb-1"
               >
                 Entrepôt source (optionnel)
               </label>
@@ -141,7 +141,7 @@ export default function SupplierReturnsPage() {
           </div>
 
           <div>
-            <label htmlFor="return-reason" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="return-reason" className="block text-sm font-medium text-zinc-700 mb-1">
               Motif du retour (optionnel)
             </label>
             <input
@@ -157,11 +157,11 @@ export default function SupplierReturnsPage() {
           {/* Articles à retourner */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <p className="text-sm font-medium text-gray-700">Articles *</p>
+              <p className="text-sm font-medium text-zinc-700">Articles *</p>
               <button
                 type="button"
                 onClick={addItem}
-                className="text-sm text-indigo-600 hover:text-indigo-800 flex items-center gap-1"
+                className="text-sm text-primary-600 hover:text-primary-800 flex items-center gap-1"
               >
                 <Plus size={14} /> Ajouter un article
               </button>
@@ -233,39 +233,39 @@ export default function SupplierReturnsPage() {
       )}
 
       {/* Table des retours */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-xl border border-zinc-200 overflow-hidden">
         {isLoading ? (
-          <div className="p-12 text-center text-gray-400">Chargement…</div>
+          <div className="p-12 text-center text-zinc-400">Chargement…</div>
         ) : returns.length === 0 ? (
           <div className="p-12 text-center">
-            <RotateCcw size={48} className="mx-auto text-gray-300 mb-3" />
-            <p className="text-gray-500">Aucun retour fournisseur.</p>
+            <RotateCcw size={48} className="mx-auto text-zinc-300 mb-3" />
+            <p className="text-zinc-500">Aucun retour fournisseur.</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-gray-50 border-b border-gray-200">
+              <thead className="bg-zinc-50 border-b border-zinc-200">
                 <tr>
-                  <th className="px-4 py-3 text-left font-medium text-gray-600">Référence</th>
-                  <th className="px-4 py-3 text-left font-medium text-gray-600">Fournisseur</th>
-                  <th className="px-4 py-3 text-left font-medium text-gray-600">Motif</th>
-                  <th className="px-4 py-3 text-left font-medium text-gray-600">Statut</th>
-                  <th className="px-4 py-3 text-left font-medium text-gray-600">Date</th>
+                  <th className="px-4 py-3 text-left font-medium text-zinc-600">Référence</th>
+                  <th className="px-4 py-3 text-left font-medium text-zinc-600">Fournisseur</th>
+                  <th className="px-4 py-3 text-left font-medium text-zinc-600">Motif</th>
+                  <th className="px-4 py-3 text-left font-medium text-zinc-600">Statut</th>
+                  <th className="px-4 py-3 text-left font-medium text-zinc-600">Date</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-zinc-100">
                 {returns.map((ret) => (
-                  <tr key={ret.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 font-mono text-gray-700">{ret.reference}</td>
-                    <td className="px-4 py-3 font-medium text-gray-900">{ret.supplierName}</td>
-                    <td className="px-4 py-3 text-gray-600">{ret.reason ?? '-'}</td>
+                  <tr key={ret.id} className="hover:bg-zinc-50">
+                    <td className="px-4 py-3 font-mono text-zinc-700">{ret.reference}</td>
+                    <td className="px-4 py-3 font-medium text-zinc-900">{ret.supplierName}</td>
+                    <td className="px-4 py-3 text-zinc-600">{ret.reason ?? '-'}</td>
                     <td className="px-4 py-3">
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                         <Package size={10} />
                         {ret.status}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-gray-600">{formatDate(ret.createdAt)}</td>
+                    <td className="px-4 py-3 text-zinc-600">{formatDate(ret.createdAt)}</td>
                   </tr>
                 ))}
               </tbody>

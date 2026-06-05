@@ -36,7 +36,7 @@ export const emailService = {
           <td style="padding: 12px 16px; color: #6b7280; font-family: monospace;">${p.sku}</td>
           <td style="padding: 12px 16px; text-align:center; color: #ef4444; font-weight: 700;">${p.currentStock}</td>
           <td style="padding: 12px 16px; text-align:center; color: #6b7280;">${p.minStock}</td>
-        </tr>`
+        </tr>`,
       )
       .join('')
 
@@ -172,6 +172,80 @@ export const emailService = {
       from: `"GesStock" <${FROM_EMAIL}>`,
       to,
       subject: `Bienvenue sur GesStock — ${tenantName}`,
+      html,
+    })
+
+    return { sent: true }
+  },
+
+  /**
+   * Email de vérification d'adresse email
+   */
+  async sendVerificationEmail(params: {
+    to: string
+    firstName: string
+    verificationToken: string
+  }) {
+    const { to, firstName, verificationToken } = params
+    const verificationUrl = `${APP_URL}/auth/verify-email?token=${verificationToken}`
+
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <body style="margin:0; padding:0; font-family: 'Helvetica Neue', Arial, sans-serif; background:#f9fafb;">
+        <div style="max-width:600px; margin:40px auto; background:#fff; border-radius:12px; overflow:hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+          <!-- Header -->
+          <div style="background: linear-gradient(135deg, #2563eb, #3b82f6); padding:32px; text-align:center;">
+            <h1 style="color:white; margin:0; font-size:24px; font-weight:700;">✉️ Vérifiez votre email</h1>
+            <p style="color: rgba(255,255,255,0.85); margin:8px 0 0; font-size:14px;">GesStock</p>
+          </div>
+          
+          <!-- Content -->
+          <div style="padding:32px;">
+            <p style="color:#374151; font-size:15px; margin:0 0 16px;">
+              Bonjour <strong>${firstName}</strong>,<br><br>
+              Bienvenue sur GesStock ! Merci de vous être inscrit(e). Pour confirmer votre adresse email et activer votre compte, veuillez cliquer sur le bouton ci-dessous.
+            </p>
+            
+            <div style="text-align:center; margin:32px 0;">
+              <a href="${verificationUrl}" style="display:inline-block; background:#2563eb; color:white; text-decoration:none; padding:14px 32px; border-radius:8px; font-weight:600; font-size:15px;">
+                Vérifier mon email →
+              </a>
+            </div>
+            
+            <p style="color:#6b7280; font-size:13px; margin:24px 0 0;">
+              Si le bouton ne fonctionne pas, copiez et collez ce lien dans votre navigateur :
+            </p>
+            <p style="color:#2563eb; font-size:12px; word-break:break-all; background:#f0f9ff; padding:12px; border-radius:6px; margin:8px 0;">
+              ${verificationUrl}
+            </p>
+            
+            <p style="color:#9ca3af; font-size:12px; margin:20px 0 0;">
+              Ce lien expire dans <strong>24 heures</strong>.
+            </p>
+          </div>
+
+          <!-- Footer -->
+          <div style="background:#f9fafb; padding:20px; text-align:center; border-top:1px solid #e5e7eb;">
+            <p style="color:#9ca3af; font-size:12px; margin:0;">GesStock — Gestion de stock pour les PME d'Afrique de l'Ouest</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `
+
+    if (!process.env.SMTP_USER) {
+      console.log(
+        `[EmailService] Verification email simulé → ${to} (token: ${verificationToken.slice(0, 10)}...)`,
+      )
+      return { simulated: true }
+    }
+
+    const transporter = createTransporter()
+    await transporter.sendMail({
+      from: `"GesStock" <${FROM_EMAIL}>`,
+      to,
+      subject: 'Vérifiez votre email — GesStock',
       html,
     })
 

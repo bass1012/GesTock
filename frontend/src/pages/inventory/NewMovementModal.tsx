@@ -70,11 +70,11 @@ export default function NewMovementModal({ isOpen, onClose }: NewMovementModalPr
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-900/50 backdrop-blur-sm">
       <div className="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden flex flex-col">
-        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900">Nouveau Mouvement Manuel</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-500">
+        <div className="px-6 py-4 border-b border-zinc-100 flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-zinc-900">Nouveau Mouvement Manuel</h2>
+          <button onClick={onClose} className="text-zinc-400 hover:text-zinc-500">
             <X size={20} />
           </button>
         </div>
@@ -84,7 +84,7 @@ export default function NewMovementModal({ isOpen, onClose }: NewMovementModalPr
             <div>
               <label
                 htmlFor="movement-warehouse"
-                className="block text-sm font-medium text-gray-700 mb-1"
+                className="block text-sm font-medium text-zinc-700 mb-1"
               >
                 Entrepôt source/destination *
               </label>
@@ -107,7 +107,7 @@ export default function NewMovementModal({ isOpen, onClose }: NewMovementModalPr
             <div>
               <label
                 htmlFor="movement-product"
-                className="block text-sm font-medium text-gray-700 mb-1"
+                className="block text-sm font-medium text-zinc-700 mb-1"
               >
                 Produit *
               </label>
@@ -130,7 +130,7 @@ export default function NewMovementModal({ isOpen, onClose }: NewMovementModalPr
                 <button
                   type="button"
                   onClick={() => setShowScanner(true)}
-                  className="px-3 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 hover:text-gray-900 transition-colors border border-gray-200 shadow-sm"
+                  className="px-3 bg-zinc-100 text-zinc-600 rounded-lg hover:bg-zinc-200 hover:text-zinc-900 transition-colors border border-zinc-200 shadow-sm"
                   title="Scanner le code"
                 >
                   <Camera size={20} />
@@ -142,7 +142,7 @@ export default function NewMovementModal({ isOpen, onClose }: NewMovementModalPr
               <div>
                 <label
                   htmlFor="movement-type"
-                  className="block text-sm font-medium text-gray-700 mb-1"
+                  className="block text-sm font-medium text-zinc-700 mb-1"
                 >
                   Type de mouvement *
                 </label>
@@ -163,7 +163,7 @@ export default function NewMovementModal({ isOpen, onClose }: NewMovementModalPr
               <div>
                 <label
                   htmlFor="movement-quantity"
-                  className="block text-sm font-medium text-gray-700 mb-1"
+                  className="block text-sm font-medium text-zinc-700 mb-1"
                 >
                   Quantité *
                 </label>
@@ -184,7 +184,7 @@ export default function NewMovementModal({ isOpen, onClose }: NewMovementModalPr
             <div>
               <label
                 htmlFor="movement-reference"
-                className="block text-sm font-medium text-gray-700 mb-1"
+                className="block text-sm font-medium text-zinc-700 mb-1"
               >
                 Référence (optionnel)
               </label>
@@ -241,7 +241,7 @@ export default function NewMovementModal({ isOpen, onClose }: NewMovementModalPr
             <div>
               <label
                 htmlFor="movement-note"
-                className="block text-sm font-medium text-gray-700 mb-1"
+                className="block text-sm font-medium text-zinc-700 mb-1"
               >
                 Note (optionnel)
               </label>

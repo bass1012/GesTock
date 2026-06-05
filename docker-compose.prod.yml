@@ -92,7 +92,7 @@ volumes:
 
 networks:
   internal:
-    internal: true   # postgres + redis : aucun accès internet direct
+    internal: true # postgres + redis : aucun accès internet direct
   web:
-    driver: bridge   # backend + frontend : accès nginx système
+    driver: bridge # backend + frontend : accès nginx système
 

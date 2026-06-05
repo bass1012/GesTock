@@ -11,11 +11,11 @@ router.use(authMiddleware)
 router.use(tenantMiddleware)
 
 const transferSchema = z.object({
-    productId: z.string().uuid('productId doit être un UUID'),
-    sourceWarehouseId: z.string().uuid('sourceWarehouseId doit être un UUID'),
-    destWarehouseId: z.string().uuid('destWarehouseId doit être un UUID'),
-    quantity: z.number().int().positive('La quantité doit être un entier positif'),
-    note: z.string().optional(),
+  productId: z.string().uuid('productId doit être un UUID'),
+  sourceWarehouseId: z.string().uuid('sourceWarehouseId doit être un UUID'),
+  destWarehouseId: z.string().uuid('destWarehouseId doit être un UUID'),
+  quantity: z.number().int().positive('La quantité doit être un entier positif'),
+  note: z.string().optional(),
 })
 
 /**
@@ -76,19 +76,19 @@ const transferSchema = z.object({
  *               $ref: '#/components/schemas/Error'
  */
 router.post('/', async (req: any, res: any, next: any) => {
-    try {
-        const data = transferSchema.parse(req.body)
-        const tenantSlug = req.tenantSlug
-        const userId = req.userId
+  try {
+    const data = transferSchema.parse(req.body)
+    const tenantSlug = req.tenantSlug
+    const userId = req.userId
 
-        const result = await stockService.createTransfer(data, tenantSlug, userId)
-        res.status(201).json(result)
-    } catch (err: any) {
-        if (err.message?.includes('Stock insuffisant') || err.message?.includes('différents')) {
-            return next(new BadRequestError(err.message))
-        }
-        next(err)
+    const result = await stockService.createTransfer(data, tenantSlug, userId)
+    res.status(201).json(result)
+  } catch (err: any) {
+    if (err.message?.includes('Stock insuffisant') || err.message?.includes('différents')) {
+      return next(new BadRequestError(err.message))
     }
+    next(err)
+  }
 })
 
 export default router

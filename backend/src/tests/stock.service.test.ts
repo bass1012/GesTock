@@ -54,7 +54,7 @@ describe('stockService', () => {
 
       mockQueryRawUnsafe
         .mockResolvedValueOnce(fakeProducts) // SELECT products
-        .mockResolvedValueOnce(fakeCount)    // COUNT
+        .mockResolvedValueOnce(fakeCount) // COUNT
 
       const result = await stockService.listProducts({ page: 1, limit: 10, tenantSlug: TENANT })
 
@@ -66,9 +66,7 @@ describe('stockService', () => {
     })
 
     it('inclut le filtre de recherche quand search est fourni', async () => {
-      mockQueryRawUnsafe
-        .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([{ total: '0' }])
+      mockQueryRawUnsafe.mockResolvedValueOnce([]).mockResolvedValueOnce([{ total: '0' }])
 
       await stockService.listProducts({ page: 1, limit: 10, search: 'test', tenantSlug: TENANT })
 
@@ -108,7 +106,7 @@ describe('stockService', () => {
       expect(result.name).toBe('Produit A')
     })
 
-    it('lève NotFoundError si le produit n\'existe pas', async () => {
+    it("lève NotFoundError si le produit n'existe pas", async () => {
       mockQueryRawUnsafe.mockResolvedValueOnce([])
 
       await expect(stockService.getProduct('uuid-999', TENANT)).rejects.toThrow(NotFoundError)
@@ -132,7 +130,7 @@ describe('stockService', () => {
 
       const result = await stockService.createProduct(
         { sku: 'SKU-NEW', name: 'Nouveau Produit', currentStock: 10, price: 50 },
-        TENANT
+        TENANT,
       )
 
       expect(result.id).toBe('uuid-new')
@@ -145,12 +143,12 @@ describe('stockService', () => {
       const fakeProduct = { id: 'uuid-new', sku: 'SKU-NEW', name: 'Produit' }
 
       mockQueryRawUnsafe
-        .mockResolvedValueOnce([fakeProduct])  // INSERT products
-        .mockResolvedValueOnce([])             // INSERT product_warehouses
+        .mockResolvedValueOnce([fakeProduct]) // INSERT products
+        .mockResolvedValueOnce([]) // INSERT product_warehouses
 
       await stockService.createProduct(
         { sku: 'SKU-NEW', name: 'Produit', warehouseId: 'wh-1', currentStock: 5 },
-        TENANT
+        TENANT,
       )
 
       expect(mockQueryRawUnsafe).toHaveBeenCalledTimes(2)
@@ -173,7 +171,7 @@ describe('stockService', () => {
       expect(query).toContain('is_deleted = true')
     })
 
-    it('lève NotFoundError si le produit n\'existe pas', async () => {
+    it("lève NotFoundError si le produit n'existe pas", async () => {
       mockQueryRawUnsafe.mockResolvedValueOnce([])
 
       await expect(stockService.deleteProduct('uuid-999', TENANT)).rejects.toThrow(NotFoundError)
@@ -185,11 +183,20 @@ describe('stockService', () => {
   // ──────────────────────────────────────────────
   describe('updateProduct', () => {
     it('met à jour le produit et retourne le résultat', async () => {
-      const fakeUpdated = { id: 'uuid-1', sku: 'SKU-001', name: 'Produit Modifié', current_stock: 15 }
+      const fakeUpdated = {
+        id: 'uuid-1',
+        sku: 'SKU-001',
+        name: 'Produit Modifié',
+        current_stock: 15,
+      }
 
       mockQueryRawUnsafe.mockResolvedValueOnce([fakeUpdated])
 
-      const result = await stockService.updateProduct('uuid-1', { name: 'Produit Modifié', currentStock: 15 }, TENANT)
+      const result = await stockService.updateProduct(
+        'uuid-1',
+        { name: 'Produit Modifié', currentStock: 15 },
+        TENANT,
+      )
 
       expect(result.name).toBe('Produit Modifié')
       const query = mockQueryRawUnsafe.mock.calls[0][0] as string
@@ -209,10 +216,12 @@ describe('stockService', () => {
       expect(callArgs).toContain(null)
     })
 
-    it('lève NotFoundError si le produit n\'existe pas', async () => {
+    it("lève NotFoundError si le produit n'existe pas", async () => {
       mockQueryRawUnsafe.mockResolvedValueOnce([])
 
-      await expect(stockService.updateProduct('uuid-999', { name: 'X' }, TENANT)).rejects.toThrow(NotFoundError)
+      await expect(stockService.updateProduct('uuid-999', { name: 'X' }, TENANT)).rejects.toThrow(
+        NotFoundError,
+      )
     })
   })
 
@@ -255,14 +264,21 @@ describe('stockService', () => {
         .mockResolvedValueOnce(fakeMovements)
         .mockResolvedValueOnce([{ total: '1' }])
 
-      await stockService.listMovements({ page: 1, limit: 10, tenantSlug: TENANT, productId: 'prod-1' })
+      await stockService.listMovements({
+        page: 1,
+        limit: 10,
+        tenantSlug: TENANT,
+        productId: 'prod-1',
+      })
 
       const query = mockQueryRawUnsafe.mock.calls[0][0] as string
       expect(query).toContain('product_id = $3::uuid')
     })
 
-    it('retourne un warehouse null si pas d\'entrepôt associé', async () => {
-      const movementWithoutWarehouse = [{ ...fakeMovements[0], warehouse_id: null, warehouse_name: null }]
+    it("retourne un warehouse null si pas d'entrepôt associé", async () => {
+      const movementWithoutWarehouse = [
+        { ...fakeMovements[0], warehouse_id: null, warehouse_name: null },
+      ]
 
       mockQueryRawUnsafe
         .mockResolvedValueOnce(movementWithoutWarehouse)

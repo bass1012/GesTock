@@ -72,8 +72,8 @@ export default function ProductsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Inventaire</h1>
-          <p className="text-gray-500 mt-1">Gérez votre catalogue de produits</p>
+          <h1 className="text-2xl font-bold text-zinc-900">Inventaire</h1>
+          <p className="text-zinc-500 mt-1">Gérez votre catalogue de produits</p>
         </div>
         <button onClick={openCreate} className="btn-primary" id="btn-add-product">
           <Plus size={18} />
@@ -85,7 +85,7 @@ export default function ProductsPage() {
       <div className="card p-4">
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+            <Search className="absolute left-3 top-1/2 -tranzinc-y-1/2 text-zinc-400" size={18} />
             <input
               type="text"
               value={search}
@@ -105,40 +105,40 @@ export default function ProductsPage() {
       {/* Table */}
       <div className="card overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full" aria-label="Liste des produits">
             <thead>
-              <tr className="bg-gray-50 border-b border-gray-200">
-                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              <tr className="bg-zinc-50 border-b border-zinc-200">
+                <th className="text-left px-6 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider">
                   Produit
                 </th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <th className="text-left px-6 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider">
                   SKU
                 </th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <th className="text-left px-6 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider">
                   Stock
                 </th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <th className="text-left px-6 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider">
                   Entrepôts
                 </th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <th className="text-left px-6 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider">
                   Expiration
                 </th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <th className="text-left px-6 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider">
                   Prix
                 </th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <th className="text-left px-6 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider">
                   Statut
                 </th>
-                <th className="text-right px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <th className="text-right px-6 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
+            <tbody className="divide-y divide-zinc-200">
               {isLoading ? (
                 <tr>
                   <td colSpan={8} className="px-6 py-12 text-center">
-                    <div className="flex items-center justify-center gap-2 text-gray-400">
+                    <div className="flex items-center justify-center gap-2 text-zinc-400">
                       <svg className="animate-spin size-5" viewBox="0 0 24 24">
                         <circle
                           className="opacity-25"
@@ -163,7 +163,7 @@ export default function ProductsPage() {
                 data.products.map((product) => (
                   <tr
                     key={product.id}
-                    className={`hover:bg-gray-50 transition-colors ${!product.isActive ? 'opacity-60 bg-gray-50/50' : ''}`}
+                    className={`hover:bg-zinc-50 transition-colors ${!product.isActive ? 'opacity-60 bg-zinc-50/50' : ''}`}
                   >
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
@@ -171,12 +171,12 @@ export default function ProductsPage() {
                           <Package size={18} className="text-primary-600" />
                         </div>
                         <div>
-                          <p className="font-medium text-gray-900">{product.name}</p>
-                          <p className="text-xs text-gray-500">{product.unit}</p>
+                          <p className="font-medium text-zinc-900">{product.name}</p>
+                          <p className="text-xs text-zinc-500">{product.unit}</p>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-600 font-mono">{product.sku}</td>
+                    <td className="px-6 py-4 text-sm text-zinc-600 font-mono">{product.sku}</td>
                     <td className="px-6 py-4">
                       <div
                         role="button"
@@ -192,7 +192,7 @@ export default function ProductsPage() {
                           className={`text-sm font-semibold group-hover:underline ${
                             product.currentStock <= product.minStock
                               ? 'text-red-600'
-                              : 'text-gray-900'
+                              : 'text-zinc-900'
                           }`}
                         >
                           {product.currentStock}
@@ -202,7 +202,7 @@ export default function ProductsPage() {
                         )}
                         <Warehouse
                           size={14}
-                          className="inline ml-1.5 text-gray-400 group-hover:text-primary-500 transition-colors"
+                          className="inline ml-1.5 text-zinc-400 group-hover:text-primary-500 transition-colors"
                         />
                       </div>
                     </td>
@@ -222,7 +222,7 @@ export default function ProductsPage() {
                           ))}
                         </div>
                       ) : (
-                        <span className="text-xs text-gray-400">-</span>
+                        <span className="text-xs text-zinc-400">-</span>
                       )}
                     </td>
                     <td className="px-6 py-4">
@@ -232,22 +232,22 @@ export default function ProductsPage() {
                             className={`text-sm font-medium ${
                               isExpiringSoon(product.expiryDate)
                                 ? 'text-amber-600'
-                                : 'text-gray-900'
+                                : 'text-zinc-900'
                             }`}
                           >
                             {formatDate(product.expiryDate)}
                           </span>
                           {product.batchNumber && (
-                            <span className="text-[10px] text-gray-400 font-mono">
+                            <span className="text-[10px] text-zinc-400 font-mono">
                               Lot: {product.batchNumber}
                             </span>
                           )}
                         </div>
                       ) : (
-                        <span className="text-sm text-gray-400">-</span>
+                        <span className="text-sm text-zinc-400">-</span>
                       )}
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-900 font-medium">
+                    <td className="px-6 py-4 text-sm text-zinc-900 font-medium">
                       {product.price.toLocaleString('fr-FR', {
                         style: 'currency',
                         currency: 'XOF',
@@ -264,7 +264,9 @@ export default function ProductsPage() {
                       <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={() => openEdit(product)}
-                          className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-primary-600 transition-colors"
+                          className="p-2 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-primary-600 transition-colors"
+                          title="Modifier"
+                          aria-label={`Modifier le produit ${product.name}`}
                         >
                           <Edit2 size={16} />
                         </button>
@@ -272,23 +274,31 @@ export default function ProductsPage() {
                           onClick={() => handleToggleActive(product)}
                           className={`p-2 rounded-lg transition-colors ${
                             product.isActive
-                              ? 'hover:bg-amber-50 text-gray-400 hover:text-amber-600'
+                              ? 'hover:bg-amber-50 text-zinc-400 hover:text-amber-600'
                               : 'hover:bg-green-50 text-green-600 hover:text-green-700'
                           }`}
                           title={product.isActive ? 'Désactiver le produit' : 'Activer le produit'}
+                          aria-label={
+                            product.isActive
+                              ? `Désactiver le produit ${product.name}`
+                              : `Activer le produit ${product.name}`
+                          }
                         >
                           {product.isActive ? <PowerOff size={16} /> : <Power size={16} />}
                         </button>
                         <button
                           onClick={() => setProductForBarcode(product)}
-                          className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-900 transition-colors"
+                          className="p-2 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-zinc-900 transition-colors"
                           title="Générer Code-barres"
+                          aria-label={`Générer le code-barres pour ${product.name}`}
                         >
                           <Barcode size={16} />
                         </button>
                         <button
                           onClick={() => handleDelete(product)}
-                          className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-red-600 transition-colors"
+                          className="p-2 rounded-lg hover:bg-zinc-100 text-zinc-500 hover:text-red-600 transition-colors"
+                          title="Supprimer"
+                          aria-label={`Supprimer le produit ${product.name}`}
                         >
                           <Trash2 size={16} />
                         </button>
@@ -299,9 +309,9 @@ export default function ProductsPage() {
               ) : (
                 <tr>
                   <td colSpan={8} className="px-6 py-12 text-center">
-                    <Package size={40} className="mx-auto mb-3 text-gray-300" />
-                    <p className="text-gray-500 font-medium">Aucun produit</p>
-                    <p className="text-sm text-gray-400 mt-1">
+                    <Package size={40} className="mx-auto mb-3 text-zinc-300" />
+                    <p className="text-zinc-500 font-medium">Aucun produit</p>
+                    <p className="text-sm text-zinc-400 mt-1">
                       Commencez par ajouter votre premier produit
                     </p>
                     <button onClick={openCreate} className="btn-primary mt-4">
@@ -317,8 +327,8 @@ export default function ProductsPage() {
 
         {/* Pagination */}
         {data && data.total > 20 && (
-          <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200">
-            <p className="text-sm text-gray-500">
+          <div className="flex items-center justify-between px-6 py-4 border-t border-zinc-200">
+            <p className="text-sm text-zinc-500">
               {(page - 1) * 20 + 1}–{Math.min(page * 20, data.total)} sur {data.total} produits
             </p>
             <div className="flex gap-2">

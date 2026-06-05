@@ -3,12 +3,12 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 async function sync() {
-    const tenants = await prisma.tenant.findMany()
-    for (const tenant of tenants) {
-        const schemaName = `tenant_${tenant.slug}`
-        console.log(`Syncing schema: ${schemaName}`)
-        
-        await prisma.$executeRawUnsafe(`
+  const tenants = await prisma.tenant.findMany()
+  for (const tenant of tenants) {
+    const schemaName = `tenant_${tenant.slug}`
+    console.log(`Syncing schema: ${schemaName}`)
+
+    await prisma.$executeRawUnsafe(`
       CREATE TABLE IF NOT EXISTS "${schemaName}".clients (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         name VARCHAR NOT NULL,
@@ -20,7 +20,7 @@ async function sync() {
       )
     `)
 
-        await prisma.$executeRawUnsafe(`
+    await prisma.$executeRawUnsafe(`
       CREATE TABLE IF NOT EXISTS "${schemaName}".sales (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         client_id UUID REFERENCES "${schemaName}".clients(id),
@@ -34,7 +34,7 @@ async function sync() {
       )
     `)
 
-        await prisma.$executeRawUnsafe(`
+    await prisma.$executeRawUnsafe(`
       CREATE TABLE IF NOT EXISTS "${schemaName}".sale_items (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         sale_id UUID NOT NULL REFERENCES "${schemaName}".sales(id) ON DELETE CASCADE,
@@ -43,12 +43,12 @@ async function sync() {
         unit_price DOUBLE PRECISION NOT NULL
       )
     `)
-    }
-    console.log('Schemas synced successfully!')
-    process.exit(0)
+  }
+  console.log('Schemas synced successfully!')
+  process.exit(0)
 }
 
-sync().catch(e => {
-    console.error(e)
-    process.exit(1)
+sync().catch((e) => {
+  console.error(e)
+  process.exit(1)
 })

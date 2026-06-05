@@ -1,25 +1,29 @@
+import 'dotenv/config'
 import { PrismaClient } from '@prisma/client'
+import { tenantService } from '../services/tenant.service'
+
 const prisma = new PrismaClient()
 
 async function migrate() {
-    const tenants = await (prisma as any).$queryRawUnsafe(`
-        SELECT schema_name FROM information_schema.schemata WHERE schema_name LIKE 'tenant_%'
-    `)
+  const tenants = await prisma.tenant.findMany()
+  console.log(`Migrating ${tenants.length} tenant schema(s)...`)
 
-    for (const t of tenants as any[]) {
-        const schema = t.schema_name
-        console.log(`Migrating schema: ${schema}`)
-        try {
-            await prisma.$executeRawUnsafe(`
-                ALTER TABLE "${schema}".products ADD COLUMN IF NOT EXISTS is_deleted BOOLEAN DEFAULT false
-            `)
-            console.log(`Successfully migrated ${schema}`)
-        } catch (error) {
-            console.error(`Failed to migrate ${schema}:`, error)
-        }
+  for (const tenant of tenants) {
+    const schema = `tenant_${tenant.slug}`
+    console.log(`  → ${schema}`)
+    try {
+      await tenantService.createTenantSchema(tenant.slug)
+      console.log(`    ✓ schema synchronized`)
+    } catch (error) {
+      console.error(`    ✗ failed to sync ${schema}:`, error)
     }
-    await prisma.$disconnect()
-    process.exit(0)
+  }
+
+  await prisma.$disconnect()
+  process.exit(0)
 }
 
-migrate()
+migrate().catch((err) => {
+  console.error('Migration failed:', err)
+  process.exit(1)
+})

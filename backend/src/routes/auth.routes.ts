@@ -165,4 +165,115 @@ router.get('/me', authMiddleware, authController.me)
  */
 router.post('/change-password-mandatory', authMiddleware, authController.changePasswordMandatory)
 
+/**
+ * @swagger
+ * /auth/2fa/enable:
+ *   post:
+ *     tags: [Auth]
+ *     summary: Enable 2FA
+ *     responses:
+ *       200:
+ *         description: Secret and backup codes generated
+ *       401:
+ *         description: Unauthorized
+ */
+router.post('/2fa/enable', authMiddleware, authController.enable2FA)
+
+/**
+ * @swagger
+ * /auth/2fa/verify:
+ *   post:
+ *     tags: [Auth]
+ *     summary: Verify 2FA code
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [code]
+ *             properties:
+ *               code: { type: string }
+ *     responses:
+ *       200:
+ *         description: Code valid
+ *       401:
+ *         description: Invalid code or 2FA not enabled
+ */
+router.post('/2fa/verify', authMiddleware, authController.verify2FA)
+
+/**
+ * @swagger
+ * /auth/2fa/disable:
+ *   post:
+ *     tags: [Auth]
+ *     summary: Disable 2FA
+ *     responses:
+ *       200:
+ *         description: 2FA disabled
+ *       401:
+ *         description: Unauthorized
+ */
+router.post('/2fa/disable', authMiddleware, authController.disable2FA)
+
+/**
+ * @swagger
+ * /auth/2fa/backup-codes:
+ *   post:
+ *     tags: [Auth]
+ *     summary: Regenerate backup codes
+ *     responses:
+ *       200:
+ *         description: New backup codes generated
+ *       401:
+ *         description: Unauthorized
+ */
+router.post('/2fa/backup-codes', authMiddleware, authController.regenerateBackupCodes)
+
+/**
+ * @swagger
+ * /auth/verify-email:
+ *   post:
+ *     tags: [Auth]
+ *     summary: Verify email address
+ *     security: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [token]
+ *             properties:
+ *               token: { type: string }
+ *     responses:
+ *       200:
+ *         description: Email verified successfully
+ *       400:
+ *         description: Invalid or expired token
+ */
+router.post('/verify-email', authController.verifyEmail)
+
+/**
+ * @swagger
+ * /auth/resend-verification-email:
+ *   post:
+ *     tags: [Auth]
+ *     summary: Resend verification email
+ *     security: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email]
+ *             properties:
+ *               email: { type: string, format: email }
+ *     responses:
+ *       200:
+ *         description: Verification email sent
+ */
+router.post('/resend-verification-email', authController.resendVerificationEmail)
+
 export default router

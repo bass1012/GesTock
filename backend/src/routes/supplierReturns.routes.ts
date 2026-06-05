@@ -13,11 +13,15 @@ const returnSchema = z.object({
   supplierId: z.string().uuid(),
   warehouseId: z.string().uuid().optional(),
   reason: z.string().optional(),
-  items: z.array(z.object({
-    productId: z.string().uuid(),
-    quantity: z.number().int().positive(),
-    unitPrice: z.number().nonnegative().optional(),
-  })).min(1, 'Au moins un article requis'),
+  items: z
+    .array(
+      z.object({
+        productId: z.string().uuid(),
+        quantity: z.number().int().positive(),
+        unitPrice: z.number().nonnegative().optional(),
+      }),
+    )
+    .min(1, 'Au moins un article requis'),
 })
 
 /**

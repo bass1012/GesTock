@@ -65,8 +65,8 @@ const ACTION_META: Record<string, { label: string; color: string; bg: string; ic
   },
   USER_LOGOUT: {
     label: 'Déconnexion',
-    color: 'text-slate-400',
-    bg: 'bg-slate-500/10 border-slate-500/20',
+    color: 'text-zinc-400',
+    bg: 'bg-zinc-500/10 border-zinc-500/20',
     icon: LogIn,
   },
   USER_REGISTER: {
@@ -287,8 +287,8 @@ const ACTION_META: Record<string, { label: string; color: string; bg: string; ic
   },
   AUDIT_LOG_VIEWED: {
     label: 'Audit consulté',
-    color: 'text-gray-400',
-    bg: 'bg-gray-500/10 border-gray-500/20',
+    color: 'text-zinc-400',
+    bg: 'bg-zinc-500/10 border-zinc-500/20',
     icon: Activity,
   },
 }
@@ -299,8 +299,8 @@ function getActionMeta(action: string) {
   return (
     ACTION_META[action] ?? {
       label: action,
-      color: 'text-gray-400',
-      bg: 'bg-gray-500/10 border-gray-500/20',
+      color: 'text-zinc-400',
+      bg: 'bg-zinc-500/10 border-zinc-500/20',
       icon: Activity,
     }
   )
@@ -458,7 +458,7 @@ export default function AuditLogPage({ secret }: { secret: string | null }) {
           <KpiCard
             label="Total Logs"
             value={stats.summary.totalLogs}
-            icon={<Clock className="text-gray-400" />}
+            icon={<Clock className="text-zinc-400" />}
             color="gray"
           />
         </div>
@@ -466,8 +466,8 @@ export default function AuditLogPage({ secret }: { secret: string | null }) {
 
       {/* ── Barre Catégories ── */}
       {stats && (
-        <div className="bg-gray-900/40 border border-gray-800 rounded-2xl p-4">
-          <p className="text-[10px] text-gray-500 uppercase font-black tracking-widest mb-3 flex items-center gap-2">
+        <div className="bg-zinc-900/40 border border-zinc-800 rounded-2xl p-4">
+          <p className="text-[10px] text-zinc-500 uppercase font-black tracking-widest mb-3 flex items-center gap-2">
             <Filter size={11} /> Répartition par catégorie : 7 derniers jours
           </p>
           <div className="flex flex-wrap gap-2">
@@ -480,7 +480,7 @@ export default function AuditLogPage({ secret }: { secret: string | null }) {
                                 ${cat.color === 'red' ? 'bg-red-500/10 border-red-500/20 text-red-400' : ''}
                                 ${cat.color === 'orange' ? 'bg-orange-500/10 border-orange-500/20 text-orange-400' : ''}
                                 ${cat.color === 'green' ? 'bg-green-500/10 border-green-500/20 text-green-400' : ''}
-                                ${cat.color === 'gray' ? 'bg-gray-500/10 border-gray-700 text-gray-400' : ''}
+                                ${cat.color === 'gray' ? 'bg-zinc-500/10 border-zinc-700 text-zinc-400' : ''}
                             `}
               >
                 <span className="font-black">{cat.count}</span>
@@ -492,17 +492,17 @@ export default function AuditLogPage({ secret }: { secret: string | null }) {
       )}
 
       {/* ── Filtres + Actions ── */}
-      <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-5 space-y-4">
+      <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-5 space-y-4">
         <div className="flex flex-wrap gap-3 items-center justify-between">
           {/* Recherche libre */}
           <div className="relative flex-1 min-w-[220px]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={15} />
+            <Search className="absolute left-3 top-1/2 -tranzinc-y-1/2 text-zinc-500" size={15} />
             <input
               type="text"
               placeholder="Rechercher email, tenant, action…"
               value={filterSearch}
               onChange={(e) => setFilterSearch(e.target.value)}
-              className="w-full bg-gray-800 border border-gray-700 rounded-xl py-2.5 pl-9 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/40"
+              className="w-full bg-zinc-800 border border-zinc-700 rounded-xl py-2.5 pl-9 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/40"
             />
           </div>
 
@@ -511,7 +511,7 @@ export default function AuditLogPage({ secret }: { secret: string | null }) {
             <button
               onClick={() => setShowFilters((v) => !v)}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-xs font-bold transition-all
-                                ${showFilters ? 'bg-primary-500 border-primary-400 text-white' : 'bg-gray-800 border-gray-700 text-gray-400 hover:text-white'}`}
+                                ${showFilters ? 'bg-primary-500 border-primary-400 text-white' : 'bg-zinc-800 border-zinc-700 text-zinc-400 hover:text-white'}`}
             >
               <Filter size={14} /> Filtres
               {(filterTenant || filterAction || filterPeriod !== '7d') && (
@@ -520,7 +520,7 @@ export default function AuditLogPage({ secret }: { secret: string | null }) {
             </button>
             <button
               onClick={() => fetchLogs(1)}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-700 bg-gray-800 text-gray-400 hover:text-white text-xs font-bold transition-all"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-zinc-700 bg-zinc-800 text-zinc-400 hover:text-white text-xs font-bold transition-all"
             >
               <RefreshCcw size={14} /> Actualiser
             </button>
@@ -535,12 +535,12 @@ export default function AuditLogPage({ secret }: { secret: string | null }) {
 
         {/* Panneau filtres avancés */}
         {showFilters && (
-          <div className="pt-3 border-t border-gray-800 grid grid-cols-1 md:grid-cols-3 gap-3 animate-in duration-200">
+          <div className="pt-3 border-t border-zinc-800 grid grid-cols-1 md:grid-cols-3 gap-3 animate-in duration-200">
             {/* Tenant */}
             <div>
               <label
                 htmlFor="audit-tenant"
-                className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1 block"
+                className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1 block"
               >
                 Tenant
               </label>
@@ -548,7 +548,7 @@ export default function AuditLogPage({ secret }: { secret: string | null }) {
                 id="audit-tenant"
                 value={filterTenant}
                 onChange={(e) => setFilterTenant(e.target.value)}
-                className="w-full bg-gray-800 border border-gray-700 rounded-xl py-2.5 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/40"
+                className="w-full bg-zinc-800 border border-zinc-700 rounded-xl py-2.5 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/40"
               >
                 <option value="">Tous les tenants</option>
                 {tenants.map((t) => (
@@ -563,7 +563,7 @@ export default function AuditLogPage({ secret }: { secret: string | null }) {
             <div>
               <label
                 htmlFor="audit-action"
-                className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1 block"
+                className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1 block"
               >
                 Type d'action
               </label>
@@ -571,7 +571,7 @@ export default function AuditLogPage({ secret }: { secret: string | null }) {
                 id="audit-action"
                 value={filterAction}
                 onChange={(e) => setFilterAction(e.target.value)}
-                className="w-full bg-gray-800 border border-gray-700 rounded-xl py-2.5 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/40"
+                className="w-full bg-zinc-800 border border-zinc-700 rounded-xl py-2.5 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/40"
               >
                 <option value="">Toutes les actions</option>
                 {ALL_ACTIONS.map((a) => (
@@ -584,7 +584,7 @@ export default function AuditLogPage({ secret }: { secret: string | null }) {
 
             {/* Période */}
             <div>
-              <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1 block">
+              <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1 block">
                 Période
               </p>
               <div className="flex gap-1">
@@ -601,7 +601,7 @@ export default function AuditLogPage({ secret }: { secret: string | null }) {
                                             ${
                                               filterPeriod === v
                                                 ? 'bg-primary-500 border-primary-400 text-white'
-                                                : 'bg-gray-800 border-gray-700 text-gray-400 hover:text-white'
+                                                : 'bg-zinc-800 border-zinc-700 text-zinc-400 hover:text-white'
                                             }`}
                   >
                     {l}
@@ -614,7 +614,7 @@ export default function AuditLogPage({ secret }: { secret: string | null }) {
             <div className="md:col-span-3 flex justify-end">
               <button
                 onClick={resetFilters}
-                className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-white transition-colors"
+                className="flex items-center gap-1.5 text-xs text-zinc-500 hover:text-white transition-colors"
               >
                 <X size={12} /> Réinitialiser les filtres
               </button>
@@ -626,24 +626,24 @@ export default function AuditLogPage({ secret }: { secret: string | null }) {
       {/* ── Timeline ── */}
       <div className="space-y-2">
         <div className="flex items-center justify-between mb-4">
-          <p className="text-xs font-black text-gray-500 uppercase tracking-widest flex items-center gap-2">
+          <p className="text-xs font-black text-zinc-500 uppercase tracking-widest flex items-center gap-2">
             <Activity size={12} />
             {total} événement(s) : Page {page}/{totalPages}
           </p>
         </div>
 
         {isLoading ? (
-          <div className="py-16 text-center text-xs font-mono text-gray-600 animate-pulse">
+          <div className="py-16 text-center text-xs font-mono text-zinc-600 animate-pulse">
             CHARGEMENT DES LOGS D'AUDIT…
           </div>
         ) : displayedLogs.length === 0 ? (
-          <div className="py-16 text-center text-gray-600 text-sm border border-gray-800 rounded-2xl">
+          <div className="py-16 text-center text-zinc-600 text-sm border border-zinc-800 rounded-2xl">
             Aucun événement trouvé pour ces filtres
           </div>
         ) : (
           <div className="relative">
             {/* Ligne verticale */}
-            <div className="absolute left-6 top-0 bottom-0 w-px bg-gray-800" />
+            <div className="absolute left-6 top-0 bottom-0 w-px bg-zinc-800" />
 
             <div className="space-y-1">
               {displayedLogs.map((log) => {
@@ -660,17 +660,17 @@ export default function AuditLogPage({ secret }: { secret: string | null }) {
 
                     {/* Contenu */}
                     <div
-                      className={`flex-1 bg-gray-900/40 border rounded-2xl px-5 py-3.5 transition-all group-hover:border-gray-700 ${meta.bg.includes('red') ? 'border-red-500/10' : 'border-gray-800'}`}
+                      className={`flex-1 bg-zinc-900/40 border rounded-2xl px-5 py-3.5 transition-all group-hover:border-zinc-700 ${meta.bg.includes('red') ? 'border-red-500/10' : 'border-zinc-800'}`}
                     >
                       <div className="flex flex-wrap items-center gap-3 mb-1">
                         <span className={`text-xs font-black ${meta.color}`}>{meta.label}</span>
                         {log.tenant && (
-                          <span className="text-[10px] font-mono text-gray-500 bg-gray-800 px-2 py-0.5 rounded">
+                          <span className="text-[10px] font-mono text-zinc-500 bg-zinc-800 px-2 py-0.5 rounded">
                             {log.tenant.name}
                           </span>
                         )}
                         {log.user && (
-                          <span className="text-[10px] text-gray-500">
+                          <span className="text-[10px] text-zinc-500">
                             {log.user.firstName} {log.user.lastName} ({log.user.email})
                           </span>
                         )}
@@ -680,7 +680,7 @@ export default function AuditLogPage({ secret }: { secret: string | null }) {
                           </span>
                         )}
                       </div>
-                      <div className="flex flex-wrap gap-4 text-[10px] text-gray-600 font-mono">
+                      <div className="flex flex-wrap gap-4 text-[10px] text-zinc-600 font-mono">
                         <span>{formatAuditDate(log.createdAt)}</span>
                         {log.ip && <span>IP: {log.ip}</span>}
                         {log.resource && (
@@ -690,7 +690,7 @@ export default function AuditLogPage({ secret }: { secret: string | null }) {
                           </span>
                         )}
                         {log.metadata && Object.keys(log.metadata).length > 0 && (
-                          <span className="text-gray-700">
+                          <span className="text-zinc-700">
                             {JSON.stringify(log.metadata).slice(0, 80)}
                             {JSON.stringify(log.metadata).length > 80 ? '…' : ''}
                           </span>
@@ -710,17 +710,17 @@ export default function AuditLogPage({ secret }: { secret: string | null }) {
             <button
               onClick={() => fetchLogs(page - 1)}
               disabled={page <= 1}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-gray-700 bg-gray-800 text-gray-400 hover:text-white disabled:opacity-30 text-xs font-bold transition-all"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-zinc-700 bg-zinc-800 text-zinc-400 hover:text-white disabled:opacity-30 text-xs font-bold transition-all"
             >
               <ChevronLeft size={14} /> Précédent
             </button>
-            <span className="text-xs font-mono text-gray-500">
+            <span className="text-xs font-mono text-zinc-500">
               Page {page} / {totalPages}
             </span>
             <button
               onClick={() => fetchLogs(page + 1)}
               disabled={page >= totalPages}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-gray-700 bg-gray-800 text-gray-400 hover:text-white disabled:opacity-30 text-xs font-bold transition-all"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-zinc-700 bg-zinc-800 text-zinc-400 hover:text-white disabled:opacity-30 text-xs font-bold transition-all"
             >
               Suivant <ChevronRight size={14} />
             </button>
@@ -748,12 +748,12 @@ function KpiCard({
     blue: 'bg-blue-500/10 border-blue-500/20',
     red: 'bg-red-500/10 border-red-500/20',
     amber: 'bg-amber-500/10 border-amber-500/20',
-    gray: 'bg-gray-500/10 border-gray-700',
+    gray: 'bg-zinc-500/10 border-zinc-700',
   }
   return (
     <div className={`rounded-2xl border p-4 ${colorMap[color] ?? colorMap.gray}`}>
       <div className="flex items-center gap-2 mb-2">{icon}</div>
-      <p className="text-[10px] text-gray-500 uppercase font-black tracking-widest">{label}</p>
+      <p className="text-[10px] text-zinc-500 uppercase font-black tracking-widest">{label}</p>
       <h4 className="text-2xl font-black text-white mt-0.5">{value.toLocaleString('fr-FR')}</h4>
     </div>
   )

@@ -51,8 +51,8 @@ export default function ConfirmModal({
           <AlertTriangle className={theme.text} size={24} />
         </div>
         <div>
-          <h3 className="text-xl font-bold text-gray-900">{title}</h3>
-          <p className="text-gray-500 leading-relaxed mt-1">{message}</p>
+          <h3 className="text-xl font-bold text-zinc-900">{title}</h3>
+          <p className="text-zinc-500 leading-relaxed mt-1">{message}</p>
         </div>
       </div>
       <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 mt-6">

@@ -30,3 +30,5 @@ backend/prisma/*.db
 # Docker volumes
 postgres_data/
 redis_data/
+backend/coverage/
+frontend/coverage/

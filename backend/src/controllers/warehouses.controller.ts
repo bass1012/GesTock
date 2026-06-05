@@ -1,12 +1,7 @@
 import { Request, Response, NextFunction } from 'express'
 import { warehouseService } from '../services/warehouse.service'
 import { auditService } from '../services/audit.service'
-import { z } from 'zod'
-
-const warehouseSchema = z.object({
-  name: z.string().min(1, 'Nom requis'),
-  address: z.string().optional(),
-})
+import { warehouseSchema, warehouseUpdateSchema } from '../utils/validators'
 
 export const warehouseController = {
   async list(req: Request, res: Response, next: NextFunction) {
@@ -41,7 +36,7 @@ export const warehouseController = {
         resourceId: warehouse.id,
         metadata: { name: warehouse.name },
         ip: req.ip,
-        userAgent: req.headers['user-agent']
+        userAgent: req.headers['user-agent'],
       })
 
       res.status(201).json(warehouse)
@@ -52,7 +47,7 @@ export const warehouseController = {
 
   async update(req: Request, res: Response, next: NextFunction) {
     try {
-      const data = warehouseSchema.partial().parse(req.body)
+      const data = warehouseUpdateSchema.parse(req.body)
       const warehouse = await warehouseService.updateWarehouse(req.params.id, data, req.tenantSlug!)
 
       // Audit log warehouse update
@@ -64,7 +59,7 @@ export const warehouseController = {
         resourceId: warehouse.id,
         metadata: { name: warehouse.name },
         ip: req.ip,
-        userAgent: req.headers['user-agent']
+        userAgent: req.headers['user-agent'],
       })
 
       res.json(warehouse)
@@ -86,7 +81,7 @@ export const warehouseController = {
         resource: 'warehouse',
         resourceId: warehouseId,
         ip: req.ip,
-        userAgent: req.headers['user-agent']
+        userAgent: req.headers['user-agent'],
       })
 
       res.json({ message: 'Entrepôt supprimé' })
@@ -102,5 +97,5 @@ export const warehouseController = {
     } catch (error) {
       next(error)
     }
-  }
+  },
 }

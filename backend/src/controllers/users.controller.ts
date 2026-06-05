@@ -1,19 +1,7 @@
 import { Request, Response, NextFunction } from 'express'
 import { userService } from '../services/user.service'
 import { auditService } from '../services/audit.service'
-import { z } from 'zod'
-
-const inviteSchema = z.object({
-  email: z.string().email('Email invalide'),
-  firstName: z.string().min(1, 'Prénom requis'),
-  lastName: z.string().min(1, 'Nom requis'),
-  role: z.enum(['admin', 'manager', 'lecteur']),
-  password: z.string().min(8, 'Mot de passe minimum 8 caractères'),
-})
-
-const roleSchema = z.object({
-  role: z.enum(['admin', 'manager', 'lecteur']),
-})
+import { userInviteSchema, userRoleSchema } from '../utils/validators'
 
 export const usersController = {
   async list(req: Request, res: Response, next: NextFunction) {
@@ -27,7 +15,7 @@ export const usersController = {
 
   async invite(req: Request, res: Response, next: NextFunction) {
     try {
-      const data = inviteSchema.parse(req.body)
+      const data = userInviteSchema.parse(req.body)
       const user = await userService.inviteUser(data, req.tenantId!, req.userRole!)
 
       // Audit log user creation
@@ -39,7 +27,7 @@ export const usersController = {
         resourceId: user.id,
         metadata: { email: user.email, role: user.role, invitedBy: req.userId },
         ip: req.ip,
-        userAgent: req.headers['user-agent']
+        userAgent: req.headers['user-agent'],
       })
 
       res.status(201).json(user)
@@ -50,14 +38,14 @@ export const usersController = {
 
   async updateRole(req: Request, res: Response, next: NextFunction) {
     try {
-      const { role } = roleSchema.parse(req.body)
+      const { role } = userRoleSchema.parse(req.body)
       const targetUserId = req.params.id
       const user = await userService.updateUserRole(
         targetUserId,
         role,
         req.tenantId!,
         req.userId!,
-        req.userRole!
+        req.userRole!,
       )
 
       // Audit log role change
@@ -69,7 +57,7 @@ export const usersController = {
         resourceId: targetUserId,
         metadata: { newRole: role, changedBy: req.userId },
         ip: req.ip,
-        userAgent: req.headers['user-agent']
+        userAgent: req.headers['user-agent'],
       })
 
       res.json(user)
@@ -92,7 +80,7 @@ export const usersController = {
         resourceId: targetUserId,
         metadata: { deletedBy: req.userId },
         ip: req.ip,
-        userAgent: req.headers['user-agent']
+        userAgent: req.headers['user-agent'],
       })
 
       res.json({ message: 'Utilisateur supprimé du tenant' })

@@ -22,6 +22,7 @@ import {
   type InviteUserPayload,
 } from '../../hooks/useUsers'
 import { useAuthStore } from '../../store/authStore'
+import ConfirmModal from '../../components/ConfirmModal'
 
 // ─── Constantes rôles ────────────────────────────────────────────────────────
 const ROLES: {
@@ -46,7 +47,7 @@ const ROLES: {
     value: 'lecteur',
     label: 'Lecteur',
     icon: Eye,
-    color: 'text-gray-600 bg-gray-50 border-gray-200',
+    color: 'text-zinc-600 bg-zinc-50 border-zinc-200',
   },
 ]
 
@@ -137,16 +138,18 @@ function InviteModal({ onClose }: { onClose: () => void }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-gray-100">
+        <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-zinc-100">
           <div className="flex items-center gap-3">
             <div className="size-9 rounded-xl bg-blue-50 flex items-center justify-center">
               <UserPlus size={18} className="text-blue-600" />
             </div>
-            <h2 className="text-base font-semibold text-gray-900">Inviter un utilisateur</h2>
+            <h2 className="text-base font-semibold text-zinc-900">Inviter un utilisateur</h2>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+            className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 transition-colors"
+            title="Fermer"
+            aria-label="Fermer la modal"
           >
             <X size={18} />
           </button>
@@ -158,14 +161,14 @@ function InviteModal({ onClose }: { onClose: () => void }) {
             <div>
               <label
                 htmlFor="user-first-name"
-                className="block text-xs font-medium text-gray-700 mb-1"
+                className="block text-xs font-medium text-zinc-700 mb-1"
               >
                 Prénom
               </label>
               <div className="relative">
                 <User
                   size={14}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                  className="absolute left-3 top-1/2 -tranzinc-y-1/2 text-zinc-400"
                 />
                 <input
                   id="user-first-name"
@@ -181,7 +184,7 @@ function InviteModal({ onClose }: { onClose: () => void }) {
             <div>
               <label
                 htmlFor="user-last-name"
-                className="block text-xs font-medium text-gray-700 mb-1"
+                className="block text-xs font-medium text-zinc-700 mb-1"
               >
                 Nom
               </label>
@@ -198,11 +201,11 @@ function InviteModal({ onClose }: { onClose: () => void }) {
           </div>
 
           <div>
-            <label htmlFor="user-email" className="block text-xs font-medium text-gray-700 mb-1">
+            <label htmlFor="user-email" className="block text-xs font-medium text-zinc-700 mb-1">
               Email
             </label>
             <div className="relative">
-              <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <Mail size={14} className="absolute left-3 top-1/2 -tranzinc-y-1/2 text-zinc-400" />
               <input
                 id="user-email"
                 type="email"
@@ -216,7 +219,7 @@ function InviteModal({ onClose }: { onClose: () => void }) {
           </div>
 
           <div>
-            <label htmlFor="user-role" className="block text-xs font-medium text-gray-700 mb-1">
+            <label htmlFor="user-role" className="block text-xs font-medium text-zinc-700 mb-1">
               Rôle
             </label>
             <select
@@ -231,7 +234,7 @@ function InviteModal({ onClose }: { onClose: () => void }) {
                 </option>
               ))}
             </select>
-            <p className="text-xs text-gray-400 mt-1">
+            <p className="text-xs text-zinc-400 mt-1">
               {form.role === 'admin' &&
                 'Accès total à toutes les fonctionnalités et à la gestion des utilisateurs.'}
               {form.role === 'manager' &&
@@ -242,11 +245,11 @@ function InviteModal({ onClose }: { onClose: () => void }) {
           </div>
 
           <div>
-            <label htmlFor="user-password" className="block text-xs font-medium text-gray-700 mb-1">
+            <label htmlFor="user-password" className="block text-xs font-medium text-zinc-700 mb-1">
               Mot de passe temporaire
             </label>
             <div className="relative">
-              <Lock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <Lock size={14} className="absolute left-3 top-1/2 -tranzinc-y-1/2 text-zinc-400" />
               <input
                 id="user-password"
                 type="text"
@@ -258,7 +261,7 @@ function InviteModal({ onClose }: { onClose: () => void }) {
                 className="input w-full pl-8 text-sm font-mono"
               />
             </div>
-            <p className="text-xs text-gray-400 mt-1">
+            <p className="text-xs text-zinc-400 mt-1">
               L'utilisateur le recevra par email et devra le changer.
             </p>
           </div>
@@ -293,16 +296,23 @@ function InviteModal({ onClose }: { onClose: () => void }) {
 export default function UsersPage() {
   const [showInvite, setShowInvite] = useState(false)
   const [removing, setRemoving] = useState<string | null>(null)
+  const [userToRemove, setUserToRemove] = useState<TenantUser | null>(null)
   const { user: me } = useAuthStore()
   const isAdmin = me?.role === 'admin'
 
   const { data: users = [], isLoading } = useUsers()
   const removeUser = useRemoveUser()
 
-  const handleRemove = async (u: TenantUser) => {
-    if (!confirm(`Révoquer l'accès de ${u.firstName} ${u.lastName} ?`)) return
-    setRemoving(u.id)
-    await removeUser.mutateAsync(u.id).finally(() => setRemoving(null))
+  const handleRemove = (u: TenantUser) => {
+    setUserToRemove(u)
+  }
+
+  const confirmRemove = async () => {
+    if (!userToRemove) return
+    const userId = userToRemove.id
+    setUserToRemove(null)
+    setRemoving(userId)
+    await removeUser.mutateAsync(userId).finally(() => setRemoving(null))
   }
 
   const formatDate = (dateStr: string) => {
@@ -319,8 +329,8 @@ export default function UsersPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Utilisateurs</h1>
-            <p className="text-gray-500 mt-1">
+            <h1 className="text-2xl font-bold text-zinc-900">Utilisateurs</h1>
+            <p className="text-zinc-500 mt-1">
               {users.length} membre{users.length > 1 ? 's' : ''} dans votre espace
             </p>
           </div>
@@ -348,8 +358,8 @@ export default function UsersPage() {
                   <Icon size={18} />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-gray-900">{count}</p>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-2xl font-bold text-zinc-900">{count}</p>
+                  <p className="text-sm text-zinc-500">
                     {r.label}
                     {count > 1 ? 's' : ''}
                   </p>
@@ -363,54 +373,54 @@ export default function UsersPage() {
         <div className="card">
           {isLoading ? (
             <div className="flex items-center justify-center py-16">
-              <Loader2 className="animate-spin text-gray-400" size={28} />
+              <Loader2 className="animate-spin text-zinc-400" size={28} />
             </div>
           ) : users.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-gray-400">
+            <div className="flex flex-col items-center justify-center py-16 text-zinc-400">
               <Users size={40} className="mb-3 opacity-30" />
               <p className="text-sm">Aucun utilisateur</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50 border-b border-gray-100">
+              <table className="w-full" aria-label="Liste des utilisateurs">
+                <thead className="bg-zinc-50 border-b border-zinc-100">
                   <tr>
-                    <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-6 py-3">
+                    <th className="text-left text-xs font-medium text-zinc-500 uppercase tracking-wider px-6 py-3">
                       Utilisateur
                     </th>
-                    <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-6 py-3">
+                    <th className="text-left text-xs font-medium text-zinc-500 uppercase tracking-wider px-6 py-3">
                       Email
                     </th>
-                    <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-6 py-3">
+                    <th className="text-left text-xs font-medium text-zinc-500 uppercase tracking-wider px-6 py-3">
                       Rôle
                     </th>
-                    <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-6 py-3">
+                    <th className="text-left text-xs font-medium text-zinc-500 uppercase tracking-wider px-6 py-3">
                       Membre depuis
                     </th>
                     {isAdmin && (
-                      <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-6 py-3">
+                      <th className="text-left text-xs font-medium text-zinc-500 uppercase tracking-wider px-6 py-3">
                         Actions
                       </th>
                     )}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50">
+                <tbody className="divide-y divide-zinc-50">
                   {users.map((u) => {
                     const isMe = u.id === me?.id
                     return (
-                      <tr key={u.id} className="hover:bg-gray-50 transition-colors">
+                      <tr key={u.id} className="hover:bg-zinc-50 transition-colors">
                         {/* Avatar + nom */}
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
-                            <div className="size-9 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-sm font-semibold shrink-0">
+                            <div className="size-9 rounded-full bg-gradient-to-br from-blue-500 to-primary-600 flex items-center justify-center text-white text-sm font-semibold shrink-0">
                               {u.firstName.charAt(0)}
                               {u.lastName.charAt(0)}
                             </div>
                             <div>
-                              <p className="font-medium text-gray-900 text-sm">
+                              <p className="font-medium text-zinc-900 text-sm">
                                 {u.firstName} {u.lastName}
                                 {isMe && (
-                                  <span className="ml-2 text-xs text-gray-400 font-normal">
+                                  <span className="ml-2 text-xs text-zinc-400 font-normal">
                                     (vous)
                                   </span>
                                 )}
@@ -420,7 +430,7 @@ export default function UsersPage() {
                         </td>
 
                         {/* Email */}
-                        <td className="px-6 py-4 text-sm text-gray-600">{u.email}</td>
+                        <td className="px-6 py-4 text-sm text-zinc-600">{u.email}</td>
 
                         {/* Rôle */}
                         <td className="px-6 py-4">
@@ -432,7 +442,7 @@ export default function UsersPage() {
                         </td>
 
                         {/* Date */}
-                        <td className="px-6 py-4 text-sm text-gray-500">
+                        <td className="px-6 py-4 text-sm text-zinc-500">
                           {formatDate(u.createdAt)}
                         </td>
 
@@ -443,8 +453,9 @@ export default function UsersPage() {
                               <button
                                 onClick={() => handleRemove(u)}
                                 disabled={removing === u.id}
-                                className="p-2 rounded-lg text-gray-500 hover:text-red-600 hover:bg-gray-100 transition-colors disabled:opacity-50"
+                                className="p-2 rounded-lg text-zinc-500 hover:text-red-600 hover:bg-zinc-100 transition-colors disabled:opacity-50"
                                 title="Révoquer l'accès"
+                                aria-label={`Révoquer l'accès de ${u.firstName} ${u.lastName}`}
                               >
                                 {removing === u.id ? (
                                   <Loader2 size={16} className="animate-spin" />
@@ -473,6 +484,14 @@ export default function UsersPage() {
       </div>
 
       {showInvite && <InviteModal onClose={() => setShowInvite(false)} />}
+      <ConfirmModal
+        isOpen={!!userToRemove}
+        onClose={() => setUserToRemove(null)}
+        onConfirm={confirmRemove}
+        title="Révoquer l'accès"
+        message={`Voulez-vous vraiment révoquer l'accès de ${userToRemove?.firstName} ${userToRemove?.lastName} ? Cette action est irréversible.`}
+        confirmText="Révoquer"
+      />
     </>
   )
 }

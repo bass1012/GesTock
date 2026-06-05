@@ -228,9 +228,9 @@ export default function SuperAdminDashboard() {
   }).length
 
   return (
-    <div className="min-h-screen bg-[#0B0F1A] text-gray-300 font-sans pb-20">
+    <div className="min-h-screen bg-[#0B0F1A] text-zinc-300 font-sans pb-20">
       {/* Header */}
-      <header className="bg-gray-900/80 backdrop-blur-xl border-b border-gray-800 px-8 py-4 flex justify-between items-center sticky top-0 z-50 shadow-2xl">
+      <header className="bg-zinc-900/80 backdrop-blur-xl border-b border-zinc-800 px-8 py-4 flex justify-between items-center sticky top-0 z-50 shadow-2xl">
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-4">
             <div className="bg-primary-600/20 p-2 rounded-xl border border-primary-500/30">
@@ -240,17 +240,17 @@ export default function SuperAdminDashboard() {
               <h1 className="text-xl font-black text-white tracking-tighter uppercase italic">
                 Radar Admin <span className="text-primary-500">v2.0</span>
               </h1>
-              <p className="text-[10px] text-gray-500 font-mono">GESTOCK - QUARTIER GÉNÉRAL</p>
+              <p className="text-[10px] text-zinc-500 font-mono">GESTOCK - QUARTIER GÉNÉRAL</p>
             </div>
           </div>
           {/* Onglets navigation */}
-          <nav className="hidden md:flex items-center gap-1 bg-gray-800/50 p-1 rounded-xl border border-gray-700">
+          <nav className="hidden md:flex items-center gap-1 bg-zinc-800/50 p-1 rounded-xl border border-zinc-700">
             <button
               onClick={() => setActiveTab('tenants')}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all ${
                 activeTab === 'tenants'
                   ? 'bg-primary-500 text-white shadow-lg shadow-primary-900/30'
-                  : 'text-gray-400 hover:text-white'
+                  : 'text-zinc-400 hover:text-white'
               }`}
             >
               <Globe size={14} /> Tenants
@@ -260,7 +260,7 @@ export default function SuperAdminDashboard() {
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all ${
                 activeTab === 'audit'
                   ? 'bg-primary-500 text-white shadow-lg shadow-primary-900/30'
-                  : 'text-gray-400 hover:text-white'
+                  : 'text-zinc-400 hover:text-white'
               }`}
             >
               <Activity size={14} /> Audit Logs
@@ -269,13 +269,13 @@ export default function SuperAdminDashboard() {
         </div>
 
         <div className="flex items-center gap-6">
-          <div className="hidden lg:flex items-center gap-2 px-4 py-2 bg-gray-800/50 rounded-full border border-gray-700">
+          <div className="hidden lg:flex items-center gap-2 px-4 py-2 bg-zinc-800/50 rounded-full border border-zinc-700">
             <div className="size-2 bg-green-500 rounded-full animate-pulse"></div>
-            <span className="text-xs font-mono text-gray-400">SYSTÈME OPÉRATIONNEL</span>
+            <span className="text-xs font-mono text-zinc-400">SYSTÈME OPÉRATIONNEL</span>
           </div>
           <button
             onClick={logout}
-            className="text-gray-400 hover:text-white flex items-center gap-2 transition-all hover:scale-105 active:scale-95"
+            className="text-zinc-400 hover:text-white flex items-center gap-2 transition-all hover:scale-105 active:scale-95"
           >
             <LogOut size={18} />
             <span className="text-sm font-medium">QUITTER LE QG</span>
@@ -353,8 +353,8 @@ export default function SuperAdminDashboard() {
             </div>
 
             {/* API Quick Links */}
-            <div className="bg-gray-900/30 border border-gray-800 rounded-2xl p-4">
-              <p className="text-[10px] text-gray-500 uppercase font-black tracking-widest mb-3 flex items-center gap-2">
+            <div className="bg-zinc-900/30 border border-zinc-800 rounded-2xl p-4">
+              <p className="text-[10px] text-zinc-500 uppercase font-black tracking-widest mb-3 flex items-center gap-2">
                 <Terminal size={12} /> Liens API Rapides : Super Admin
               </p>
               <div className="flex flex-wrap gap-2">
@@ -389,21 +389,21 @@ export default function SuperAdminDashboard() {
             </div>
 
             {/* Search & Actions Bar */}
-            <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-gray-900/50 p-6 rounded-2xl border border-gray-800 shadow-xl">
+            <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-zinc-900/50 p-6 rounded-2xl border border-zinc-800 shadow-xl">
               <div className="relative w-full md:w-96">
                 <Search
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500"
+                  className="absolute left-4 top-1/2 -tranzinc-y-1/2 text-zinc-500"
                   size={18}
                 />
                 <input
                   type="text"
                   placeholder="Rechercher une boutique (nom, slug)…"
-                  className="w-full bg-gray-800 border border-gray-700 rounded-xl py-3 pl-12 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/50 transition-all"
+                  className="w-full bg-zinc-800 border border-zinc-700 rounded-xl py-3 pl-12 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/50 transition-all"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
-              <div className="flex items-center gap-4 text-xs font-mono text-gray-500 uppercase">
+              <div className="flex items-center gap-4 text-xs font-mono text-zinc-500 uppercase">
                 <LayoutDashboard size={14} />
                 {activeFilter !== 'all' ? (
                   <span className="text-primary-400">
@@ -422,7 +422,7 @@ export default function SuperAdminDashboard() {
               {filteredTenants.map((t) => (
                 <div
                   key={t.id}
-                  className={`group relative bg-gray-900 rounded-3xl overflow-hidden border transition-all duration-300 ${t.isSuspended ? 'border-red-500/30' : 'border-gray-800 hover:border-gray-700 shadow-2xl'}`}
+                  className={`group relative bg-zinc-900 rounded-3xl overflow-hidden border transition-all duration-300 ${t.isSuspended ? 'border-red-500/30' : 'border-zinc-800 hover:border-zinc-700 shadow-2xl'}`}
                 >
                   {t.isSuspended && (
                     <div className="absolute inset-0 bg-red-500/5 pointer-events-none"></div>
@@ -439,7 +439,7 @@ export default function SuperAdminDashboard() {
                               ? 'bg-amber-500/10 text-amber-500 border-amber-500/20'
                               : t.plan === 'pro'
                                 ? 'bg-primary-500/10 text-primary-500 border-primary-500/20'
-                                : 'bg-gray-800 text-gray-400 border-gray-700'
+                                : 'bg-zinc-800 text-zinc-400 border-zinc-700'
                           }`}
                         >
                           {t.plan}
@@ -478,11 +478,11 @@ export default function SuperAdminDashboard() {
                     </div>
 
                     {/* Séparateur Vertical */}
-                    <div className="hidden xl:block w-px h-32 bg-gray-800"></div>
+                    <div className="hidden xl:block w-px h-32 bg-zinc-800"></div>
 
                     {/* Section Action Commerciale (Plans) */}
                     <div className="w-full xl:w-auto grid grid-cols-2 gap-2">
-                      <p className="col-span-full text-[10px] text-gray-500 uppercase font-black tracking-widest mb-1">
+                      <p className="col-span-full text-[10px] text-zinc-500 uppercase font-black tracking-widest mb-1">
                         Renouveler Contrat
                       </p>
                       <PlanButton
@@ -518,7 +518,7 @@ export default function SuperAdminDashboard() {
 
                     {/* Section Contrôle Sécurité */}
                     <div className="w-full xl:w-auto flex flex-col gap-2 min-w-[200px]">
-                      <p className="text-[10px] text-gray-500 uppercase font-black tracking-widest mb-1">
+                      <p className="text-[10px] text-zinc-500 uppercase font-black tracking-widest mb-1">
                         Droit d'Intervention
                       </p>
                       <button
@@ -580,13 +580,13 @@ function StatCard({
   color: string
 }) {
   return (
-    <div className="bg-gray-900/50 p-6 rounded-3xl border border-gray-800 shadow-lg hover:border-gray-700 transition-all hover:-translate-y-1">
+    <div className="bg-zinc-900/50 p-6 rounded-3xl border border-zinc-800 shadow-lg hover:border-zinc-700 transition-all hover:-tranzinc-y-1">
       <div className="flex justify-between items-start mb-4">
         <div className={`p-2 rounded-xl bg-${color}-500/10 border border-${color}-500/20`}>
           {icon}
         </div>
       </div>
-      <p className="text-gray-500 text-xs uppercase font-black tracking-widest mb-1">{title}</p>
+      <p className="text-zinc-500 text-xs uppercase font-black tracking-widest mb-1">{title}</p>
       <h4 className="text-3xl font-black text-white">{value}</h4>
     </div>
   )
@@ -614,7 +614,7 @@ function InfoBadge({
             ? 'bg-green-500/10 border-green-500/30 text-green-400'
             : active === false
               ? 'bg-red-500/10 border-red-500/30 text-red-400'
-              : 'bg-gray-800/50 border-gray-700 text-gray-400'
+              : 'bg-zinc-800/50 border-zinc-700 text-zinc-400'
       }`}
     >
       {icon}
@@ -637,7 +637,7 @@ function PlanButton({
   const colorClasses = {
     primary: 'bg-primary-600 border-primary-500 text-white hover:bg-primary-500',
     amber: 'bg-amber-600 border-amber-500 text-white hover:bg-amber-500',
-    gray: 'bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700',
+    gray: 'bg-zinc-800 border-zinc-700 text-zinc-300 hover:bg-zinc-700',
   }
 
   return (
@@ -667,8 +667,8 @@ function QuickFilterButton({
 }) {
   const colorClasses = {
     gray: {
-      base: 'bg-gray-800/50 border-gray-700 text-gray-400 hover:bg-gray-800 hover:text-white',
-      active: 'bg-gray-700 border-gray-600 text-white shadow-lg shadow-gray-900/30',
+      base: 'bg-zinc-800/50 border-zinc-700 text-zinc-400 hover:bg-zinc-800 hover:text-white',
+      active: 'bg-zinc-700 border-zinc-600 text-white shadow-lg shadow-zinc-900/30',
     },
     amber: {
       base: 'bg-amber-500/10 border-amber-500/20 text-amber-500 hover:bg-amber-500/20',
@@ -725,7 +725,7 @@ function ApiLinkButton({
   }
 
   const colorClasses = {
-    gray: 'hover:bg-gray-800 hover:border-gray-600',
+    gray: 'hover:bg-zinc-800 hover:border-zinc-600',
     primary: 'hover:bg-primary-500/10 hover:border-primary-500/30',
     blue: 'hover:bg-blue-500/10 hover:border-blue-500/30',
     amber: 'hover:bg-amber-500/10 hover:border-amber-500/30',
@@ -741,7 +741,7 @@ function ApiLinkButton({
   }
 
   return (
-    <div className="group relative bg-gray-900/50 border border-gray-800 rounded-xl p-3 transition-all hover:border-gray-700 min-w-[200px]">
+    <div className="group relative bg-zinc-900/50 border border-zinc-800 rounded-xl p-3 transition-all hover:border-zinc-700 min-w-[200px]">
       <div className="flex items-center gap-2 mb-2">
         <span
           className={`text-[9px] font-black px-1.5 py-0.5 rounded border ${methodColors[method]}`}
@@ -750,14 +750,14 @@ function ApiLinkButton({
         </span>
         <span className="text-xs font-bold text-white">{label}</span>
       </div>
-      <p className="text-[10px] text-gray-500 mb-2">{description}</p>
+      <p className="text-[10px] text-zinc-500 mb-2">{description}</p>
       <div className="flex items-center gap-1">
-        <code className="flex-1 text-[9px] font-mono text-gray-600 truncate bg-gray-950 px-2 py-1 rounded">
+        <code className="flex-1 text-[9px] font-mono text-zinc-600 truncate bg-zinc-950 px-2 py-1 rounded">
           {path}
         </code>
         <button
           onClick={handleCopy}
-          className={`p-1.5 rounded-lg bg-gray-800 text-gray-400 transition-all ${colorClasses[color]}`}
+          className={`p-1.5 rounded-lg bg-zinc-800 text-zinc-400 transition-all ${colorClasses[color]}`}
           title="Copier l'URL"
         >
           <ExternalLink size={12} />
@@ -840,10 +840,10 @@ function TenantUsers({ tenantId, secret }: { tenantId: string; secret: string | 
   }
 
   return (
-    <div className="border-t border-gray-800">
+    <div className="border-t border-zinc-800">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full px-8 py-3 flex items-center justify-between text-[10px] font-bold text-gray-500 hover:text-white transition-colors"
+        className="w-full px-8 py-3 flex items-center justify-between text-[10px] font-bold text-zinc-500 hover:text-white transition-colors"
       >
         <div className="flex items-center gap-2">
           <Users size={12} />
@@ -863,24 +863,24 @@ function TenantUsers({ tenantId, secret }: { tenantId: string; secret: string | 
               {users.map((user) => (
                 <div
                   key={user.id}
-                  className="bg-gray-800/30 border border-gray-700/50 p-4 rounded-2xl flex flex-col justify-between gap-4"
+                  className="bg-zinc-800/30 border border-zinc-700/50 p-4 rounded-2xl flex flex-col justify-between gap-4"
                 >
                   <div className="flex items-start gap-3">
-                    <div className="p-2 bg-gray-700/50 rounded-lg">
-                      <UserCircle size={18} className="text-gray-400" />
+                    <div className="p-2 bg-zinc-700/50 rounded-lg">
+                      <UserCircle size={18} className="text-zinc-400" />
                     </div>
                     <div>
                       <p className="text-sm font-bold text-white">
                         {user.firstName} {user.lastName}
                       </p>
-                      <p className="text-[10px] text-gray-500 font-mono">{user.email}</p>
+                      <p className="text-[10px] text-zinc-500 font-mono">{user.email}</p>
                       <div className="mt-1 flex flex-wrap gap-2">
                         <select
                           value={user.role}
                           onChange={(e) =>
                             handleUpdateRole(user.id, user.firstName, e.target.value)
                           }
-                          className="text-[9px] px-2 py-1 bg-gray-800 border border-gray-700 rounded text-gray-200 uppercase font-bold outline-none cursor-pointer hover:border-primary-500 transition-all appearance-none"
+                          className="text-[9px] px-2 py-1 bg-zinc-800 border border-zinc-700 rounded text-zinc-200 uppercase font-bold outline-none cursor-pointer hover:border-primary-500 transition-all appearance-none"
                           style={{
                             backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
                             backgroundPosition: 'right 0.4rem center',
@@ -904,7 +904,7 @@ function TenantUsers({ tenantId, secret }: { tenantId: string; secret: string | 
 
                   <button
                     onClick={() => handleReset(user.id, user.firstName)}
-                    className="w-full py-2 bg-indigo-600/10 border border-indigo-500/30 text-indigo-400 text-[10px] font-black rounded-lg hover:bg-indigo-600 hover:text-white transition-all flex items-center justify-center gap-2"
+                    className="w-full py-2 bg-primary-600/10 border border-primary-500/30 text-primary-400 text-[10px] font-black rounded-lg hover:bg-primary-600 hover:text-white transition-all flex items-center justify-center gap-2"
                   >
                     <RefreshCcw size={12} /> GÉNÉRER CODE TEMPORAIRE
                   </button>

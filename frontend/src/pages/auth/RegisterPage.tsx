@@ -88,16 +88,16 @@ export default function RegisterPage() {
             <div className="size-10 rounded-xl bg-primary-600 flex items-center justify-center">
               <Package size={24} className="text-white" />
             </div>
-            <span className="text-2xl font-bold text-gray-900">GesStock</span>
+            <span className="text-2xl font-bold text-zinc-900">GesStock</span>
           </div>
 
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Créer un compte</h2>
-          <p className="text-gray-500 mb-8">Configurez votre espace de gestion de stock</p>
+          <h2 className="text-2xl font-bold text-zinc-900 mb-2">Créer un compte</h2>
+          <p className="text-zinc-500 mb-8">Configurez votre espace de gestion de stock</p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="firstName" className="block text-sm font-medium text-zinc-700 mb-1">
                   Prénom
                 </label>
                 <input
@@ -111,7 +111,7 @@ export default function RegisterPage() {
                 />
               </div>
               <div>
-                <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="lastName" className="block text-sm font-medium text-zinc-700 mb-1">
                   Nom
                 </label>
                 <input
@@ -127,7 +127,7 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label htmlFor="companyName" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="companyName" className="block text-sm font-medium text-zinc-700 mb-1">
                 Nom de l'entreprise
               </label>
               <input
@@ -142,7 +142,7 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label htmlFor="companySlug" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="companySlug" className="block text-sm font-medium text-zinc-700 mb-1">
                 Identifiant (URL)
               </label>
               <div className="flex items-center">
@@ -155,14 +155,14 @@ export default function RegisterPage() {
                   placeholder="mon-entreprise"
                   required
                 />
-                <span className="px-3 py-2.5 bg-gray-100 border border-l-0 border-gray-300 rounded-r-lg text-sm text-gray-500">
+                <span className="px-3 py-2.5 bg-zinc-100 border border-l-0 border-zinc-300 rounded-r-lg text-sm text-zinc-500">
                   .gestock.app
                 </span>
               </div>
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="email" className="block text-sm font-medium text-zinc-700 mb-1">
                 Email
               </label>
               <input
@@ -177,7 +177,7 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="password" className="block text-sm font-medium text-zinc-700 mb-1">
                 Mot de passe
               </label>
               <div className="relative">
@@ -194,7 +194,7 @@ export default function RegisterPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 -tranzinc-y-1/2 text-zinc-400 hover:text-zinc-600"
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
@@ -206,7 +206,7 @@ export default function RegisterPage() {
             </button>
           </form>
 
-          <p className="mt-6 text-center text-sm text-gray-500">
+          <p className="mt-6 text-center text-sm text-zinc-500">
             Déjà un compte ?{' '}
             <Link to="/login" className="font-medium text-primary-600 hover:text-primary-700">
               Se connecter

@@ -69,13 +69,9 @@ describe('SalesService', () => {
         reference: 'FAC-001',
         created_at: new Date(),
       }
-      const fakeItems = [
-        { quantity: 2, unit_price: 100, product_name: 'Produit A' },
-      ]
+      const fakeItems = [{ quantity: 2, unit_price: 100, product_name: 'Produit A' }]
 
-      mockQueryRawUnsafe
-        .mockResolvedValueOnce([fakeSale])
-        .mockResolvedValueOnce(fakeItems)
+      mockQueryRawUnsafe.mockResolvedValueOnce([fakeSale]).mockResolvedValueOnce(fakeItems)
 
       const result = await salesService.getSaleById('sale-1', TENANT)
 
@@ -85,7 +81,7 @@ describe('SalesService', () => {
       expect(result!.items[0].product.name).toBe('Produit A')
     })
 
-    it('retourne null si la vente n\'existe pas', async () => {
+    it("retourne null si la vente n'existe pas", async () => {
       mockQueryRawUnsafe.mockResolvedValueOnce([])
 
       const result = await salesService.getSaleById('sale-999', TENANT)
@@ -108,14 +104,19 @@ describe('SalesService', () => {
 
     it('crée une vente et déduit le stock', async () => {
       const fakeProduct = { id: 'prod-1', name: 'Produit A', price: 100, current_stock: 10 }
-      const fakeSale = { id: 'sale-new', reference: 'FAC-123', status: 'COMPLETED', total_amount: 200 }
+      const fakeSale = {
+        id: 'sale-new',
+        reference: 'FAC-123',
+        status: 'COMPLETED',
+        total_amount: 200,
+      }
 
       mockQueryRawUnsafe
-        .mockResolvedValueOnce([fakeProduct])  // SELECT product pour item[0]
-        .mockResolvedValueOnce([fakeSale])     // INSERT INTO sales
-        .mockResolvedValueOnce([])             // INSERT INTO sale_items
-        .mockResolvedValueOnce([])             // UPDATE products (stock deduction)
-        .mockResolvedValueOnce([])             // INSERT INTO stock_movements
+        .mockResolvedValueOnce([fakeProduct]) // SELECT product pour item[0]
+        .mockResolvedValueOnce([fakeSale]) // INSERT INTO sales
+        .mockResolvedValueOnce([]) // INSERT INTO sale_items
+        .mockResolvedValueOnce([]) // UPDATE products (stock deduction)
+        .mockResolvedValueOnce([]) // INSERT INTO stock_movements
 
       const result = await salesService.createSale(saleData, userId, TENANT)
 
@@ -124,7 +125,8 @@ describe('SalesService', () => {
 
       // Vérifie que la déduction de stock a été appelée
       const updateCall = mockQueryRawUnsafe.mock.calls.find(
-        (call) => typeof call[0] === 'string' && call[0].includes('current_stock = current_stock -')
+        (call) =>
+          typeof call[0] === 'string' && call[0].includes('current_stock = current_stock -'),
       )
       expect(updateCall).toBeDefined()
     })
@@ -135,19 +137,30 @@ describe('SalesService', () => {
       mockQueryRawUnsafe.mockResolvedValueOnce([lowStockProduct])
 
       await expect(
-        salesService.createSale({ ...saleData, items: [{ productId: 'prod-1', quantity: 5 }] }, userId, TENANT)
+        salesService.createSale(
+          { ...saleData, items: [{ productId: 'prod-1', quantity: 5 }] },
+          userId,
+          TENANT,
+        ),
       ).rejects.toThrow('Stock insuffisant')
     })
 
-    it('lève une erreur si le produit n\'existe pas', async () => {
+    it("lève une erreur si le produit n'existe pas", async () => {
       mockQueryRawUnsafe.mockResolvedValueOnce([]) // produit introuvable
 
-      await expect(salesService.createSale(saleData, userId, TENANT)).rejects.toThrow('Produit introuvable')
+      await expect(salesService.createSale(saleData, userId, TENANT)).rejects.toThrow(
+        'Produit introuvable',
+      )
     })
 
     it('applique la TVA correctement', async () => {
       const fakeProduct = { id: 'prod-1', name: 'Produit A', price: 100, current_stock: 10 }
-      const fakeSale = { id: 'sale-new', reference: 'FAC-124', status: 'COMPLETED', total_amount: 220 }
+      const fakeSale = {
+        id: 'sale-new',
+        reference: 'FAC-124',
+        status: 'COMPLETED',
+        total_amount: 220,
+      }
 
       mockQueryRawUnsafe
         .mockResolvedValueOnce([fakeProduct])
@@ -160,7 +173,10 @@ describe('SalesService', () => {
 
       // Vérifier que l'INSERT INTO sales utilise le bon montant TTC et TVA
       const insertSaleCall = mockQueryRawUnsafe.mock.calls.find(
-        (call) => typeof call[0] === 'string' && call[0].includes('INSERT INTO') && call[0].includes('sales')
+        (call) =>
+          typeof call[0] === 'string' &&
+          call[0].includes('INSERT INTO') &&
+          call[0].includes('sales'),
       )
       expect(insertSaleCall).toBeDefined()
       // taxAmount = 100*2 * 20/100 = 40
@@ -179,21 +195,22 @@ describe('SalesService', () => {
       const fakeSale = { id: 'sale-dev', reference: 'DEV-001', status: 'DRAFT', total_amount: 100 }
 
       mockQueryRawUnsafe
-        .mockResolvedValueOnce([fakeProduct])  // SELECT product
-        .mockResolvedValueOnce([fakeSale])     // INSERT INTO sales
-        .mockResolvedValueOnce([])             // INSERT INTO sale_items
+        .mockResolvedValueOnce([fakeProduct]) // SELECT product
+        .mockResolvedValueOnce([fakeSale]) // INSERT INTO sales
+        .mockResolvedValueOnce([]) // INSERT INTO sale_items
 
       const result = await salesService.createSale(
         { type: 'DEV', items: [{ productId: 'prod-1', quantity: 1 }] },
         'user-1',
-        TENANT
+        TENANT,
       )
 
       expect(result.status).toBe('DRAFT')
 
       // Vérifier qu'aucune déduction de stock n'a été faite
       const stockUpdate = mockQueryRawUnsafe.mock.calls.find(
-        (call) => typeof call[0] === 'string' && call[0].includes('current_stock = current_stock -')
+        (call) =>
+          typeof call[0] === 'string' && call[0].includes('current_stock = current_stock -'),
       )
       expect(stockUpdate).toBeUndefined()
     })

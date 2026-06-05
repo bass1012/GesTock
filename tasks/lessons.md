@@ -197,4 +197,3 @@
 - **Import de classe d'erreur manquant dans les tests** | `ConflictError` était défini dans `utils/errors.ts` et utilisé dans `middleware.test.ts`, mais jamais importé — provoquant `TS2304: Cannot find name 'ConflictError'`. | **Règle** : Après toute modification de `utils/errors.ts` (ajout/renommage de classe), lancer `npx tsc --noEmit` dans `backend/` immédiatement pour détecter les tests qui référencent la classe sans l'importer.
 
 - **`.env.example` incomplet après ajout de features** | Des variables ajoutées en Phase 7 (`BACKUP_ENCRYPTION_KEY`, `SMTP_*`, `BACKUP_S3_DEST`) n'étaient pas documentées dans `.env.example`. | **Règle** : Toute nouvelle variable d'environnement doit être ajoutée simultanément dans `.env.example` (racine + `backend/.env.example`) au même commit que son introduction dans le code.
-

@@ -29,7 +29,7 @@ const statusConfig: Record<ExpiryStatus, { label: string; color: string; icon: R
   }
 
 function ExpiryBadge({ status }: { status: ExpiryStatus | null }) {
-  if (!status) return <span className="text-gray-400 text-xs">-</span>
+  if (!status) return <span className="text-zinc-400 text-xs">-</span>
   const cfg = statusConfig[status]
   return (
     <span
@@ -69,8 +69,8 @@ export default function LotsPage() {
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Lots & Péremption</h1>
-          <p className="text-sm text-gray-500 mt-1">Suivi des lots avec dates d'expiration</p>
+          <h1 className="text-2xl font-bold text-zinc-900">Lots & Péremption</h1>
+          <p className="text-sm text-zinc-500 mt-1">Suivi des lots avec dates d'expiration</p>
         </div>
       </div>
 
@@ -100,7 +100,7 @@ export default function LotsPage() {
       {/* Filtres */}
       <div className="flex flex-wrap gap-3">
         <div className="relative flex-1 min-w-[200px]">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <Search size={16} className="absolute left-3 top-1/2 -tranzinc-y-1/2 text-zinc-400" />
           <input
             type="text"
             placeholder="Rechercher produit ou lot…"
@@ -135,14 +135,14 @@ export default function LotsPage() {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-xl border border-zinc-200 overflow-hidden">
         {isLoading ? (
-          <div className="p-12 text-center text-gray-400">Chargement…</div>
+          <div className="p-12 text-center text-zinc-400">Chargement…</div>
         ) : filtered.length === 0 ? (
           <div className="p-12 text-center">
-            <Package size={48} className="mx-auto text-gray-300 mb-3" />
-            <p className="text-gray-500">Aucun lot trouvé.</p>
-            <p className="text-sm text-gray-400 mt-1">
+            <Package size={48} className="mx-auto text-zinc-300 mb-3" />
+            <p className="text-zinc-500">Aucun lot trouvé.</p>
+            <p className="text-sm text-zinc-400 mt-1">
               Les lots apparaissent lors d'entrées de stock avec un numéro de lot ou une date de
               péremption.
             </p>
@@ -150,19 +150,19 @@ export default function LotsPage() {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-gray-50 border-b border-gray-200">
+              <thead className="bg-zinc-50 border-b border-zinc-200">
                 <tr>
-                  <th className="px-4 py-3 text-left font-medium text-gray-600">Produit</th>
-                  <th className="px-4 py-3 text-left font-medium text-gray-600">N° Lot</th>
-                  <th className="px-4 py-3 text-left font-medium text-gray-600">Entrepôt</th>
-                  <th className="px-4 py-3 text-right font-medium text-gray-600">Qté reçue</th>
-                  <th className="px-4 py-3 text-left font-medium text-gray-600">Reçu le</th>
-                  <th className="px-4 py-3 text-left font-medium text-gray-600">Péremption</th>
-                  <th className="px-4 py-3 text-left font-medium text-gray-600">Jours restants</th>
-                  <th className="px-4 py-3 text-left font-medium text-gray-600">Statut</th>
+                  <th className="px-4 py-3 text-left font-medium text-zinc-600">Produit</th>
+                  <th className="px-4 py-3 text-left font-medium text-zinc-600">N° Lot</th>
+                  <th className="px-4 py-3 text-left font-medium text-zinc-600">Entrepôt</th>
+                  <th className="px-4 py-3 text-right font-medium text-zinc-600">Qté reçue</th>
+                  <th className="px-4 py-3 text-left font-medium text-zinc-600">Reçu le</th>
+                  <th className="px-4 py-3 text-left font-medium text-zinc-600">Péremption</th>
+                  <th className="px-4 py-3 text-left font-medium text-zinc-600">Jours restants</th>
+                  <th className="px-4 py-3 text-left font-medium text-zinc-600">Statut</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-zinc-100">
                 {filtered.map((lot) => (
                   <tr
                     key={lot.id}
@@ -175,18 +175,18 @@ export default function LotsPage() {
                     }
                   >
                     <td className="px-4 py-3">
-                      <div className="font-medium text-gray-900">{lot.productName}</div>
-                      <div className="text-gray-400 text-xs">{lot.productSku}</div>
+                      <div className="font-medium text-zinc-900">{lot.productName}</div>
+                      <div className="text-zinc-400 text-xs">{lot.productSku}</div>
                     </td>
-                    <td className="px-4 py-3 font-mono text-gray-700">
-                      {lot.batchNumber ?? <span className="text-gray-400">-</span>}
+                    <td className="px-4 py-3 font-mono text-zinc-700">
+                      {lot.batchNumber ?? <span className="text-zinc-400">-</span>}
                     </td>
-                    <td className="px-4 py-3 text-gray-600">{lot.warehouseName ?? '-'}</td>
-                    <td className="px-4 py-3 text-right font-medium text-gray-900">
+                    <td className="px-4 py-3 text-zinc-600">{lot.warehouseName ?? '-'}</td>
+                    <td className="px-4 py-3 text-right font-medium text-zinc-900">
                       {lot.quantity} {lot.productUnit ?? ''}
                     </td>
-                    <td className="px-4 py-3 text-gray-600">{formatDate(lot.receivedAt)}</td>
-                    <td className="px-4 py-3 text-gray-600">{formatDate(lot.expiryDate)}</td>
+                    <td className="px-4 py-3 text-zinc-600">{formatDate(lot.receivedAt)}</td>
+                    <td className="px-4 py-3 text-zinc-600">{formatDate(lot.expiryDate)}</td>
                     <td className="px-4 py-3">
                       {lot.daysRemaining !== null ? (
                         <span
@@ -195,7 +195,7 @@ export default function LotsPage() {
                               ? 'text-red-600 font-semibold'
                               : lot.daysRemaining <= 7
                                 ? 'text-orange-600 font-semibold'
-                                : 'text-gray-700'
+                                : 'text-zinc-700'
                           }
                         >
                           {lot.daysRemaining < 0
@@ -203,7 +203,7 @@ export default function LotsPage() {
                             : `${lot.daysRemaining}j`}
                         </span>
                       ) : (
-                        <span className="text-gray-400">-</span>
+                        <span className="text-zinc-400">-</span>
                       )}
                     </td>
                     <td className="px-4 py-3">

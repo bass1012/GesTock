@@ -17,11 +17,17 @@ jest.mock('../services/jwtBlacklist.service', () => ({
 import { Request, Response, NextFunction } from 'express'
 import { authMiddleware, requireRole } from '../middleware/auth.middleware'
 import { errorHandler } from '../middleware/errorHandler'
-import { BadRequestError, UnauthorizedError, ForbiddenError, NotFoundError, AppError, ConflictError } from '../utils/errors'
+import {
+  BadRequestError,
+  UnauthorizedError,
+  ForbiddenError,
+  NotFoundError,
+  ConflictError,
+} from '../utils/errors'
 import { ZodError, ZodIssue } from 'zod'
 
 function mockReq(overrides: Partial<Request> = {}): Request {
-  return { headers: {}, ...overrides } as unknown as Request
+  return { headers: {}, hostname: 'localhost', ...overrides } as unknown as Request
 }
 
 function mockRes(): Response {
@@ -41,6 +47,9 @@ describe('authMiddleware', () => {
     req = mockReq()
     res = mockRes()
     next = jest.fn()
+    // Setup default mock behavior
+    mockIsBlacklisted.mockResolvedValue(false)
+    mockGetActiveSession.mockResolvedValue(undefined)
   })
 
   it('passe si la requête est authentifiée par clé API', async () => {
@@ -78,10 +87,13 @@ describe('authMiddleware', () => {
     expect(next).toHaveBeenCalledWith(expect.any(UnauthorizedError))
   })
 
-  it('rejette si la session n\'est plus active', async () => {
+  it("rejette si la session n'est plus active", async () => {
     req.headers = { authorization: 'Bearer valid-token' }
     mockVerifyAccessToken.mockReturnValue({
-      userId: 'user-1', tenantId: 'tenant-1', role: 'admin', sessionId: 'sess-1',
+      userId: 'user-1',
+      tenantId: 'tenant-1',
+      role: 'admin',
+      sessionId: 'sess-1',
     })
     mockGetActiveSession.mockResolvedValue('sess-2')
 
@@ -92,7 +104,10 @@ describe('authMiddleware', () => {
   it('injecte userId, tenantId, userRole et token dans la requête', async () => {
     req.headers = { authorization: 'Bearer valid-token' }
     mockVerifyAccessToken.mockReturnValue({
-      userId: 'user-1', tenantId: 'tenant-1', role: 'admin', sessionId: 'sess-1',
+      userId: 'user-1',
+      tenantId: 'tenant-1',
+      role: 'admin',
+      sessionId: 'sess-1',
     })
     mockGetActiveSession.mockResolvedValue('sess-1')
 
@@ -124,7 +139,7 @@ describe('requireRole', () => {
     expect(next).toHaveBeenCalled()
   })
 
-  it('rejette si le rôle n\'est pas dans la liste', () => {
+  it("rejette si le rôle n'est pas dans la liste", () => {
     req.userRole = 'lecteur'
     const middleware = requireRole('admin', 'manager')
     expect(() => middleware(req, res, next)).toThrow(ForbiddenError)
@@ -164,7 +179,9 @@ describe('tenantMiddleware', () => {
   it('extrait le tenant du header X-Tenant-Id', async () => {
     req.headers = { 'x-tenant-id': 'ma-boutique' }
     mockPrismaTenantFindUnique.mockResolvedValue({
-      id: 'tenant-1', slug: 'ma-boutique', isSuspended: false,
+      id: 'tenant-1',
+      slug: 'ma-boutique',
+      isSuspended: false,
     })
 
     await tenantMiddleware(req, res, next)
@@ -177,7 +194,9 @@ describe('tenantMiddleware', () => {
   it('extrait le tenant du JWT payload (req.tenantId)', async () => {
     req.tenantId = 'tenant-1'
     mockPrismaTenantFindUnique.mockResolvedValue({
-      id: 'tenant-1', slug: 'slug-from-jwt', isSuspended: false,
+      id: 'tenant-1',
+      slug: 'slug-from-jwt',
+      isSuspended: false,
     })
 
     await tenantMiddleware(req, res, next)
@@ -185,7 +204,7 @@ describe('tenantMiddleware', () => {
     expect(req.tenantSlug).toBe('slug-from-jwt')
   })
 
-  it('retourne une erreur si aucun tenant n\'est identifié', async () => {
+  it("retourne une erreur si aucun tenant n'est identifié", async () => {
     await tenantMiddleware(req, res, next)
     expect(next).toHaveBeenCalledWith(expect.any(BadRequestError))
   })
@@ -193,7 +212,9 @@ describe('tenantMiddleware', () => {
   it('retourne 403 si le tenant est suspendu', async () => {
     req.headers = { 'x-tenant-id': 'suspendu' }
     mockPrismaTenantFindUnique.mockResolvedValue({
-      id: 'tenant-suspended', slug: 'suspendu', isSuspended: true,
+      id: 'tenant-suspended',
+      slug: 'suspendu',
+      isSuspended: true,
     })
 
     await tenantMiddleware(req, res, next)
@@ -216,13 +237,20 @@ describe('errorHandler', () => {
 
   it('formate les erreurs Zod en 400 avec les champs en erreur', () => {
     const zodIssues: ZodIssue[] = [
-      { code: 'invalid_type', expected: 'string', received: 'undefined', path: ['email'], message: 'Required' },
+      {
+        code: 'invalid_type',
+        expected: 'string',
+        received: 'undefined',
+        path: ['email'],
+        message: 'Required',
+      },
     ]
     const zodError = new ZodError(zodIssues)
     errorHandler(zodError, req, res, next)
     expect(res.status).toHaveBeenCalledWith(400)
     expect(res.json).toHaveBeenCalledWith({
-      status: 400, message: 'Données invalides',
+      status: 400,
+      message: 'Données invalides',
       errors: [{ field: 'email', message: 'Required' }],
     })
   })
@@ -231,7 +259,8 @@ describe('errorHandler', () => {
     errorHandler(new NotFoundError('Ressource non trouvée'), req, res, next)
     expect(res.status).toHaveBeenCalledWith(404)
     expect(res.json).toHaveBeenCalledWith({
-      status: 404, message: 'Ressource non trouvée',
+      status: 404,
+      message: 'Ressource non trouvée',
     })
   })
 
@@ -239,7 +268,8 @@ describe('errorHandler', () => {
     errorHandler(new Error('Something broke'), req, res, next)
     expect(res.status).toHaveBeenCalledWith(500)
     expect(res.json).toHaveBeenCalledWith({
-      status: 500, message: 'Erreur interne du serveur',
+      status: 500,
+      message: 'Erreur interne du serveur',
     })
   })
 

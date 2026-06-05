@@ -40,12 +40,10 @@ import { format, subDays, startOfDay, isSameDay } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import toast from 'react-hot-toast'
 
-const formatDate = (d: string) => new Date(d).toLocaleDateString('fr-FR')
-
 // Donut Chart Component
 function DonutChart({ segments }: { segments: { label: string; value: number; color: string }[] }) {
   const total = segments.reduce((sum, s) => sum + s.value, 0)
-  if (total === 0) return <div className="text-gray-400 text-sm">Aucune donnée</div>
+  if (total === 0) return <div className="text-zinc-400 text-sm">Aucune donnée</div>
 
   let currentAngle = 0
   return (
@@ -76,7 +74,7 @@ function DonutChart({ segments }: { segments: { label: string; value: number; co
         <circle cx="50" cy="50" r="25" fill="white" />
       </svg>
       <div className="absolute inset-0 flex items-center justify-center">
-        <span className="text-lg font-bold text-gray-700">{total}</span>
+        <span className="text-lg font-bold text-zinc-700">{total}</span>
       </div>
     </div>
   )
@@ -102,9 +100,9 @@ function StatCard({
     <div className="card p-6">
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          <p className="text-sm font-medium text-gray-500">{title}</p>
-          <p className="text-2xl font-bold text-gray-900 mt-1">{value}</p>
-          {subtitle && <p className="text-xs text-gray-400 mt-1">{subtitle}</p>}
+          <p className="text-sm font-medium text-zinc-500">{title}</p>
+          <p className="text-2xl font-bold text-zinc-900 mt-1">{value}</p>
+          {subtitle && <p className="text-xs text-zinc-400 mt-1">{subtitle}</p>}
           {trend && (
             <div className="flex items-center gap-1 mt-2">
               <TrendingUp
@@ -144,7 +142,7 @@ export default function ReportsPage() {
   const { data: movementsResponse, isLoading: isLoadingMovements } = useMovementReport({
     startDate: filterDate,
   })
-  const { data: inventoryResponse, isLoading: isLoadingInventory } = useInventoryReport()
+  const { data: _inventoryResponse, isLoading: isLoadingInventory } = useInventoryReport()
 
   // BI Reports (Pro/Enterprise only)
   const isPro = tenant?.plan === 'pro' || tenant?.plan === 'enterprise'
@@ -201,33 +199,43 @@ export default function ReportsPage() {
     }
   }
 
-  const handlePDFInventory = () => {
-    if (!inventoryResponse) return toast.error('Données non disponibles')
-    exportInventoryToPDF(inventoryResponse)
-    toast.success("PDF d'inventaire généré")
+  const handlePDFInventory = async () => {
+    const loadingToast = toast.loading("Génération du PDF d'inventaire…")
+    try {
+      await exportInventoryToPDF()
+      toast.dismiss(loadingToast)
+      toast.success("PDF d'inventaire téléchargé !")
+    } catch {
+      toast.dismiss(loadingToast)
+      toast.error('Erreur lors du téléchargement')
+    }
   }
 
-  const handlePDFMovements = () => {
-    if (!movementsResponse) return toast.error('Données non disponibles')
-    exportMovementsToPDF(
-      movementsResponse,
-      dateRange === '7days' ? '7 Jours' : dateRange === '30days' ? '30 Jours' : '90 Jours',
-    )
-    toast.success('PDF des mouvements généré')
+  const handlePDFMovements = async () => {
+    const loadingToast = toast.loading('Génération du PDF des mouvements…')
+    try {
+      const startDate = filterDate
+      await exportMovementsToPDF({ startDate })
+      toast.dismiss(loadingToast)
+      toast.success('PDF des mouvements téléchargé !')
+    } catch {
+      toast.dismiss(loadingToast)
+      toast.error('Erreur lors du téléchargement')
+    }
   }
 
   if (isLoading) {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Rapports & Tableaux de bord</h1>
-          <p className="text-gray-500 mt-1">Analyse et exports de données</p>
+          <h1 className="text-2xl font-bold text-zinc-900">Rapports & Tableaux de bord</h1>
+          <p className="text-zinc-500 mt-1">Analyse et exports de données</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {['sk-r1', 'sk-r2', 'sk-r3', 'sk-r4'].map((sk) => (
             <div key={sk} className="card p-6 animate-pulse">
-              <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
-              <div className="h-8 bg-gray-200 rounded w-1/2" />
+              <div className="h-4 bg-zinc-200 rounded w-3/4 mb-2" />
+              <div className="h-8 bg-zinc-200 rounded w-1/2" />
             </div>
           ))}
         </div>
@@ -240,8 +248,8 @@ export default function ReportsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Rapports & Tableaux de bord</h1>
-          <p className="text-gray-500 mt-1">Analyse de stock et exports de données</p>
+          <h1 className="text-2xl font-bold text-zinc-900">Rapports & Tableaux de bord</h1>
+          <p className="text-zinc-500 mt-1">Analyse de stock et exports de données</p>
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -259,7 +267,7 @@ export default function ReportsPage() {
             <FileText size={18} />
             <span className="hidden sm:inline">PDF Inventaire</span>
           </button>
-          <div className="w-px h-6 bg-gray-200 hidden sm:block mx-2"></div>
+          <div className="w-px h-6 bg-zinc-200 hidden sm:block mx-2"></div>
           <button
             onClick={handleExportMovements}
             className="btn btn-secondary flex items-center gap-2"
@@ -270,7 +278,7 @@ export default function ReportsPage() {
           </button>
           <button
             onClick={handlePDFMovements}
-            className="btn bg-indigo-50 text-indigo-600 hover:bg-indigo-100 flex items-center gap-2 border border-indigo-200"
+            className="btn bg-primary-50 text-primary-600 hover:bg-primary-100 flex items-center gap-2 border border-primary-200"
           >
             <FileText size={18} />
             <span className="hidden sm:inline">PDF Mouvements</span>
@@ -279,7 +287,7 @@ export default function ReportsPage() {
       </div>
 
       {/* Tabs */}
-      <div className="border-b border-gray-200">
+      <div className="border-b border-zinc-200">
         <div className="flex gap-6">
           {[
             { id: 'overview', label: "Vue d'ensemble", icon: BarChart3 },
@@ -298,7 +306,7 @@ export default function ReportsPage() {
               className={`flex items-center gap-2 pb-3 text-sm font-medium border-b-2 transition-colors ${
                 activeTab === tab.id
                   ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
+                  : 'border-transparent text-zinc-500 hover:text-zinc-700'
               }`}
             >
               <tab.icon size={16} />
@@ -347,7 +355,7 @@ export default function ReportsPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Top Products */}
             <div className="card p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              <h3 className="text-lg font-semibold text-zinc-900 mb-4">
                 Top 5 produits (valeur stock)
               </h3>
               <div className="space-y-3">
@@ -357,14 +365,14 @@ export default function ReportsPage() {
                       {i + 1}
                     </span>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">{product.name}</p>
-                      <p className="text-xs text-gray-500">{product.sku}</p>
+                      <p className="text-sm font-medium text-zinc-900 truncate">{product.name}</p>
+                      <p className="text-xs text-zinc-500">{product.sku}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-semibold text-gray-900">
+                      <p className="text-sm font-semibold text-zinc-900">
                         {product.value.toLocaleString('fr-FR')} F CFA
                       </p>
-                      <p className="text-xs text-gray-500">{product.currentStock} unités</p>
+                      <p className="text-xs text-zinc-500">{product.currentStock} unités</p>
                     </div>
                   </div>
                 ))}
@@ -373,7 +381,7 @@ export default function ReportsPage() {
 
             {/* Stock by Category */}
             <div className="card p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              <h3 className="text-lg font-semibold text-zinc-900 mb-4">
                 Répartition par catégorie
               </h3>
               <div className="flex items-center gap-6">
@@ -400,9 +408,9 @@ export default function ReportsPage() {
                             ][i % 5],
                           }}
                         />
-                        <span className="text-gray-600">{cat.category}</span>
+                        <span className="text-zinc-600">{cat.category}</span>
                       </div>
-                      <span className="font-medium text-gray-900">
+                      <span className="font-medium text-zinc-900">
                         {cat.count} ({cat.value.toLocaleString('fr-FR')} F CFA)
                       </span>
                     </div>
@@ -414,20 +422,20 @@ export default function ReportsPage() {
 
           {/* Movements Chart */}
           <div className="card p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            <h3 className="text-lg font-semibold text-zinc-900 mb-4">
               Mouvements de stock (7 jours)
             </h3>
             <div className="grid grid-cols-3 gap-4 mb-6">
               {stats.movementsByType.map((movement) => (
-                <div key={movement.type} className="text-center p-4 rounded-lg bg-gray-50">
-                  <p className="text-2xl font-bold text-gray-900">{movement.count}</p>
-                  <p className="text-sm text-gray-500">
+                <div key={movement.type} className="text-center p-4 rounded-lg bg-zinc-50">
+                  <p className="text-2xl font-bold text-zinc-900">{movement.count}</p>
+                  <p className="text-sm text-zinc-500">
                     {movement.type === 'IN' && 'Entrées'}
                     {movement.type === 'OUT' && 'Sorties'}
                     {movement.type === 'ADJUSTMENT' && 'Ajustements'}
                     {movement.type === 'TRANSFER' && 'Transferts'}
                   </p>
-                  <p className="text-xs text-gray-400 mt-1">{movement.quantity} unités</p>
+                  <p className="text-xs text-zinc-400 mt-1">{movement.quantity} unités</p>
                 </div>
               ))}
             </div>
@@ -455,7 +463,7 @@ export default function ReportsPage() {
       {activeTab === 'inventory' && (
         <div className="space-y-6">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-900">État de l'inventaire</h3>
+            <h3 className="text-lg font-semibold text-zinc-900">État de l'inventaire</h3>
             <button
               onClick={handleExportInventory}
               className="btn btn-secondary flex items-center gap-2"
@@ -465,8 +473,8 @@ export default function ReportsPage() {
             </button>
           </div>
           <div className="card p-12 text-center">
-            <Package size={48} className="mx-auto mb-4 text-gray-300" />
-            <p className="text-gray-500">
+            <Package size={48} className="mx-auto mb-4 text-zinc-300" />
+            <p className="text-zinc-500">
               Consultez l'onglet "Vue d'ensemble" pour les statistiques d'inventaire détaillées.
               Utilisez le bouton Exporter CSV pour télécharger le rapport complet.
             </p>
@@ -479,8 +487,8 @@ export default function ReportsPage() {
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <h3 className="text-lg font-semibold text-gray-900">Activité (Séries Temporelles)</h3>
-              <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
+              <h3 className="text-lg font-semibold text-zinc-900">Activité (Séries Temporelles)</h3>
+              <div className="flex items-center gap-2 bg-zinc-100 rounded-lg p-1">
                 {[
                   { id: '7days', label: '7 jours' },
                   { id: '30days', label: '30 jours' },
@@ -491,8 +499,8 @@ export default function ReportsPage() {
                     onClick={() => setDateRange(range.id as any)}
                     className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${
                       dateRange === range.id
-                        ? 'bg-white text-gray-900 shadow-sm'
-                        : 'text-gray-500 hover:text-gray-700'
+                        ? 'bg-white text-zinc-900 shadow-sm'
+                        : 'text-zinc-500 hover:text-zinc-700'
                     }`}
                   >
                     {range.label}
@@ -502,7 +510,7 @@ export default function ReportsPage() {
             </div>
             <button
               onClick={handlePDFMovements}
-              className="btn bg-indigo-600 hover:bg-indigo-700 text-white flex items-center gap-2"
+              className="btn bg-primary-600 hover:bg-primary-700 text-white flex items-center gap-2"
             >
               <FileText size={16} />
               Bilan PDF
@@ -510,7 +518,7 @@ export default function ReportsPage() {
           </div>
 
           <div className="card p-6 min-h-[400px]">
-            <h4 className="text-sm font-medium text-gray-500 mb-6 uppercase tracking-wider">
+            <h4 className="text-sm font-medium text-zinc-500 mb-6 uppercase tracking-wider">
               Évolution des Flux Logistiques
             </h4>
             <div className="w-full h-[350px]">
@@ -564,7 +572,7 @@ export default function ReportsPage() {
             {/* Expiry Alerts */}
             <div className="card p-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                <h3 className="text-lg font-semibold text-zinc-900 flex items-center gap-2">
                   <Clock className="text-amber-500" size={20} />
                   Produits approchant la péremption
                 </h3>
@@ -576,11 +584,11 @@ export default function ReportsPage() {
                 {expiryResponse?.map((item) => (
                   <div
                     key={item.id}
-                    className="flex items-center justify-between p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
+                    className="flex items-center justify-between p-3 bg-zinc-50 rounded-xl hover:bg-zinc-100 transition-colors"
                   >
                     <div className="min-w-0">
-                      <p className="text-sm font-bold text-gray-900 truncate">{item.name}</p>
-                      <p className="text-xs text-gray-500 font-mono">{item.sku}</p>
+                      <p className="text-sm font-bold text-zinc-900 truncate">{item.name}</p>
+                      <p className="text-xs text-zinc-500 font-mono">{item.sku}</p>
                     </div>
                     <div className="text-right">
                       <p
@@ -588,14 +596,14 @@ export default function ReportsPage() {
                       >
                         {item.daysRemaining <= 0 ? 'PÉRIMÉ' : `dans ${item.daysRemaining} j`}
                       </p>
-                      <p className="text-[10px] text-gray-400">
+                      <p className="text-[10px] text-zinc-400">
                         Exp: {formatDate(item.expiry_date)}
                       </p>
                     </div>
                   </div>
                 ))}
                 {(!expiryResponse || expiryResponse.length === 0) && (
-                  <div className="py-8 text-center text-gray-400 italic text-sm">
+                  <div className="py-8 text-center text-zinc-400 italic text-sm">
                     Aucun produit proche de la péremption. ✨
                   </div>
                 )}
@@ -605,11 +613,11 @@ export default function ReportsPage() {
             {/* Slow Rotation */}
             <div className="card p-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                  <History className="text-indigo-500" size={20} />
+                <h3 className="text-lg font-semibold text-zinc-900 flex items-center gap-2">
+                  <History className="text-primary-500" size={20} />
                   Rotation lente (Stock dormant)
                 </h3>
-                <span className="text-xs font-medium px-2 py-1 bg-indigo-100 text-indigo-700 rounded-full">
+                <span className="text-xs font-medium px-2 py-1 bg-primary-100 text-primary-700 rounded-full">
                   +90 jours sans vente
                 </span>
               </div>
@@ -617,29 +625,29 @@ export default function ReportsPage() {
                 {slowRotationResponse?.map((item) => (
                   <div
                     key={item.id}
-                    className="flex items-center justify-between p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
+                    className="flex items-center justify-between p-3 bg-zinc-50 rounded-xl hover:bg-zinc-100 transition-colors"
                   >
                     <div className="min-w-0">
-                      <p className="text-sm font-bold text-gray-900 truncate">{item.name}</p>
+                      <p className="text-sm font-bold text-zinc-900 truncate">{item.name}</p>
                       <div className="flex items-center gap-2 mt-0.5">
-                        <span className="text-xs text-gray-500 bg-white px-1.5 rounded border">
+                        <span className="text-xs text-zinc-500 bg-white px-1.5 rounded border">
                           Stock: {item.current_stock}
                         </span>
-                        <span className="text-xs text-gray-500">Dernière sortie: Jamais</span>
+                        <span className="text-xs text-zinc-500">Dernière sortie: Jamais</span>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-bold text-indigo-600">
+                      <p className="text-sm font-bold text-primary-600">
                         {item.value.toLocaleString('fr-FR')} F
                       </p>
-                      <p className="text-[10px] text-gray-400 uppercase tracking-tighter">
+                      <p className="text-[10px] text-zinc-400 uppercase tracking-tighter">
                         Capital immobilisé
                       </p>
                     </div>
                   </div>
                 ))}
                 {(!slowRotationResponse || slowRotationResponse.length === 0) && (
-                  <div className="py-8 text-center text-gray-400 italic text-sm">
+                  <div className="py-8 text-center text-zinc-400 italic text-sm">
                     Félicitations ! Votre stock tourne bien. 🚀
                   </div>
                 )}
@@ -656,10 +664,10 @@ export default function ReportsPage() {
                 Planifiez une remise immédiate pour ces produits avant perte totale.
               </p>
             </div>
-            <div className="card p-4 bg-gradient-to-br from-indigo-50 to-white border-indigo-100">
-              <Download size={18} className="text-indigo-500 mb-2" />
-              <h4 className="text-sm font-bold text-indigo-900">Optimisation Stock</h4>
-              <p className="text-xs text-indigo-700 mt-1">
+            <div className="card p-4 bg-gradient-to-br from-primary-50 to-white border-primary-100">
+              <Download size={18} className="text-primary-500 mb-2" />
+              <h4 className="text-sm font-bold text-primary-900">Optimisation Stock</h4>
+              <p className="text-xs text-primary-700 mt-1">
                 Considérez un retour fournisseur ou un pack promotionnel pour libérer de l'espace.
               </p>
             </div>
@@ -679,11 +687,11 @@ export default function ReportsPage() {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+              <h2 className="text-lg font-semibold text-zinc-900 flex items-center gap-2">
                 <ShoppingBag className="text-emerald-500" size={20} />
                 Prévisions de réapprovisionnement
               </h2>
-              <p className="text-sm text-gray-500 mt-0.5">
+              <p className="text-sm text-zinc-500 mt-0.5">
                 Basé sur la vélocité de sortie des 30 derniers jours
               </p>
             </div>
@@ -701,39 +709,39 @@ export default function ReportsPage() {
           </div>
 
           {isLoadingForecasts ? (
-            <div className="card p-8 text-center text-gray-500">Calcul des prévisions…</div>
+            <div className="card p-8 text-center text-zinc-500">Calcul des prévisions…</div>
           ) : (
             <div className="card overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-left">
                   <thead>
-                    <tr className="bg-gray-50 border-b border-gray-100">
-                      <th className="px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    <tr className="bg-zinc-50 border-b border-zinc-100">
+                      <th className="px-5 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider">
                         Produit
                       </th>
-                      <th className="px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">
+                      <th className="px-5 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider text-right">
                         Stock actuel
                       </th>
-                      <th className="px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">
+                      <th className="px-5 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider text-right">
                         Vélocité/sem.
                       </th>
-                      <th className="px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                      <th className="px-5 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider">
                         Date rupture est.
                       </th>
-                      <th className="px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">
+                      <th className="px-5 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider text-right">
                         Qté recommandée
                       </th>
-                      <th className="px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                      <th className="px-5 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider">
                         Statut
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100">
+                  <tbody className="divide-y divide-zinc-100">
                     {forecastsResponse?.length === 0 && (
                       <tr>
                         <td
                           colSpan={6}
-                          className="px-5 py-8 text-center text-gray-400 italic text-sm"
+                          className="px-5 py-8 text-center text-zinc-400 italic text-sm"
                         >
                           Aucune donnée disponible. Enregistrez des mouvements de stock pour générer
                           des prévisions.
@@ -745,7 +753,7 @@ export default function ReportsPage() {
                         critical: 'bg-red-100 text-red-700',
                         warning: 'bg-amber-100 text-amber-700',
                         ok: 'bg-emerald-100 text-emerald-700',
-                        no_movement: 'bg-gray-100 text-gray-500',
+                        no_movement: 'bg-zinc-100 text-zinc-500',
                       }[item.urgency]
                       const urgencyLabel = {
                         critical: 'Critique',
@@ -755,49 +763,49 @@ export default function ReportsPage() {
                       }[item.urgency]
 
                       return (
-                        <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
+                        <tr key={item.id} className="hover:bg-zinc-50/50 transition-colors">
                           <td className="px-5 py-3">
-                            <p className="text-sm font-semibold text-gray-900">{item.name}</p>
-                            <p className="text-xs text-gray-400 font-mono">{item.sku}</p>
+                            <p className="text-sm font-semibold text-zinc-900">{item.name}</p>
+                            <p className="text-xs text-zinc-400 font-mono">{item.sku}</p>
                           </td>
                           <td className="px-5 py-3 text-right">
                             <span
-                              className={`text-sm font-bold ${item.currentStock <= item.minStock ? 'text-red-600' : 'text-gray-800'}`}
+                              className={`text-sm font-bold ${item.currentStock <= item.minStock ? 'text-red-600' : 'text-zinc-800'}`}
                             >
                               {item.currentStock}
                             </span>
-                            <span className="text-xs text-gray-400 ml-1">{item.unit}</span>
+                            <span className="text-xs text-zinc-400 ml-1">{item.unit}</span>
                           </td>
                           <td className="px-5 py-3 text-right">
-                            <span className="text-sm text-gray-700">
+                            <span className="text-sm text-zinc-700">
                               {item.weeklyVelocity > 0 ? item.weeklyVelocity : '-'}
                             </span>
                             {item.weeklyVelocity > 0 && (
-                              <span className="text-xs text-gray-400 ml-1">{item.unit}</span>
+                              <span className="text-xs text-zinc-400 ml-1">{item.unit}</span>
                             )}
                           </td>
                           <td className="px-5 py-3">
                             {item.estimatedStockoutDate ? (
                               <div>
-                                <p className="text-sm font-medium text-gray-800">
+                                <p className="text-sm font-medium text-zinc-800">
                                   {formatDate(item.estimatedStockoutDate)}
                                 </p>
-                                <p className="text-xs text-gray-400">
+                                <p className="text-xs text-zinc-400">
                                   dans {item.daysUntilStockout} j
                                 </p>
                               </div>
                             ) : (
-                              <span className="text-sm text-gray-400">-</span>
+                              <span className="text-sm text-zinc-400">-</span>
                             )}
                           </td>
                           <td className="px-5 py-3 text-right">
                             <span
-                              className={`text-sm font-bold ${item.recommendedOrderQty > 0 ? 'text-blue-600' : 'text-gray-400'}`}
+                              className={`text-sm font-bold ${item.recommendedOrderQty > 0 ? 'text-blue-600' : 'text-zinc-400'}`}
                             >
                               {item.recommendedOrderQty > 0 ? `+ ${item.recommendedOrderQty}` : '-'}
                             </span>
                             {item.recommendedOrderQty > 0 && (
-                              <span className="text-xs text-gray-400 ml-1">{item.unit}</span>
+                              <span className="text-xs text-zinc-400 ml-1">{item.unit}</span>
                             )}
                           </td>
                           <td className="px-5 py-3">

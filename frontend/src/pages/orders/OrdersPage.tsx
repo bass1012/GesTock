@@ -50,7 +50,7 @@ export default function OrdersPage() {
         )
       case 'DRAFT':
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-zinc-100 text-zinc-700 border border-zinc-200">
             <FileText size={14} /> Brouillon
           </span>
         )
@@ -75,8 +75,8 @@ export default function OrdersPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900">Bons de Commande</h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <h1 className="text-2xl font-bold tracking-tight text-zinc-900">Bons de Commande</h1>
+          <p className="text-sm text-zinc-500 mt-1">
             Gérez vos achats fournisseurs et réceptionnez la marchandise.
           </p>
         </div>
@@ -87,9 +87,9 @@ export default function OrdersPage() {
       </div>
 
       <div className="card">
-        <div className="p-4 border-b border-gray-100 flex gap-4">
+        <div className="p-4 border-b border-zinc-100 flex gap-4">
           <div className="relative max-w-sm flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+            <Search className="absolute left-3 top-1/2 -tranzinc-y-1/2 text-zinc-400" size={20} />
             <input
               type="text"
               placeholder="Rechercher par fournisseur ou numéro de bon…"
@@ -103,50 +103,50 @@ export default function OrdersPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
-              <tr className="bg-gray-50/50 border-b border-gray-100">
-                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              <tr className="bg-zinc-50/50 border-b border-zinc-100">
+                <th className="px-6 py-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider">
                   Référence
                 </th>
-                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider">
                   Fournisseur
                 </th>
-                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider">
                   Statut
                 </th>
-                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">
+                <th className="px-6 py-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider text-right">
                   Montant Total
                 </th>
-                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">
+                <th className="px-6 py-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider text-right">
                   Action
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-zinc-100">
               {isLoading ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
+                  <td colSpan={5} className="px-6 py-8 text-center text-zinc-500">
                     Chargement…
                   </td>
                 </tr>
               ) : filteredOrders?.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
+                  <td colSpan={5} className="px-6 py-8 text-center text-zinc-500">
                     Aucun bon de commande trouvé.
                   </td>
                 </tr>
               ) : (
                 filteredOrders?.map((order) => (
-                  <tr key={order.id} className="hover:bg-gray-50/50 transition-colors group">
+                  <tr key={order.id} className="hover:bg-zinc-50/50 transition-colors group">
                     <td className="px-6 py-4">
                       <div className="font-mono text-sm text-primary font-medium">
                         #{order.id.split('-')[0].toUpperCase()}
                       </div>
-                      <div className="text-xs text-gray-500 mt-1">
+                      <div className="text-xs text-zinc-500 mt-1">
                         Créé le {formatDate(order.createdAt)}
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="font-medium text-gray-900">{order.supplierName}</div>
+                      <div className="font-medium text-zinc-900">{order.supplierName}</div>
                       {order.expectedDate && (
                         <div className="text-xs text-amber-600 mt-1 flex items-center gap-1">
                           Requis av. {formatDate(order.expectedDate)}
@@ -154,13 +154,13 @@ export default function OrdersPage() {
                       )}
                     </td>
                     <td className="px-6 py-4">{getStatusBadge(order.status)}</td>
-                    <td className="px-6 py-4 text-right font-medium text-gray-900">
+                    <td className="px-6 py-4 text-right font-medium text-zinc-900">
                       {formatAmount(order.totalAmount)}
                     </td>
                     <td className="px-6 py-4 text-right">
                       {order.status !== 'RECEIVED' && order.status !== 'CANCELLED' && (
                         <select
-                          className="text-sm border-gray-200 rounded-lg shadow-sm focus:border-primary focus:ring-primary py-1.5 pl-3 pr-8 bg-white cursor-pointer"
+                          className="text-sm border-zinc-200 rounded-lg shadow-sm focus:border-primary focus:ring-primary py-1.5 pl-3 pr-8 bg-white cursor-pointer"
                           value={order.status}
                           onChange={(e) => handleStatusChange(order.id, e.target.value)}
                         >

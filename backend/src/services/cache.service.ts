@@ -29,9 +29,9 @@ export const cacheService = {
     try {
       const { ttl = DEFAULT_TTL, tags = [] } = options
       const serialized = JSON.stringify(value)
-      
+
       await redisClient.setEx(key, ttl, serialized)
-      
+
       // Store tags for later invalidation
       if (tags.length > 0) {
         for (const tag of tags) {
@@ -88,11 +88,7 @@ export const cacheService = {
    * @param options Cache options
    * @returns Cached function result
    */
-  async wrap<T>(
-    fn: () => Promise<T>,
-    cacheKey: string,
-    options: CacheOptions = {}
-  ): Promise<T> {
+  async wrap<T>(fn: () => Promise<T>, cacheKey: string, options: CacheOptions = {}): Promise<T> {
     // Try to get from cache first
     const cached = await this.get<T>(cacheKey)
     if (cached !== null) {
@@ -113,7 +109,7 @@ export const cacheService = {
   generateKey(prefix: string, params: Record<string, unknown>): string {
     const sortedParams = Object.keys(params)
       .sort()
-      .map(key => {
+      .map((key) => {
         const val = params[key]
         if (val === null || val === undefined) return `${key}:null`
         if (typeof val === 'object') return `${key}:${JSON.stringify(val)}`
@@ -139,13 +135,13 @@ export const cacheService = {
       const tagKeys = await redisClient.keys('cache:tag:*')
       return {
         keys: allKeys.length,
-        tags: tagKeys.length
+        tags: tagKeys.length,
       }
     } catch (error) {
       console.error('[Cache] Error getting stats:', error)
       return { keys: 0, tags: 0 }
     }
-  }
+  },
 }
 
 export default cacheService

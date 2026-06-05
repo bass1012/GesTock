@@ -27,7 +27,7 @@ const SuperAdminDashboard = lazy(() => import('./pages/superadmin/SuperAdminDash
 
 function PageLoader() {
   return (
-    <div className="min-h-screen flex items-center justify-center text-slate-500">Chargement…</div>
+    <div className="min-h-screen flex items-center justify-center text-zinc-500">Chargement…</div>
   )
 }
 

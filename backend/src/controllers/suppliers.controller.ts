@@ -36,7 +36,7 @@ export const suppliersController = {
         resourceId: supplier.id,
         metadata: { name: supplier.name },
         ip: req.ip,
-        userAgent: req.headers['user-agent']
+        userAgent: req.headers['user-agent'],
       })
 
       res.status(201).json(supplier)
@@ -59,7 +59,7 @@ export const suppliersController = {
         resourceId: supplier.id,
         metadata: { name: supplier.name },
         ip: req.ip,
-        userAgent: req.headers['user-agent']
+        userAgent: req.headers['user-agent'],
       })
 
       res.json(supplier)
@@ -81,7 +81,7 @@ export const suppliersController = {
         resource: 'supplier',
         resourceId: supplierId,
         ip: req.ip,
-        userAgent: req.headers['user-agent']
+        userAgent: req.headers['user-agent'],
       })
 
       res.json({ message: 'Fournisseur supprimé' })

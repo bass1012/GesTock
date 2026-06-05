@@ -11,22 +11,22 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 async function migrate() {
-    const tenants = await prisma.tenant.findMany()
-    console.log(`Migrating ${tenants.length} tenant schema(s) for loyalty module...`)
+  const tenants = await prisma.tenant.findMany()
+  console.log(`Migrating ${tenants.length} tenant schema(s) for loyalty module...`)
 
-    for (const tenant of tenants) {
-        const schema = `tenant_${tenant.slug}`
-        console.log(`  → ${schema}`)
+  for (const tenant of tenants) {
+    const schema = `tenant_${tenant.slug}`
+    console.log(`  → ${schema}`)
 
-        // Add loyalty columns to clients table (idempotent)
-        await prisma.$executeRawUnsafe(`
+    // Add loyalty columns to clients table (idempotent)
+    await prisma.$executeRawUnsafe(`
             ALTER TABLE "${schema}".clients
             ADD COLUMN IF NOT EXISTS loyalty_points INT DEFAULT 0,
             ADD COLUMN IF NOT EXISTS total_spent DOUBLE PRECISION DEFAULT 0
         `)
 
-        // Create loyalty_transactions table (idempotent)
-        await prisma.$executeRawUnsafe(`
+    // Create loyalty_transactions table (idempotent)
+    await prisma.$executeRawUnsafe(`
             CREATE TABLE IF NOT EXISTS "${schema}".loyalty_transactions (
                 id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
                 client_id UUID NOT NULL REFERENCES "${schema}".clients(id) ON DELETE CASCADE,
@@ -38,14 +38,14 @@ async function migrate() {
             )
         `)
 
-        console.log(`  ✓ ${schema} — loyalty columns & table ready`)
-    }
+    console.log(`  ✓ ${schema} — loyalty columns & table ready`)
+  }
 
-    console.log('\nMigration fidélité terminée.')
-    await prisma.$disconnect()
+  console.log('\nMigration fidélité terminée.')
+  await prisma.$disconnect()
 }
 
 migrate().catch((err) => {
-    console.error(err)
-    process.exit(1)
+  console.error(err)
+  process.exit(1)
 })

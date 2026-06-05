@@ -39,33 +39,39 @@ app.set('trust proxy', 1)
 // Global middleware
 app.use(helmet())
 app.use(compression())
-app.use(cors({
+app.use(
+  cors({
     origin: process.env.FRONTEND_URL || 'http://localhost:5173',
     credentials: true,
-}))
+  }),
+)
 app.use(express.json({ limit: '10mb' }))
 app.use('/api', apiLimiter)
 app.use(apiKeyMiddleware) // Authentifier via clé API si le header X-API-Key est présent
 
 // Health check
 app.get('/api/health', (_req, res) => {
-    res.json({ status: 'ok', timestamp: new Date().toISOString() })
+  res.json({ status: 'ok', timestamp: new Date().toISOString() })
 })
 
 // Swagger UI — uniquement hors production ou si explicitement activé
 if (process.env.NODE_ENV !== 'production' || process.env.SWAGGER_ENABLED === 'true') {
-    app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
-        customSiteTitle: 'GesStock API Docs',
-        swaggerOptions: {
-            persistAuthorization: true,
-            docExpansion: 'list',
-            filter: true,
-        },
-    }))
-    app.get('/api/docs.json', (_req, res) => {
-        res.setHeader('Content-Type', 'application/json')
-        res.send(swaggerSpec)
-    })
+  app.use(
+    '/api/docs',
+    swaggerUi.serve,
+    swaggerUi.setup(swaggerSpec, {
+      customSiteTitle: 'GesStock API Docs',
+      swaggerOptions: {
+        persistAuthorization: true,
+        docExpansion: 'list',
+        filter: true,
+      },
+    }),
+  )
+  app.get('/api/docs.json', (_req, res) => {
+    res.setHeader('Content-Type', 'application/json')
+    res.send(swaggerSpec)
+  })
 }
 
 // API v1 routes
@@ -94,12 +100,12 @@ app.use(errorHandler)
 
 // Start server only if not in test environment
 if (process.env.NODE_ENV !== 'test') {
-    app.listen(PORT, async () => {
-        console.log(`🚀 GesStock API running on http://localhost:${PORT}`)
-        console.log(`   Environment: ${process.env.NODE_ENV || 'development'}`)
-        await connectRedis()
-        startStockAlertJob()
-    })
+  app.listen(PORT, async () => {
+    console.log(`🚀 GesStock API running on http://localhost:${PORT}`)
+    console.log(`   Environment: ${process.env.NODE_ENV || 'development'}`)
+    await connectRedis()
+    startStockAlertJob()
+  })
 }
 
 export default app

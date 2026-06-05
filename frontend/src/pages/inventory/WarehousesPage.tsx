@@ -73,8 +73,8 @@ export default function WarehousesPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Entrepôts</h1>
-          <p className="text-gray-500">Gérez vos emplacements de stockage physique</p>
+          <h1 className="text-2xl font-bold text-zinc-900">Entrepôts</h1>
+          <p className="text-zinc-500">Gérez vos emplacements de stockage physique</p>
         </div>
         <button
           onClick={() => {
@@ -103,8 +103,8 @@ export default function WarehousesPage() {
                     <Warehouse className="text-primary-600" size={24} />
                   </div>
                   <div>
-                    <h3 className="font-bold text-lg text-gray-900">{w.name}</h3>
-                    <div className="flex items-center gap-1 text-gray-500 text-sm mt-1">
+                    <h3 className="font-bold text-lg text-zinc-900">{w.name}</h3>
+                    <div className="flex items-center gap-1 text-zinc-500 text-sm mt-1">
                       <MapPin size={14} />
                       <span>{w.address || 'Aucune adresse'}</span>
                     </div>
@@ -117,7 +117,7 @@ export default function WarehousesPage() {
                       setFormData({ name: w.name, address: w.address })
                       setShowModal(true)
                     }}
-                    className="p-1.5 text-gray-400 hover:text-primary-600 transition-colors"
+                    className="p-1.5 text-zinc-400 hover:text-primary-600 transition-colors"
                   >
                     <Edit2 size={18} />
                   </button>
@@ -132,7 +132,7 @@ export default function WarehousesPage() {
                             onConfirm: () => handleDelete(w.id),
                           })
                         }
-                        className="p-1.5 text-gray-400 hover:text-red-500 transition-colors"
+                        className="p-1.5 text-zinc-400 hover:text-red-500 transition-colors"
                         aria-label={`Supprimer ${w.name}`}
                       >
                         <Trash2 size={18} />
@@ -149,13 +149,13 @@ export default function WarehousesPage() {
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-              <h2 className="text-xl font-bold text-gray-900">
+            <div className="px-6 py-4 border-b border-zinc-100 flex justify-between items-center bg-zinc-50">
+              <h2 className="text-xl font-bold text-zinc-900">
                 {editingWarehouse ? "Modifier l'entrepôt" : 'Nouvel entrepôt'}
               </h2>
               <button
                 onClick={() => setShowModal(false)}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-zinc-400 hover:text-zinc-600"
               >
                 &times;
               </button>
@@ -164,7 +164,7 @@ export default function WarehousesPage() {
               <div>
                 <label
                   htmlFor="warehouse-name"
-                  className="block text-sm font-medium text-gray-700 mb-1"
+                  className="block text-sm font-medium text-zinc-700 mb-1"
                 >
                   Nom de l'entrepôt
                 </label>
@@ -181,7 +181,7 @@ export default function WarehousesPage() {
               <div>
                 <label
                   htmlFor="warehouse-address"
-                  className="block text-sm font-medium text-gray-700 mb-1"
+                  className="block text-sm font-medium text-zinc-700 mb-1"
                 >
                   Adresse / Emplacement
                 </label>

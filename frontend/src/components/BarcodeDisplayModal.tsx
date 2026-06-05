@@ -40,27 +40,27 @@ export default function BarcodeDisplayModal({ isOpen, onClose, sku, productName 
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-900/50 backdrop-blur-sm">
       <div className="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden">
-        <div className="flex items-center justify-between p-6 border-b border-gray-100 bg-gray-50">
-          <h3 className="text-lg font-semibold text-gray-900">Code-barres Produit</h3>
+        <div className="flex items-center justify-between p-6 border-b border-zinc-100 bg-zinc-50">
+          <h3 className="text-lg font-semibold text-zinc-900">Code-barres Produit</h3>
           <button
             onClick={onClose}
-            className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors"
+            className="p-2 text-zinc-400 hover:text-zinc-600 rounded-lg hover:bg-zinc-100 transition-colors"
           >
             <X size={20} />
           </button>
         </div>
         <div className="p-8 flex flex-col items-center">
-          <p className="text-sm font-medium text-gray-700 mb-6 text-center">{productName}</p>
+          <p className="text-sm font-medium text-zinc-700 mb-6 text-center">{productName}</p>
           <div id="barcode-print-area" className="bg-white rounded-lg flex justify-center">
             <Barcode value={sku} displayValue={true} width={2} height={80} fontSize={16} />
           </div>
         </div>
-        <div className="p-6 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
+        <div className="p-6 bg-zinc-50 border-t border-zinc-100 flex justify-end gap-3">
           <button
             onClick={onClose}
-            className="px-4 py-2.5 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-white rounded-lg transition-colors border shadow-sm"
+            className="px-4 py-2.5 text-sm font-medium text-zinc-700 hover:text-zinc-900 hover:bg-white rounded-lg transition-colors border shadow-sm"
           >
             Annuler
           </button>

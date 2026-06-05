@@ -92,11 +92,11 @@ export default function TransfersPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-zinc-900 flex items-center gap-2">
             <ArrowRightLeft size={24} className="text-primary-600" />
             Transferts inter-entrepôts
           </h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-zinc-500 mt-1">
             Déplacez du stock d'un entrepôt vers un autre sans modifier le stock global.
           </p>
         </div>
@@ -112,27 +112,27 @@ export default function TransfersPage() {
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         {/* Form : 3 cols */}
         <div className="lg:col-span-3">
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-primary-50 to-white">
-              <h2 className="text-base font-semibold text-gray-800">Nouveau transfert</h2>
+          <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm overflow-hidden">
+            <div className="px-6 py-4 border-b border-zinc-100 bg-gradient-to-r from-primary-50 to-white">
+              <h2 className="text-base font-semibold text-zinc-800">Nouveau transfert</h2>
             </div>
 
             {isLoading ? (
-              <div className="p-8 text-center text-gray-400">Chargement…</div>
+              <div className="p-8 text-center text-zinc-400">Chargement…</div>
             ) : (
               <form onSubmit={handleSubmit} className="p-6 space-y-5">
                 {/* Produit */}
                 <div>
                   <label
                     htmlFor="transfer-product"
-                    className="text-sm font-medium text-gray-700 flex items-center gap-1.5 mb-1"
+                    className="text-sm font-medium text-zinc-700 flex items-center gap-1.5 mb-1"
                   >
-                    <Package size={14} className="text-gray-400" />
+                    <Package size={14} className="text-zinc-400" />
                     Produit
                   </label>
                   <select
                     id="transfer-product"
-                    className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white ${submitted && !form.productId ? 'border-red-400' : 'border-gray-300'}`}
+                    className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white ${submitted && !form.productId ? 'border-red-400' : 'border-zinc-300'}`}
                     value={form.productId}
                     onChange={(e) =>
                       setForm((f) => ({
@@ -143,7 +143,7 @@ export default function TransfersPage() {
                       }))
                     }
                   >
-                    <option value="">: Sélectionner un produit,</option>
+                    <option value="">Sélectionner un produit…</option>
                     {products.map((p) => (
                       <option key={p.id} value={p.id}>
                         {p.name} ({p.sku}) : Stock: {p.currentStock} {p.unit}
@@ -167,24 +167,24 @@ export default function TransfersPage() {
                 <div>
                   <label
                     htmlFor="transfer-source"
-                    className="text-sm font-medium text-gray-700 flex items-center gap-1.5 mb-3"
+                    className="text-sm font-medium text-zinc-700 flex items-center gap-1.5 mb-3"
                   >
-                    <Warehouse size={14} className="text-gray-400" />
+                    <Warehouse size={14} className="text-zinc-400" />
                     Trajet du transfert
                   </label>
                   <div className="flex items-center gap-3">
                     {/* Source */}
                     <div className="flex-1">
-                      <p className="text-xs text-gray-400 mb-1">Depuis</p>
+                      <p className="text-xs text-zinc-400 mb-1">Depuis</p>
                       <select
                         id="transfer-source"
-                        className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white ${submitted && !form.sourceWarehouseId ? 'border-red-400' : isSameWarehouse ? 'border-orange-400' : 'border-gray-300'}`}
+                        className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white ${submitted && !form.sourceWarehouseId ? 'border-red-400' : isSameWarehouse ? 'border-orange-400' : 'border-zinc-300'}`}
                         value={form.sourceWarehouseId}
                         onChange={(e) =>
                           setForm((f) => ({ ...f, sourceWarehouseId: e.target.value }))
                         }
                       >
-                        <option value="">: Source,</option>
+                        <option value="">Source…</option>
                         {warehouses.map((w) => {
                           const qty = stockByWarehouse[w.id]
                           const label =
@@ -216,16 +216,16 @@ export default function TransfersPage() {
 
                     {/* Destination */}
                     <div className="flex-1">
-                      <p className="text-xs text-gray-400 mb-1">Vers</p>
+                      <p className="text-xs text-zinc-400 mb-1">Vers</p>
                       <select
                         id="transfer-destination"
-                        className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white ${submitted && !form.destWarehouseId ? 'border-red-400' : isSameWarehouse ? 'border-orange-400' : 'border-gray-300'}`}
+                        className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white ${submitted && !form.destWarehouseId ? 'border-red-400' : isSameWarehouse ? 'border-orange-400' : 'border-zinc-300'}`}
                         value={form.destWarehouseId}
                         onChange={(e) =>
                           setForm((f) => ({ ...f, destWarehouseId: e.target.value }))
                         }
                       >
-                        <option value="">: Destination,</option>
+                        <option value="">Destination…</option>
                         {warehouses.map((w) => (
                           <option
                             key={w.id}
@@ -253,7 +253,7 @@ export default function TransfersPage() {
                 <div>
                   <label
                     htmlFor="transfer-quantity"
-                    className="text-sm font-medium text-gray-700 mb-1 block"
+                    className="text-sm font-medium text-zinc-700 mb-1 block"
                   >
                     Quantité à transférer
                   </label>
@@ -263,15 +263,15 @@ export default function TransfersPage() {
                       type="number"
                       min={1}
                       max={sourceStock ?? undefined}
-                      className={`w-32 px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 ${submitted && form.quantity < 1 ? 'border-red-400' : 'border-gray-300'}`}
+                      className={`w-32 px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 ${submitted && form.quantity < 1 ? 'border-red-400' : 'border-zinc-300'}`}
                       value={form.quantity}
                       onChange={(e) =>
                         setForm((f) => ({ ...f, quantity: parseInt(e.target.value) || 1 }))
                       }
                     />
                     {sourceStock !== null && (
-                      <span className="text-xs text-gray-500">
-                        / <span className="font-medium text-gray-700">{sourceStock}</span>{' '}
+                      <span className="text-xs text-zinc-500">
+                        / <span className="font-medium text-zinc-700">{sourceStock}</span>{' '}
                         disponible
                         {form.quantity > sourceStock && (
                           <span className="ml-2 text-red-500 font-medium">: insuffisant</span>
@@ -285,14 +285,14 @@ export default function TransfersPage() {
                 <div>
                   <label
                     htmlFor="transfer-note"
-                    className="text-sm font-medium text-gray-700 mb-1 block"
+                    className="text-sm font-medium text-zinc-700 mb-1 block"
                   >
-                    Note <span className="text-gray-400 font-normal">(optionnel)</span>
+                    Note <span className="text-zinc-400 font-normal">(optionnel)</span>
                   </label>
                   <input
                     id="transfer-note"
                     type="text"
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    className="w-full px-3 py-2 text-sm border border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                     placeholder="Ex: Réapprovisionnement succursale nord"
                     value={form.note}
                     onChange={(e) => setForm((f) => ({ ...f, note: e.target.value }))}
@@ -305,11 +305,11 @@ export default function TransfersPage() {
                   destWarehouse &&
                   form.quantity > 0 &&
                   !isSameWarehouse && (
-                    <div className="bg-gray-50 rounded-xl border border-gray-200 px-4 py-3 flex items-center gap-3 text-sm">
+                    <div className="bg-zinc-50 rounded-xl border border-zinc-200 px-4 py-3 flex items-center gap-3 text-sm">
                       <CheckCircle size={16} className="text-green-500 shrink-0" />
-                      <span className="text-gray-600">
+                      <span className="text-zinc-600">
                         Transfert de{' '}
-                        <span className="font-semibold text-gray-900">
+                        <span className="font-semibold text-zinc-900">
                           {form.quantity} × {selectedProduct.name}
                         </span>{' '}
                         depuis{' '}
@@ -346,28 +346,28 @@ export default function TransfersPage() {
 
         {/* Historique récent : 2 cols */}
         <div className="lg:col-span-2">
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden h-full">
-            <div className="px-6 py-4 border-b border-gray-100">
-              <h2 className="text-base font-semibold text-gray-800 flex items-center gap-2">
-                <Clock size={16} className="text-gray-400" />
+          <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm overflow-hidden h-full">
+            <div className="px-6 py-4 border-b border-zinc-100">
+              <h2 className="text-base font-semibold text-zinc-800 flex items-center gap-2">
+                <Clock size={16} className="text-zinc-400" />
                 Transferts récents
               </h2>
             </div>
             {recentTransfers.length === 0 ? (
               <div className="p-8 text-center">
-                <ArrowRightLeft size={36} className="mx-auto text-gray-200 mb-3" />
-                <p className="text-sm text-gray-400">Aucun transfert effectué.</p>
+                <ArrowRightLeft size={36} className="mx-auto text-zinc-200 mb-3" />
+                <p className="text-sm text-zinc-400">Aucun transfert effectué.</p>
               </div>
             ) : (
-              <ul className="divide-y divide-gray-50">
+              <ul className="divide-y divide-zinc-50">
                 {recentTransfers.map((m) => (
-                  <li key={m.id} className="px-5 py-3.5 hover:bg-gray-50 transition-colors">
+                  <li key={m.id} className="px-5 py-3.5 hover:bg-zinc-50 transition-colors">
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate">
+                        <p className="text-sm font-medium text-zinc-900 truncate">
                           {m.product?.name ?? '-'}
                         </p>
-                        <p className="text-xs text-gray-400 mt-0.5">
+                        <p className="text-xs text-zinc-400 mt-0.5">
                           {m.note ?? 'Transfert stock'}
                         </p>
                       </div>
@@ -376,7 +376,7 @@ export default function TransfersPage() {
                         {m.quantity}
                       </span>
                     </div>
-                    <p className="text-xs text-gray-300 mt-1">{formatDateTime(m.createdAt)}</p>
+                    <p className="text-xs text-zinc-300 mt-1">{formatDateTime(m.createdAt)}</p>
                   </li>
                 ))}
               </ul>

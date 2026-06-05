@@ -44,22 +44,22 @@ export default function BarcodeScannerModal({ isOpen, onClose, onScan }: Props) 
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-900/50 backdrop-blur-sm">
       <div className="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden">
-        <div className="flex items-center justify-between p-6 border-b border-gray-100 bg-gray-50">
-          <h3 className="text-lg font-semibold text-gray-900">Scanner un Code-barres</h3>
+        <div className="flex items-center justify-between p-6 border-b border-zinc-100 bg-zinc-50">
+          <h3 className="text-lg font-semibold text-zinc-900">Scanner un Code-barres</h3>
           <button
             onClick={() => {
               onClose()
             }}
-            className="p-2 text-gray-500 hover:text-red-600 rounded-lg hover:bg-gray-100 transition-colors"
+            className="p-2 text-zinc-500 hover:text-red-600 rounded-lg hover:bg-zinc-100 transition-colors"
           >
             <X size={20} />
           </button>
         </div>
         <div className="p-6">
           <div id="reader" className="w-full mx-auto" style={{ minHeight: '300px' }}></div>
-          <p className="text-sm text-gray-500 text-center mt-6">
+          <p className="text-sm text-zinc-500 text-center mt-6">
             Placez le code-barres de l'article devant la caméra, la lecture est automatique.
           </p>
         </div>

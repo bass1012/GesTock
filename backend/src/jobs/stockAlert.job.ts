@@ -28,12 +28,18 @@ export function startStockAlertJob() {
         const schemaName = `tenant_${tenant.slug}`
 
         try {
-          const lowStockProducts = await prisma.$queryRawUnsafe(
+          const lowStockProducts = (await prisma.$queryRawUnsafe(
             `SELECT id, name, sku, current_stock, min_stock
              FROM "${schemaName}".products
              WHERE current_stock <= min_stock AND is_active = true
-             ORDER BY (min_stock - current_stock) DESC`
-          ) as Array<{ id: string; name: string; sku: string; current_stock: number; min_stock: number }>
+             ORDER BY (min_stock - current_stock) DESC`,
+          )) as Array<{
+            id: string
+            name: string
+            sku: string
+            current_stock: number
+            min_stock: number
+          }>
 
           if (lowStockProducts.length === 0) continue
 
@@ -52,7 +58,7 @@ export function startStockAlertJob() {
           }
 
           console.log(
-            `[StockAlertJob] Tenant "${tenant.slug}" — ${lowStockProducts.length} alerte(s) envoyée(s)`
+            `[StockAlertJob] Tenant "${tenant.slug}" — ${lowStockProducts.length} alerte(s) envoyée(s)`,
           )
         } catch (schemaErr) {
           // Le schéma peut ne pas exister pour les tenants très récents
@@ -74,7 +80,7 @@ export function startStockAlertJob() {
  */
 export async function runStockAlertNow(tenantSlug?: string) {
   const where = tenantSlug ? { slug: tenantSlug } : {}
-  
+
   const tenants = await prisma.tenant.findMany({
     where,
     include: {
@@ -90,11 +96,11 @@ export async function runStockAlertNow(tenantSlug?: string) {
   for (const tenant of tenants) {
     const schemaName = `tenant_${tenant.slug}`
     try {
-      const lowStockProducts = await prisma.$queryRawUnsafe(
+      const lowStockProducts = (await prisma.$queryRawUnsafe(
         `SELECT name, sku, current_stock, min_stock
          FROM "${schemaName}".products
-         WHERE current_stock <= min_stock AND is_active = true`
-      ) as any[]
+         WHERE current_stock <= min_stock AND is_active = true`,
+      )) as any[]
 
       results[tenant.slug] = lowStockProducts.length
 

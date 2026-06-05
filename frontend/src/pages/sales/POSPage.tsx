@@ -3,9 +3,7 @@ import { useProducts } from '../../hooks/useProducts'
 import { useSales } from '../../hooks/useSales'
 import { useClients } from '../../hooks/useClients'
 import { useClientLoyalty } from '../../hooks/useLoyalty'
-import { jsPDF } from 'jspdf'
-import autoTable from 'jspdf-autotable'
-import { format } from 'date-fns'
+import { downloadReceiptPDF } from '../../utils/pdfExport'
 import {
   ShoppingCart,
   Plus,
@@ -82,73 +80,6 @@ export default function POSPage() {
     )
   }
 
-  const generateReceipt = (saleRef: string, pointsEarned: number) => {
-    const doc = new jsPDF()
-
-    doc.setFontSize(22)
-    doc.setTextColor(37, 99, 235)
-    doc.text('GesStock', 14, 20)
-
-    doc.setFontSize(10)
-    doc.setTextColor(100)
-    doc.text(`Reçu N° : ${saleRef}`, 14, 30)
-    doc.text(`Date : ${format(new Date(), 'dd/MM/yyyy HH:mm')}`, 14, 36)
-    const displayName = selectedClientId
-      ? clients.find((c) => c.id === selectedClientId)?.name
-      : clientName
-    if (displayName) doc.text(`Client : ${displayName}`, 14, 42)
-
-    const tableBody = cart.map((item) => [
-      item.product.name,
-      item.quantity.toString(),
-      item.product.price.toLocaleString('fr-FR').replace(/\s/g, ' '),
-      (item.product.price * item.quantity).toLocaleString('fr-FR').replace(/\s/g, ' '),
-    ])
-
-    autoTable(doc, {
-      startY: 50,
-      head: [['Produit', 'Qté', 'Prix Unitaire', 'Total']],
-      body: tableBody,
-      theme: 'striped',
-      headStyles: { fillColor: [37, 99, 235] },
-      margin: { left: 14, right: 14 },
-    })
-
-    const finalY = (doc as any).lastAutoTable.finalY + 10
-    doc.text(
-      `Sous-total : ${subTotal.toLocaleString('fr-FR').replace(/\s/g, ' ')} F CFA`,
-      140,
-      finalY,
-    )
-    if (taxRate > 0)
-      doc.text(
-        `Taxe (${taxRate}%) : ${taxAmount.toLocaleString('fr-FR').replace(/\s/g, ' ')} F CFA`,
-        140,
-        finalY + 6,
-      )
-    if (loyaltyDiscount > 0)
-      doc.text(
-        `Remise fidélité : -${loyaltyDiscount.toLocaleString('fr-FR').replace(/\s/g, ' ')} F CFA`,
-        140,
-        finalY + 12,
-      )
-    doc.setFontSize(12)
-    doc.setFont('helvetica', 'bold')
-    doc.text(
-      `TOTAL : ${superTotal.toLocaleString('fr-FR').replace(/\s/g, ' ')} F CFA`,
-      140,
-      finalY + 20,
-    )
-    if (pointsEarned > 0) {
-      doc.setFontSize(9)
-      doc.setFont('helvetica', 'normal')
-      doc.setTextColor(22, 163, 74)
-      doc.text(`★ Points fidélité gagnés : +${pointsEarned} pts`, 14, finalY + 28)
-    }
-
-    doc.save(`Recu_${saleRef}.pdf`)
-  }
-
   const handleCheckout = async () => {
     if (!selectedWarehouseId) return toast.error('Veuillez sélectionner un entrepôt de sortie')
     if (cart.length === 0) return toast.error('Le panier est vide')
@@ -171,7 +102,7 @@ export default function POSPage() {
         })),
       })
 
-      generateReceipt(sale.reference, sale.pointsEarned || 0)
+      await downloadReceiptPDF(sale.id, sale.reference)
       setCart([])
       setClientName('')
       setSelectedClientId('')
@@ -183,19 +114,19 @@ export default function POSPage() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] bg-gray-50 overflow-hidden">
+    <div className="flex flex-col lg:flex-row h-[calc(100vh-4rem)] bg-zinc-50 overflow-hidden">
       {/* Products Grid */}
-      <div className="flex-1 p-6 overflow-y-auto">
+      <div className="flex-1 p-4 lg:p-6 overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Catalogue Caisse</h1>
+          <h1 className="text-2xl font-bold text-zinc-900">Catalogue Caisse</h1>
           <div className="relative w-64">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+            <Search className="absolute left-3 top-1/2 -tranzinc-y-1/2 text-zinc-400" size={18} />
             <input
               type="text"
               placeholder="Rechercher par nom, SKU…"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 rounded-lg bg-white border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all"
+              className="w-full pl-10 pr-4 py-2 rounded-lg bg-white border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all"
             />
           </div>
         </div>
@@ -207,10 +138,10 @@ export default function POSPage() {
               tabIndex={0}
               onClick={() => addToCart(p)}
               onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && addToCart(p)}
-              className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 cursor-pointer hover:shadow-md hover:border-primary-200 transition-all active:scale-[0.98]"
+              className="bg-white p-4 rounded-xl shadow-sm border border-zinc-100 cursor-pointer hover:shadow-md hover:border-primary-200 transition-all active:scale-[0.98]"
             >
-              <h3 className="font-semibold text-gray-900 line-clamp-1">{p.name}</h3>
-              <p className="text-sm text-gray-500 mb-3">{p.sku}</p>
+              <h3 className="font-semibold text-zinc-900 line-clamp-1">{p.name}</h3>
+              <p className="text-sm text-zinc-500 mb-3">{p.sku}</p>
               <div className="flex justify-between items-end">
                 <span className="font-bold text-primary-600">
                   {p.price.toLocaleString('fr-FR')} F
@@ -227,8 +158,8 @@ export default function POSPage() {
       </div>
 
       {/* Cart Panel */}
-      <div className="w-96 bg-white border-l border-gray-200 flex flex-col shadow-[-4px_0_24px_rgba(0,0,0,0.02)] z-10">
-        <div className="p-4 border-b border-gray-100 flex items-center gap-2">
+      <div className="w-full lg:w-96 h-[480px] lg:h-full bg-white border-t lg:border-t-0 lg:border-l border-zinc-200 flex flex-col shadow-[-4px_0_24px_rgba(0,0,0,0.02)] z-10">
+        <div className="p-4 border-b border-zinc-100 flex items-center gap-2">
           <ShoppingCart className="text-primary-600" />
           <h2 className="text-lg font-bold">Panier Actuel</h2>
         </div>
@@ -240,11 +171,11 @@ export default function POSPage() {
                 <h4 className="text-sm font-semibold truncate leading-tight">
                   {item.product.name}
                 </h4>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-zinc-500">
                   {(item.product.price * item.quantity).toLocaleString()} F
                 </p>
               </div>
-              <div className="flex items-center gap-2 bg-gray-50 rounded-lg p-1 border">
+              <div className="flex items-center gap-2 bg-zinc-50 rounded-lg p-1 border">
                 <button
                   onClick={() => updateQuantity(item.product.id, -1)}
                   className="p-1 hover:bg-white rounded"
@@ -268,19 +199,19 @@ export default function POSPage() {
             </div>
           ))}
           {cart.length === 0 && (
-            <div className="h-full flex flex-col items-center justify-center text-gray-400">
+            <div className="h-full flex flex-col items-center justify-center text-zinc-400">
               <ShoppingCart size={48} className="mb-4 opacity-20" />
               <p>Le panier est vide</p>
             </div>
           )}
         </div>
 
-        <div className="p-4 bg-gray-50 border-t border-gray-200 space-y-4">
+        <div className="p-4 bg-zinc-50 border-t border-zinc-200 space-y-4">
           <div className="space-y-3">
             <div>
               <label
                 htmlFor="pos-warehouse"
-                className="text-xs font-semibold text-gray-500 uppercase flex items-center gap-1"
+                className="text-xs font-semibold text-zinc-500 uppercase flex items-center gap-1"
               >
                 <Warehouse size={12} /> Entrepôt de Sortie *
               </label>
@@ -300,7 +231,7 @@ export default function POSPage() {
               </select>
             </div>
             <div>
-              <label htmlFor="pos-client" className="text-xs font-semibold text-gray-500 uppercase">
+              <label htmlFor="pos-client" className="text-xs font-semibold text-zinc-500 uppercase">
                 Nom du client (Optionnel)
               </label>
               <select
@@ -374,12 +305,12 @@ export default function POSPage() {
             </div>
           </div>
 
-          <div className="pt-3 border-t border-gray-200">
-            <div className="flex justify-between text-sm text-gray-600 mb-1">
+          <div className="pt-3 border-t border-zinc-200">
+            <div className="flex justify-between text-sm text-zinc-600 mb-1">
               <span>Sous-total</span>
               <span>{subTotal.toLocaleString()} F</span>
             </div>
-            <div className="flex justify-between text-sm text-gray-600 mb-2">
+            <div className="flex justify-between text-sm text-zinc-600 mb-2">
               <span>Taxe</span>
               <span>{taxAmount.toLocaleString()} F</span>
             </div>
@@ -393,7 +324,7 @@ export default function POSPage() {
               </div>
             )}
             <div className="flex justify-between items-end">
-              <span className="font-bold text-gray-900">Total à Payer</span>
+              <span className="font-bold text-zinc-900">Total à Payer</span>
               <span className="text-2xl font-bold text-primary-600">
                 {superTotal.toLocaleString('fr-FR')} F
               </span>

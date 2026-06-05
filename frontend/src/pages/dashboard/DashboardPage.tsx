@@ -58,8 +58,8 @@ export default function DashboardPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-gray-500 mt-1">Vue d'ensemble de votre gestion de stock</p>
+        <h1 className="text-2xl font-bold text-zinc-900">Dashboard</h1>
+        <p className="text-zinc-500 mt-1">Vue d'ensemble de votre gestion de stock</p>
       </div>
 
       {/* KPI Cards */}
@@ -67,9 +67,9 @@ export default function DashboardPage() {
         {isLoading
           ? ['sk-k1', 'sk-k2', 'sk-k3', 'sk-k4'].map((sk) => (
               <div key={sk} className="card p-6 animate-pulse">
-                <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
-                <div className="h-8 bg-gray-200 rounded w-1/2 mb-2" />
-                <div className="h-3 bg-gray-100 rounded w-2/3" />
+                <div className="h-4 bg-zinc-200 rounded w-3/4 mb-2" />
+                <div className="h-8 bg-zinc-200 rounded w-1/2 mb-2" />
+                <div className="h-3 bg-zinc-100 rounded w-2/3" />
               </div>
             ))
           : kpiCards.map((card) => (
@@ -85,9 +85,9 @@ export default function DashboardPage() {
                   </div>
                   {card.alert && <AlertTriangle size={16} className="text-amber-500" />}
                 </div>
-                <p className="text-2xl font-bold text-gray-900 truncate">{card.value}</p>
-                <p className="text-sm font-medium text-gray-700 mt-1">{card.label}</p>
-                <p className="text-xs text-gray-400 mt-0.5">{card.sub}</p>
+                <p className="text-2xl font-bold text-zinc-900 truncate">{card.value}</p>
+                <p className="text-sm font-medium text-zinc-700 mt-1">{card.label}</p>
+                <p className="text-xs text-zinc-400 mt-0.5">{card.sub}</p>
               </div>
             ))}
       </div>
@@ -97,13 +97,13 @@ export default function DashboardPage() {
         {/* Mouvements récents */}
         <div className="card p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">Mouvements récents</h3>
+            <h3 className="text-lg font-semibold text-zinc-900">Mouvements récents</h3>
             <Link to="/movements" className="text-sm text-blue-600 hover:text-blue-700 font-medium">
               Voir tout →
             </Link>
           </div>
           {movementsData?.movements.length === 0 || !movementsData ? (
-            <div className="flex items-center justify-center h-40 text-gray-400">
+            <div className="flex items-center justify-center h-40 text-zinc-400">
               <div className="text-center">
                 <Package size={36} className="mx-auto mb-2 opacity-40" />
                 <p className="text-sm">Aucun mouvement pour le moment</p>
@@ -114,7 +114,7 @@ export default function DashboardPage() {
               {movementsData.movements.map((mov) => (
                 <div
                   key={mov.id}
-                  className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0"
+                  className="flex items-center justify-between py-2 border-b border-zinc-50 last:border-0"
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <span
@@ -127,10 +127,10 @@ export default function DashboardPage() {
                       }`}
                     />
                     <div className="min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">
+                      <p className="text-sm font-medium text-zinc-900 truncate">
                         {mov.product.name}
                       </p>
-                      <p className="text-xs text-gray-400">
+                      <p className="text-xs text-zinc-400">
                         {formatDate(mov.createdAt)} · {mov.product.sku}
                       </p>
                     </div>
@@ -154,17 +154,17 @@ export default function DashboardPage() {
         {/* Alertes de stock */}
         <div className="card p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">Alertes de stock</h3>
+            <h3 className="text-lg font-semibold text-zinc-900">Alertes de stock</h3>
             <Link to="/inventory" className="text-sm text-blue-600 hover:text-blue-700 font-medium">
               Gérer →
             </Link>
           </div>
           {!stats || stats.lowStockCount === 0 ? (
-            <div className="flex items-center justify-center h-40 text-gray-400">
+            <div className="flex items-center justify-center h-40 text-zinc-400">
               <div className="text-center">
                 <AlertTriangle size={36} className="mx-auto mb-2 opacity-40" />
                 <p className="text-sm">Aucune alerte de stock</p>
-                <p className="text-xs text-gray-300 mt-1">
+                <p className="text-xs text-zinc-300 mt-1">
                   Tous les stocks sont au-dessus du seuil
                 </p>
               </div>
@@ -183,7 +183,7 @@ export default function DashboardPage() {
                 .slice(0, 4)
                 .map((p: any) => (
                   <div key={p.id} className="flex items-center justify-between py-1.5">
-                    <p className="text-sm text-gray-700 truncate">{p.name}</p>
+                    <p className="text-sm text-zinc-700 truncate">{p.name}</p>
                     <span className="text-xs font-medium text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full ml-2 shrink-0">
                       Stock: {p.currentStock}
                     </span>

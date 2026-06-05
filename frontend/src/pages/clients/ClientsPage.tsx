@@ -9,7 +9,7 @@ const formatDate = (d: string) => new Date(d).toLocaleDateString('fr-FR')
 function LoyaltyPanel({ clientId, onClose }: { clientId: string; onClose: () => void }) {
   const { data: loyalty, isLoading } = useClientLoyalty(clientId)
 
-  if (isLoading) return <div className="p-6 text-center text-gray-400">Chargement…</div>
+  if (isLoading) return <div className="p-6 text-center text-zinc-400">Chargement…</div>
   if (!loyalty) return null
 
   return (
@@ -29,9 +29,9 @@ function LoyaltyPanel({ clientId, onClose }: { clientId: string; onClose: () => 
         <div className="flex justify-between items-start mb-4">
           <div>
             <h2 className="text-xl font-bold">{loyalty.name}</h2>
-            <p className="text-sm text-gray-500">{loyalty.email || loyalty.phone || '-'}</p>
+            <p className="text-sm text-zinc-500">{loyalty.email || loyalty.phone || '-'}</p>
           </div>
-          <button onClick={onClose} className="p-1 rounded-lg hover:bg-gray-100">
+          <button onClick={onClose} className="p-1 rounded-lg hover:bg-zinc-100">
             <X size={18} />
           </button>
         </div>
@@ -58,19 +58,19 @@ function LoyaltyPanel({ clientId, onClose }: { clientId: string; onClose: () => 
         </div>
 
         {/* Historique */}
-        <h3 className="text-sm font-semibold text-gray-700 mb-2">Historique des points</h3>
+        <h3 className="text-sm font-semibold text-zinc-700 mb-2">Historique des points</h3>
         <div className="space-y-2 max-h-64 overflow-y-auto">
           {loyalty.transactions.length === 0 && (
-            <p className="text-sm text-gray-400 text-center py-4">Aucune transaction</p>
+            <p className="text-sm text-zinc-400 text-center py-4">Aucune transaction</p>
           )}
           {loyalty.transactions.map((t) => (
             <div
               key={t.id}
-              className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0"
+              className="flex items-center justify-between py-2 border-b border-zinc-50 last:border-0"
             >
               <div>
                 <p className="text-sm">{t.description}</p>
-                <p className="text-xs text-gray-400">{formatDate(t.createdAt)}</p>
+                <p className="text-xs text-zinc-400">{formatDate(t.createdAt)}</p>
               </div>
               <span
                 className={`font-bold text-sm ${t.type === 'EARN' ? 'text-green-600' : 'text-red-500'}`}
@@ -112,13 +112,13 @@ function NewClientModal({ onClose }: { onClose: () => void }) {
       >
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-bold">Nouveau Client</h2>
-          <button onClick={onClose} className="p-1 rounded-lg hover:bg-gray-100">
+          <button onClick={onClose} className="p-1 rounded-lg hover:bg-zinc-100">
             <X size={18} />
           </button>
         </div>
         <form onSubmit={handleSubmit} className="space-y-3">
           <div>
-            <label htmlFor="client-name" className="text-sm font-medium text-gray-700">
+            <label htmlFor="client-name" className="text-sm font-medium text-zinc-700">
               Nom *
             </label>
             <input
@@ -131,7 +131,7 @@ function NewClientModal({ onClose }: { onClose: () => void }) {
             />
           </div>
           <div>
-            <label htmlFor="client-email" className="text-sm font-medium text-gray-700">
+            <label htmlFor="client-email" className="text-sm font-medium text-zinc-700">
               Email
             </label>
             <input
@@ -144,7 +144,7 @@ function NewClientModal({ onClose }: { onClose: () => void }) {
             />
           </div>
           <div>
-            <label htmlFor="client-phone" className="text-sm font-medium text-gray-700">
+            <label htmlFor="client-phone" className="text-sm font-medium text-zinc-700">
               Téléphone
             </label>
             <input
@@ -156,7 +156,7 @@ function NewClientModal({ onClose }: { onClose: () => void }) {
             />
           </div>
           <div>
-            <label htmlFor="client-address" className="text-sm font-medium text-gray-700">
+            <label htmlFor="client-address" className="text-sm font-medium text-zinc-700">
               Adresse
             </label>
             <input
@@ -171,7 +171,7 @@ function NewClientModal({ onClose }: { onClose: () => void }) {
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-sm rounded-lg border hover:bg-gray-50"
+              className="px-4 py-2 text-sm rounded-lg border hover:bg-zinc-50"
             >
               Annuler
             </button>
@@ -210,8 +210,8 @@ export default function ClientsPage() {
             <Users size={22} className="text-primary-600" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Clients & Fidélité</h1>
-            <p className="text-sm text-gray-500">
+            <h1 className="text-2xl font-bold text-zinc-900">Clients & Fidélité</h1>
+            <p className="text-sm text-zinc-500">
               Gérez vos clients et suivez leurs points de fidélité
             </p>
           </div>
@@ -244,37 +244,37 @@ export default function ClientsPage() {
       </div>
 
       {/* Tableau clients */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-sm border border-zinc-100 overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="bg-gray-50 border-b">
+          <thead className="bg-zinc-50 border-b">
             <tr>
-              <th className="text-left px-4 py-3 font-semibold text-gray-600">Nom</th>
-              <th className="text-left px-4 py-3 font-semibold text-gray-600">Contact</th>
-              <th className="text-center px-4 py-3 font-semibold text-gray-600">Points fidélité</th>
-              <th className="text-right px-4 py-3 font-semibold text-gray-600">Total dépensé</th>
-              <th className="text-right px-4 py-3 font-semibold text-gray-600">Remise dispo.</th>
+              <th className="text-left px-4 py-3 font-semibold text-zinc-600">Nom</th>
+              <th className="text-left px-4 py-3 font-semibold text-zinc-600">Contact</th>
+              <th className="text-center px-4 py-3 font-semibold text-zinc-600">Points fidélité</th>
+              <th className="text-right px-4 py-3 font-semibold text-zinc-600">Total dépensé</th>
+              <th className="text-right px-4 py-3 font-semibold text-zinc-600">Remise dispo.</th>
               <th className="px-4 py-3"></th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-50">
+          <tbody className="divide-y divide-zinc-50">
             {isLoading && (
               <tr>
-                <td colSpan={6} className="text-center py-8 text-gray-400">
+                <td colSpan={6} className="text-center py-8 text-zinc-400">
                   Chargement…
                 </td>
               </tr>
             )}
             {!isLoading && filtered.length === 0 && (
               <tr>
-                <td colSpan={6} className="text-center py-8 text-gray-400">
+                <td colSpan={6} className="text-center py-8 text-zinc-400">
                   Aucun client trouvé
                 </td>
               </tr>
             )}
             {filtered.map((c: any) => (
-              <tr key={c.id} className="hover:bg-gray-50 transition-colors">
-                <td className="px-4 py-3 font-medium text-gray-900">{c.name}</td>
-                <td className="px-4 py-3 text-gray-500">{c.email || c.phone || '-'}</td>
+              <tr key={c.id} className="hover:bg-zinc-50 transition-colors">
+                <td className="px-4 py-3 font-medium text-zinc-900">{c.name}</td>
+                <td className="px-4 py-3 text-zinc-500">{c.email || c.phone || '-'}</td>
                 <td className="px-4 py-3 text-center">
                   {c.loyaltyPoints > 0 ? (
                     <span className="inline-flex items-center gap-1 bg-amber-100 text-amber-700 px-2 py-1 rounded-full text-xs font-semibold">
@@ -282,10 +282,10 @@ export default function ClientsPage() {
                       pts
                     </span>
                   ) : (
-                    <span className="text-gray-300">-</span>
+                    <span className="text-zinc-300">-</span>
                   )}
                 </td>
-                <td className="px-4 py-3 text-right text-gray-700">
+                <td className="px-4 py-3 text-right text-zinc-700">
                   {c.totalSpent > 0 ? formatCFA(c.totalSpent) : '-'}
                 </td>
                 <td className="px-4 py-3 text-right">
@@ -294,7 +294,7 @@ export default function ClientsPage() {
                       {formatCFA(c.loyaltyPoints * 50)}
                     </span>
                   ) : (
-                    <span className="text-gray-300">-</span>
+                    <span className="text-zinc-300">-</span>
                   )}
                 </td>
                 <td className="px-4 py-3 text-right">

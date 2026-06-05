@@ -70,12 +70,12 @@ export default function ProductModal({ product, onClose }: ProductModalProps) {
 
       {/* Modal */}
       <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900">
+        <div className="flex items-center justify-between p-6 border-b border-zinc-200">
+          <h2 className="text-lg font-semibold text-zinc-900">
             {isEditing ? 'Modifier le produit' : 'Nouveau produit'}
           </h2>
-          <button onClick={onClose} className="p-2 rounded-lg hover:bg-gray-100 transition-colors">
-            <X size={20} className="text-gray-500" />
+          <button onClick={onClose} className="p-2 rounded-lg hover:bg-zinc-100 transition-colors">
+            <X size={20} className="text-zinc-500" />
           </button>
         </div>
 
@@ -84,7 +84,7 @@ export default function ProductModal({ product, onClose }: ProductModalProps) {
             <div className="col-span-2">
               <label
                 htmlFor="product-name"
-                className="block text-sm font-medium text-gray-700 mb-1"
+                className="block text-sm font-medium text-zinc-700 mb-1"
               >
                 Nom du produit
               </label>
@@ -103,7 +103,7 @@ export default function ProductModal({ product, onClose }: ProductModalProps) {
                             but for now we just make sure we don't lose the ID if it exists */}
 
             <div>
-              <label htmlFor="product-sku" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="product-sku" className="block text-sm font-medium text-zinc-700 mb-1">
                 SKU / Code
               </label>
               <input
@@ -120,7 +120,7 @@ export default function ProductModal({ product, onClose }: ProductModalProps) {
             <div>
               <label
                 htmlFor="product-status"
-                className="block text-sm font-medium text-gray-700 mb-1"
+                className="block text-sm font-medium text-zinc-700 mb-1"
               >
                 Statut du produit
               </label>
@@ -138,7 +138,7 @@ export default function ProductModal({ product, onClose }: ProductModalProps) {
             <div>
               <label
                 htmlFor="product-unit"
-                className="block text-sm font-medium text-gray-700 mb-1"
+                className="block text-sm font-medium text-zinc-700 mb-1"
               >
                 Unité
               </label>
@@ -160,7 +160,7 @@ export default function ProductModal({ product, onClose }: ProductModalProps) {
             <div>
               <label
                 htmlFor="product-price"
-                className="block text-sm font-medium text-gray-700 mb-1"
+                className="block text-sm font-medium text-zinc-700 mb-1"
               >
                 Prix unitaire (F CFA)
               </label>
@@ -179,7 +179,7 @@ export default function ProductModal({ product, onClose }: ProductModalProps) {
             <div>
               <label
                 htmlFor="product-stock"
-                className="block text-sm font-medium text-gray-700 mb-1"
+                className="block text-sm font-medium text-zinc-700 mb-1"
               >
                 Stock actuel
               </label>
@@ -197,7 +197,7 @@ export default function ProductModal({ product, onClose }: ProductModalProps) {
             <div className="col-span-2">
               <label
                 htmlFor="product-warehouse"
-                className="block text-sm font-medium text-gray-700 mb-1"
+                className="block text-sm font-medium text-zinc-700 mb-1"
               >
                 🏭 Entrepôt
               </label>
@@ -219,7 +219,7 @@ export default function ProductModal({ product, onClose }: ProductModalProps) {
             <div className="col-span-2">
               <label
                 htmlFor="product-min-stock"
-                className="block text-sm font-medium text-gray-700 mb-1"
+                className="block text-sm font-medium text-zinc-700 mb-1"
               >
                 Stock minimum (alerte)
               </label>
@@ -236,7 +236,7 @@ export default function ProductModal({ product, onClose }: ProductModalProps) {
             <div>
               <label
                 htmlFor="product-expiry-date"
-                className="block text-sm font-medium text-gray-700 mb-1"
+                className="block text-sm font-medium text-zinc-700 mb-1"
               >
                 📅 Date d'expiration
               </label>
@@ -252,7 +252,7 @@ export default function ProductModal({ product, onClose }: ProductModalProps) {
             <div>
               <label
                 htmlFor="product-batch-number"
-                className="block text-sm font-medium text-gray-700 mb-1"
+                className="block text-sm font-medium text-zinc-700 mb-1"
               >
                 🔢 Numéro de lot
               </label>
@@ -269,7 +269,7 @@ export default function ProductModal({ product, onClose }: ProductModalProps) {
             <div className="col-span-2">
               <label
                 htmlFor="product-description"
-                className="block text-sm font-medium text-gray-700 mb-1"
+                className="block text-sm font-medium text-zinc-700 mb-1"
               >
                 Description
               </label>
@@ -284,7 +284,7 @@ export default function ProductModal({ product, onClose }: ProductModalProps) {
             </div>
           </div>
 
-          <div className="flex gap-3 pt-4 border-t border-gray-200">
+          <div className="flex gap-3 pt-4 border-t border-zinc-200">
             <button type="button" onClick={onClose} className="btn-secondary flex-1">
               Annuler
             </button>

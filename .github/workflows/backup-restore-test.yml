@@ -1,0 +1,128 @@
+name: Backup Restore Test
+
+on:
+  # Test mensuel automatique (1er du mois à 3h)
+  schedule:
+    - cron: '0 3 1 * *'
+  # Déclenchement manuel depuis GitHub UI
+  workflow_dispatch:
+    inputs:
+      with_encryption:
+        description: 'Tester avec chiffrement AES-256'
+        required: false
+        default: 'false'
+        type: boolean
+      verbose:
+        description: 'Activer les logs verbeux'
+        required: false
+        default: 'false'
+        type: boolean
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  backup-restore-test:
+    name: Test Backup → Restauration
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: gestock
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: gestock_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+          --name gestock-postgres
+        ports:
+          - 5432:5432
+
+    env:
+      CONTAINER: gestock-postgres
+      DB_USER: gestock
+      DB_NAME: gestock_db
+      BACKUP_ENCRYPTION_KEY: ci-test-aes-key-backup-restore-2024
+      # Slack non configuré en CI (alertes désactivées)
+      SLACK_WEBHOOK_URL: ''
+      ALERT_EMAIL: ''
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.2.2
+
+      - name: Vérifier les scripts (shellcheck)
+        run: |
+          if command -v shellcheck &>/dev/null; then
+            shellcheck backup-postgres.sh restore-postgres.sh test-backup-restore.sh
+            echo "✅ shellcheck passé"
+          else
+            echo "⚠️  shellcheck non disponible — skipping"
+          fi
+
+      - name: Rendre les scripts exécutables
+        run: chmod +x backup-postgres.sh restore-postgres.sh test-backup-restore.sh
+
+      - name: Attendre PostgreSQL
+        run: |
+          for i in $(seq 1 10); do
+            if docker exec gestock-postgres pg_isready -U gestock; then
+              echo "✅ PostgreSQL ready"
+              break
+            fi
+            echo "Waiting... ($i/10)"
+            sleep 3
+          done
+
+      - name: Test backup/restore (sans chiffrement)
+        run: |
+          VERBOSE_FLAG=""
+          [ "${{ github.event.inputs.verbose }}" = "true" ] && VERBOSE_FLAG="--verbose"
+          ./test-backup-restore.sh $VERBOSE_FLAG
+
+      - name: Test backup/restore (avec chiffrement AES-256)
+        if: github.event.inputs.with_encryption == 'true' || github.event_name == 'schedule'
+        run: |
+          VERBOSE_FLAG=""
+          [ "${{ github.event.inputs.verbose }}" = "true" ] && VERBOSE_FLAG="--verbose"
+          ./test-backup-restore.sh --with-encryption $VERBOSE_FLAG
+
+      - name: Vérifier que restore-postgres.sh --help fonctionne
+        run: |
+          ./restore-postgres.sh --help && echo "✅ --help OK" || true
+
+      - name: Vérifier la syntaxe bash des scripts
+        run: |
+          bash -n backup-postgres.sh   && echo "✅ backup-postgres.sh syntaxe OK"
+          bash -n restore-postgres.sh  && echo "✅ restore-postgres.sh syntaxe OK"
+          bash -n test-backup-restore.sh && echo "✅ test-backup-restore.sh syntaxe OK"
+
+      - name: Notifier sur Slack si échec
+        if: failure() && env.SLACK_WEBHOOK_URL != ''
+        run: |
+          curl -s -X POST "$SLACK_WEBHOOK_URL" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "attachments": [{
+                "color": "danger",
+                "title": "❌ GesStock — Test Backup/Restore échoué",
+                "text": "Le test mensuel backup/restore a échoué en CI.\nVoir les logs : ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+                "footer": "GitHub Actions — ${{ github.workflow }}"
+              }]
+            }'
+
+      - name: Résumé du test
+        if: always()
+        run: |
+          echo "## Test Backup/Restore" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Paramètre | Valeur |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Conteneur | \`$CONTAINER\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Base de test | \`${DB_NAME}_backup_test\` (temporaire) |" >> $GITHUB_STEP_SUMMARY
+          echo "| Chiffrement | \`${{ github.event.inputs.with_encryption || 'schedule=true' }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Déclencheur | \`${{ github.event_name }}\` |" >> $GITHUB_STEP_SUMMARY

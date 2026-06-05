@@ -1,5 +1,16 @@
 version: '3.8'
 
+# ──────────────────────────────────────────────────────────────────────────────
+# docker-compose.yml — Environnement de DÉVELOPPEMENT LOCAL uniquement
+#
+# Les valeurs de configuration sont lues depuis le fichier .env à la racine.
+# Copiez .env.example → .env et adaptez les valeurs avant de démarrer.
+#
+# Usage :
+#   cp .env.example .env
+#   docker compose up -d
+# ──────────────────────────────────────────────────────────────────────────────
+
 services:
   postgres:
     image: postgres:16-alpine
@@ -8,13 +19,17 @@ services:
     ports:
       - '5432:5432'
     environment:
-      POSTGRES_USER: gestock
-      POSTGRES_PASSWORD: gestock_dev_2024
-      POSTGRES_DB: gestock_db
+      POSTGRES_USER: ${POSTGRES_DEV_USER:-gestock}
+      POSTGRES_PASSWORD: ${POSTGRES_DEV_PASSWORD:?POSTGRES_DEV_PASSWORD manquant — copiez .env.example vers .env}
+      POSTGRES_DB: ${POSTGRES_DEV_DB:-gestock_db}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U gestock -d gestock_db']
+      test:
+        [
+          'CMD-SHELL',
+          'pg_isready -U ${POSTGRES_DEV_USER:-gestock} -d ${POSTGRES_DEV_DB:-gestock_db}',
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -25,6 +40,11 @@ services:
     restart: unless-stopped
     ports:
       - '6379:6379'
+    command: >
+      redis-server
+      --appendonly yes
+      --appendfsync everysec
+      ${REDIS_DEV_PASSWORD:+--requirepass ${REDIS_DEV_PASSWORD}}
     volumes:
       - redis_data:/data
     healthcheck:

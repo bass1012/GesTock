@@ -1,5 +1,6 @@
 import { Router, Request } from 'express'
 import { salesService } from '../services/sales.service'
+import { pdfService } from '../services/pdf.service'
 import { authMiddleware, requireRole } from '../middleware/auth.middleware'
 import { tenantMiddleware } from '../middleware/tenant.middleware'
 import { z } from 'zod'
@@ -21,10 +22,14 @@ const saleSchema = z.object({
   taxRate: z.number().min(0).max(100).optional(),
   warehouseId: z.string().uuid().optional().nullable(),
   pointsToRedeem: z.number().int().min(0).optional().default(0),
-  items: z.array(z.object({
-    productId: z.string().uuid(),
-    quantity: z.number().int().positive()
-  })).min(1)
+  items: z
+    .array(
+      z.object({
+        productId: z.string().uuid(),
+        quantity: z.number().int().positive(),
+      }),
+    )
+    .min(1),
 })
 
 /**
@@ -77,7 +82,9 @@ router.get('/', async (req, res, next) => {
   try {
     const sales = await salesService.getAllSales(req.tenantSlug!)
     res.json(sales)
-  } catch (error) { next(error) }
+  } catch (error) {
+    next(error)
+  }
 })
 
 /**
@@ -120,7 +127,9 @@ router.get('/:id', async (req, res, next) => {
     const sale = await salesService.getSaleById(req.params.id, req.tenantSlug!)
     if (!sale) return res.status(404).json({ error: 'Vente non trouvée' })
     res.json(sale)
-  } catch (error) { next(error) }
+  } catch (error) {
+    next(error)
+  }
 })
 
 router.post('/', requireRole('admin', 'manager'), async (req: Request, res, next) => {
@@ -128,11 +137,25 @@ router.post('/', requireRole('admin', 'manager'), async (req: Request, res, next
     const validatedData = saleSchema.parse(req.body)
     const sale = await salesService.createSale(validatedData, req.userId!, req.tenantSlug!)
     res.status(201).json(sale)
-  } catch (error: any) { 
+  } catch (error: any) {
     if (error.message.includes('Stock insuffisant')) {
       return res.status(400).json({ error: error.message })
     }
-    next(error) 
+    next(error)
+  }
+})
+
+router.get('/:id/pdf', async (req, res, next) => {
+  try {
+    const sale = await salesService.getSaleById(req.params.id, req.tenantSlug!)
+    if (!sale) return res.status(404).json({ error: 'Vente non trouvée' })
+
+    res.setHeader('Content-Type', 'application/pdf')
+    res.setHeader('Content-Disposition', `attachment; filename="Duplicata_${sale.reference}.pdf"`)
+
+    await pdfService.generateReceiptPDF(sale, res)
+  } catch (error) {
+    next(error)
   }
 })
 

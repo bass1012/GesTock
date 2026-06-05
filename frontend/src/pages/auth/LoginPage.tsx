@@ -39,7 +39,7 @@ export default function LoginPage() {
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-[-20%] left-[-10%] size-[80%] rounded-full bg-primary-900/40 blur-[150px]"></div>
           <div className="absolute bottom-[-20%] right-[-10%] size-[70%] rounded-full bg-blue-950/50 blur-[120px]"></div>
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle_at_center,transparent_0%,#09090b_100%)]"></div>
+          <div className="absolute top-1/2 left-1/2 -tranzinc-x-1/2 -tranzinc-y-1/2 w-full h-full bg-[radial-gradient(circle_at_center,transparent_0%,#09090b_100%)]"></div>
         </div>
 
         {/* Top: Logo */}
@@ -85,7 +85,7 @@ export default function LoginPage() {
             <h1 className="text-5xl font-black tracking-tighter mb-6 leading-[1.1]">
               Propulsez votre <span className="text-primary-400">Logistique.</span>
             </h1>
-            <p className="text-gray-400 text-lg font-medium leading-relaxed">
+            <p className="text-zinc-400 text-lg font-medium leading-relaxed">
               L'écosystème complet pour gérer, suivre et optimiser vos stocks avec une précision
               absolue.
             </p>
@@ -93,7 +93,7 @@ export default function LoginPage() {
         </div>
 
         {/* Bottom: Footer Info */}
-        <div className="relative z-10 flex items-center justify-between text-xs text-gray-500 border-t border-white/5 pt-6">
+        <div className="relative z-10 flex items-center justify-between text-xs text-zinc-500 border-t border-white/5 pt-6">
           <span>© 2026 GesStock Cloud</span>
           <div className="flex gap-4">
             <span>Status: Online</span>
@@ -109,13 +109,13 @@ export default function LoginPage() {
             <div className="size-10 rounded-xl bg-primary-600 flex items-center justify-center">
               <Package size={24} className="text-white" />
             </div>
-            <span className="text-2xl font-bold text-gray-900">GesStock</span>
+            <span className="text-2xl font-bold text-zinc-900">GesStock</span>
           </div>
 
-          <h2 className="text-3xl font-black text-gray-900 mb-3 animate-in opacity-0 [animation-fill-mode:forwards]">
+          <h2 className="text-3xl font-black text-zinc-900 mb-3 animate-in opacity-0 [animation-fill-mode:forwards]">
             Re-bienvenue.
           </h2>
-          <p className="text-gray-500 mb-10 animate-in delay-100 opacity-0 [animation-fill-mode:forwards]">
+          <p className="text-zinc-500 mb-10 animate-in delay-100 opacity-0 [animation-fill-mode:forwards]">
             Accédez à votre tableau de bord sécurisé.
           </p>
 
@@ -123,7 +123,7 @@ export default function LoginPage() {
             <div className="animate-in delay-200 opacity-0 [animation-fill-mode:forwards]">
               <label
                 htmlFor="email"
-                className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide"
+                className="block text-sm font-bold text-zinc-700 mb-2 uppercase tracking-wide"
               >
                 Email
               </label>
@@ -132,7 +132,7 @@ export default function LoginPage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="input input-glow bg-gray-50/50 border-gray-200"
+                className="input input-glow bg-zinc-50/50 border-zinc-200"
                 placeholder="name@company.com"
                 required
               />
@@ -141,7 +141,7 @@ export default function LoginPage() {
             <div className="animate-in delay-300 opacity-0 [animation-fill-mode:forwards]">
               <label
                 htmlFor="password"
-                className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide"
+                className="block text-sm font-bold text-zinc-700 mb-2 uppercase tracking-wide"
               >
                 Mot de passe
               </label>
@@ -151,14 +151,14 @@ export default function LoginPage() {
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="input input-glow bg-gray-50/50 border-gray-200 pr-12"
+                  className="input input-glow bg-zinc-50/50 border-zinc-200 pr-12"
                   placeholder="••••••••"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-primary-600 transition-colors"
+                  className="absolute right-4 top-1/2 -tranzinc-y-1/2 text-zinc-400 hover:text-primary-600 transition-colors"
                 >
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
@@ -198,7 +198,7 @@ export default function LoginPage() {
             </div>
           </form>
 
-          <p className="mt-6 text-center text-sm text-gray-500">
+          <p className="mt-6 text-center text-sm text-zinc-500">
             Pas encore de compte ?{' '}
             <Link to="/register" className="font-medium text-primary-600 hover:text-primary-700">
               Créer un compte

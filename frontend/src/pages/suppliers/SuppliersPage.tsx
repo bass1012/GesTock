@@ -32,8 +32,8 @@ export default function SuppliersPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900">Fournisseurs</h1>
-          <p className="text-sm text-gray-500 mt-1">Gérez vos fournisseurs et coordonnées.</p>
+          <h1 className="text-2xl font-bold tracking-tight text-zinc-900">Fournisseurs</h1>
+          <p className="text-sm text-zinc-500 mt-1">Gérez vos fournisseurs et coordonnées.</p>
         </div>
         <button
           onClick={() => {
@@ -49,9 +49,9 @@ export default function SuppliersPage() {
 
       <div className="card">
         {/* Filtres alignés comme dans ProductsPage */}
-        <div className="p-4 border-b border-gray-100">
+        <div className="p-4 border-b border-zinc-100">
           <div className="relative max-w-sm">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+            <Search className="absolute left-3 top-1/2 -tranzinc-y-1/2 text-zinc-400" size={20} />
             <input
               type="text"
               placeholder="Rechercher par nom, email…"
@@ -64,51 +64,51 @@ export default function SuppliersPage() {
 
         {/* Tableau premium */}
         <div className="overflow-x-auto">
-          <table className="w-full text-left">
+          <table className="w-full text-left" aria-label="Liste des fournisseurs">
             <thead>
-              <tr className="bg-gray-50/50 border-b border-gray-100">
-                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              <tr className="bg-zinc-50/50 border-b border-zinc-100">
+                <th className="px-6 py-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider">
                   Fournisseur
                 </th>
-                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider">
                   Contact
                 </th>
-                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider">
                   Adresse
                 </th>
-                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">
+                <th className="px-6 py-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider text-right">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-zinc-100">
               {isLoading ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-8 text-center text-gray-500">
+                  <td colSpan={4} className="px-6 py-8 text-center text-zinc-500">
                     Chargement des fournisseurs…
                   </td>
                 </tr>
               ) : filteredSuppliers?.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-8 text-center text-gray-500">
+                  <td colSpan={4} className="px-6 py-8 text-center text-zinc-500">
                     Aucun fournisseur trouvé.
                   </td>
                 </tr>
               ) : (
                 filteredSuppliers?.map((supplier) => (
-                  <tr key={supplier.id} className="hover:bg-gray-50/50 transition-colors">
+                  <tr key={supplier.id} className="hover:bg-zinc-50/50 transition-colors">
                     <td className="px-6 py-4">
-                      <div className="font-medium text-gray-900">{supplier.name}</div>
-                      <div className="text-xs text-gray-500 font-mono mt-0.5 mt-1">
+                      <div className="font-medium text-zinc-900">{supplier.name}</div>
+                      <div className="text-xs text-zinc-500 font-mono mt-0.5 mt-1">
                         ID: {supplier.id.split('-')[0]}
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="text-sm text-gray-900">{supplier.email || '-'}</div>
-                      <div className="text-sm text-gray-500">{supplier.phone || '-'}</div>
+                      <div className="text-sm text-zinc-900">{supplier.email || '-'}</div>
+                      <div className="text-sm text-zinc-500">{supplier.phone || '-'}</div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="text-sm text-gray-500 max-w-xs truncate">
+                      <div className="text-sm text-zinc-500 max-w-xs truncate">
                         {supplier.address || 'Non renseignée'}
                       </div>
                     </td>
@@ -116,15 +116,17 @@ export default function SuppliersPage() {
                       <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={() => handleEdit(supplier)}
-                          className="p-2 text-gray-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
+                          className="p-2 text-zinc-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
                           title="Modifier"
+                          aria-label="Modifier le fournisseur"
                         >
                           <Edit2 size={18} />
                         </button>
                         <button
                           onClick={() => handleDelete(supplier.id)}
-                          className="p-2 text-gray-500 hover:text-red-500 hover:bg-gray-100 rounded-lg transition-colors"
+                          className="p-2 text-zinc-500 hover:text-red-500 hover:bg-zinc-100 rounded-lg transition-colors"
                           title="Supprimer"
+                          aria-label="Supprimer le fournisseur"
                         >
                           <Trash2 size={18} />
                         </button>

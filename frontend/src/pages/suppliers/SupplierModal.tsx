@@ -55,13 +55,13 @@ export default function SupplierModal({ isOpen, onClose, supplier }: SupplierMod
   const isPending = isCreating || isUpdating
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-900/50 backdrop-blur-sm">
       <div className="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900">
+        <div className="px-6 py-4 border-b border-zinc-100 flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-zinc-900">
             {supplier ? 'Modifier le fournisseur' : 'Nouveau fournisseur'}
           </h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-500">
+          <button onClick={onClose} className="text-zinc-400 hover:text-zinc-500">
             <X size={20} />
           </button>
         </div>
@@ -71,7 +71,7 @@ export default function SupplierModal({ isOpen, onClose, supplier }: SupplierMod
             <div>
               <label
                 htmlFor="supplier-name"
-                className="block text-sm font-medium text-gray-700 mb-1"
+                className="block text-sm font-medium text-zinc-700 mb-1"
               >
                 Nom de l'entreprise *
               </label>
@@ -90,7 +90,7 @@ export default function SupplierModal({ isOpen, onClose, supplier }: SupplierMod
               <div>
                 <label
                   htmlFor="supplier-email"
-                  className="block text-sm font-medium text-gray-700 mb-1"
+                  className="block text-sm font-medium text-zinc-700 mb-1"
                 >
                   Email
                 </label>
@@ -106,7 +106,7 @@ export default function SupplierModal({ isOpen, onClose, supplier }: SupplierMod
               <div>
                 <label
                   htmlFor="supplier-phone"
-                  className="block text-sm font-medium text-gray-700 mb-1"
+                  className="block text-sm font-medium text-zinc-700 mb-1"
                 >
                   Téléphone
                 </label>
@@ -124,7 +124,7 @@ export default function SupplierModal({ isOpen, onClose, supplier }: SupplierMod
             <div>
               <label
                 htmlFor="supplier-address"
-                className="block text-sm font-medium text-gray-700 mb-1"
+                className="block text-sm font-medium text-zinc-700 mb-1"
               >
                 Adresse
               </label>

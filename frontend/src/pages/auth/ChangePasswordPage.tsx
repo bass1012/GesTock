@@ -55,7 +55,7 @@ export default function ChangePasswordPage() {
           <CheckCircle2 size={40} className="text-green-500" />
         </div>
         <h1 className="text-3xl font-black text-white mb-2">Compte Sécurisé</h1>
-        <p className="text-gray-400">
+        <p className="text-zinc-400">
           Votre nouveau mot de passe a été enregistré.
           <br />
           Redirection vers votre espace…
@@ -90,7 +90,7 @@ export default function ChangePasswordPage() {
             <h1 className="text-3xl font-black text-white mb-3 tracking-tighter uppercase italic leading-none">
               Protection <span className="text-primary-500">Activée</span>
             </h1>
-            <p className="text-gray-400 text-sm font-medium">
+            <p className="text-zinc-400 text-sm font-medium">
               Configurez votre nouvel accès pour déverrouiller vos outils logistiques.
             </p>
           </div>
@@ -99,13 +99,13 @@ export default function ChangePasswordPage() {
             <div>
               <label
                 htmlFor="new-password"
-                className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2"
+                className="block text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-2"
               >
                 Nouveau Mot de Passe
               </label>
               <div className="relative">
                 <Lock
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500"
+                  className="absolute left-4 top-1/2 -tranzinc-y-1/2 text-zinc-500"
                   size={18}
                 />
                 <input
@@ -120,7 +120,7 @@ export default function ChangePasswordPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white"
+                  className="absolute right-4 top-1/2 -tranzinc-y-1/2 text-zinc-500 hover:text-white"
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
@@ -130,13 +130,13 @@ export default function ChangePasswordPage() {
             <div>
               <label
                 htmlFor="confirm-password"
-                className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2"
+                className="block text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-2"
               >
                 Confirmer le Mot de Passe
               </label>
               <div className="relative">
                 <Lock
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500"
+                  className="absolute left-4 top-1/2 -tranzinc-y-1/2 text-zinc-500"
                   size={18}
                 />
                 <input
@@ -161,7 +161,7 @@ export default function ChangePasswordPage() {
           </form>
         </div>
 
-        <p className="mt-8 text-center text-[10px] text-gray-600 font-mono tracking-tighter">
+        <p className="mt-8 text-center text-[10px] text-zinc-600 font-mono tracking-tighter">
           SYSTÈME DE PROTECTION GESTOCK v1.2 · CHIFFREMENT AES-256
         </p>
       </div>

@@ -59,7 +59,7 @@ export default function Modal({ isOpen, onClose, title, children, size = 'md' }:
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       <div
-        className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity"
+        className="absolute inset-0 bg-zinc-900/60 backdrop-blur-sm transition-opacity"
         onClick={onClose}
       />
       <div
@@ -67,13 +67,13 @@ export default function Modal({ isOpen, onClose, title, children, size = 'md' }:
         className={`relative bg-white rounded-2xl shadow-2xl w-full ${sizeClasses[size]} overflow-hidden transform transition-all animate-in fade-in zoom-in duration-200`}
       >
         {title && (
-          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-            <h3 className="text-lg font-bold text-gray-900">{title}</h3>
+          <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-100">
+            <h3 className="text-lg font-bold text-zinc-900">{title}</h3>
             <button
               onClick={onClose}
-              className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+              className="p-2 rounded-lg hover:bg-zinc-100 transition-colors"
             >
-              <X size={20} className="text-gray-400" />
+              <X size={20} className="text-zinc-400" />
             </button>
           </div>
         )}

@@ -1,186 +1,198 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, AuditLog } from '@prisma/client'
+
+export interface EnrichedUserSummary {
+  id: string
+  email: string
+  firstName: string
+  lastName: string
+  role: string
+}
+
+export interface EnrichedTenantSummary {
+  id: string
+  name: string
+  slug: string
+}
 
 const prisma = new PrismaClient()
 
-export type AuditAction = 
-    // Auth actions
-    | 'USER_LOGIN'
-    | 'USER_LOGOUT'
-    | 'USER_REGISTER'
-    | 'PASSWORD_CHANGE'
-    | 'PASSWORD_RESET'
-    // User management
-    | 'USER_CREATED'
-    | 'USER_UPDATED'
-    | 'USER_DELETED'
-    | 'ROLE_CHANGED'
-    // SuperAdmin actions
-    | 'TENANT_SUSPENDED'
-    | 'TENANT_ACTIVATED'
-    | 'SUBSCRIPTION_MODIFIED'
-    | 'QUOTA_MODIFIED'
-    | 'FORCE_PASSWORD_RESET'
-    | 'AUDIT_LOG_VIEWED'
-    | 'WAREHOUSE_CREATED'
-    | 'WAREHOUSE_UPDATED'
-    | 'WAREHOUSE_DELETED'
-    // Critical data operations
-    | 'PRODUCT_CREATED'
-    | 'PRODUCT_UPDATED'
-    | 'PRODUCT_DELETED'
-    | 'SUPPLIER_CREATED'
-    | 'SUPPLIER_UPDATED'
-    | 'SUPPLIER_DELETED'
-    | 'CLIENT_CREATED'
-    | 'CLIENT_UPDATED'
-    | 'CLIENT_DELETED'
-    | 'ORDER_CREATED'
-    | 'ORDER_UPDATED'
-    | 'ORDER_CANCELLED'
-    | 'ORDER_RECEIVED'
-    | 'STOCK_ADJUSTED'
-    | 'STOCK_MOVEMENT_IN'
-    | 'STOCK_MOVEMENT_OUT'
-    | 'STOCK_TRANSFER'
-    | 'SALE_COMPLETED'
-    | 'SALE_CANCELLED'
-    | 'API_KEY_GENERATED'
-    | 'API_KEY_REVOKED'
+export type AuditAction =
+  // Auth actions
+  | 'USER_LOGIN'
+  | 'USER_LOGOUT'
+  | 'USER_REGISTER'
+  | 'PASSWORD_CHANGE'
+  | 'PASSWORD_RESET'
+  | '2FA_ENABLE'
+  | '2FA_VERIFY'
+  | '2FA_DISABLE'
+  | '2FA_BACKUP_REGEN'
+  // User management
+  | 'USER_CREATED'
+  | 'USER_UPDATED'
+  | 'USER_DELETED'
+  | 'ROLE_CHANGED'
+  // SuperAdmin actions
+  | 'TENANT_SUSPENDED'
+  | 'TENANT_ACTIVATED'
+  | 'SUBSCRIPTION_MODIFIED'
+  | 'QUOTA_MODIFIED'
+  | 'FORCE_PASSWORD_RESET'
+  | 'AUDIT_LOG_VIEWED'
+  | 'WAREHOUSE_CREATED'
+  | 'WAREHOUSE_UPDATED'
+  | 'WAREHOUSE_DELETED'
+  // Critical data operations
+  | 'PRODUCT_CREATED'
+  | 'PRODUCT_UPDATED'
+  | 'PRODUCT_DELETED'
+  | 'SUPPLIER_CREATED'
+  | 'SUPPLIER_UPDATED'
+  | 'SUPPLIER_DELETED'
+  | 'CLIENT_CREATED'
+  | 'CLIENT_UPDATED'
+  | 'CLIENT_DELETED'
+  | 'ORDER_CREATED'
+  | 'ORDER_UPDATED'
+  | 'ORDER_CANCELLED'
+  | 'ORDER_RECEIVED'
+  | 'STOCK_ADJUSTED'
+  | 'STOCK_MOVEMENT_IN'
+  | 'STOCK_MOVEMENT_OUT'
+  | 'STOCK_TRANSFER'
+  | 'SALE_COMPLETED'
+  | 'SALE_CANCELLED'
+  | 'API_KEY_GENERATED'
+  | 'API_KEY_REVOKED'
 
 export interface AuditLogData {
-    action: AuditAction
-    userId: string
-    tenantId?: string | null
-    resource?: string
-    resourceId?: string
-    metadata?: Record<string, any>
-    ip?: string
-    userAgent?: string
+  action: AuditAction
+  userId: string
+  tenantId?: string | null
+  resource?: string
+  resourceId?: string
+  metadata?: Record<string, any>
+  ip?: string
+  userAgent?: string
 }
 
 export const auditService = {
-    /**
-     * Log a critical action
-     */
-    async log(data: AuditLogData): Promise<void> {
-        try {
-            await (prisma as any).auditLog.create({
-                data: {
-                    action: data.action,
-                    userId: data.userId,
-                    tenantId: data.tenantId,
-                    resource: data.resource,
-                    resourceId: data.resourceId,
-                    metadata: data.metadata || {},
-                    ip: data.ip,
-                    userAgent: data.userAgent,
-                    createdAt: new Date(),
-                },
-            })
-        } catch (error) {
-            // Audit logging should not break the application
-            // But we should log to console for debugging
-            console.error('Failed to create audit log:', error)
-        }
-    },
+  /**
+   * Log a critical action
+   */
+  async log(data: AuditLogData): Promise<void> {
+    try {
+      await prisma.auditLog.create({
+        data: {
+          action: data.action,
+          userId: data.userId,
+          tenantId: data.tenantId,
+          resource: data.resource,
+          resourceId: data.resourceId,
+          metadata: data.metadata || {},
+          ip: data.ip,
+          userAgent: data.userAgent,
+          createdAt: new Date(),
+        },
+      })
+    } catch (error) {
+      // Audit logging should not break the application
+      // But we should log to console for debugging
+      console.error('Failed to create audit log:', error)
+    }
+  },
 
-    /**
-     * Get audit logs with filtering and pagination
-     */
-    async getLogs(options: {
-        tenantId?: string
-        userId?: string
-        action?: AuditAction
-        startDate?: Date
-        endDate?: Date
-        page?: number
-        limit?: number
-    }) {
-        const {
-            tenantId,
-            userId,
-            action,
-            startDate,
-            endDate,
-            page = 1,
-            limit = 50,
-        } = options
+  /**
+   * Get audit logs with filtering and pagination
+   */
+  async getLogs(options: {
+    tenantId?: string
+    userId?: string
+    action?: AuditAction
+    startDate?: Date
+    endDate?: Date
+    page?: number
+    limit?: number
+  }) {
+    const { tenantId, userId, action, startDate, endDate, page = 1, limit = 50 } = options
 
-        const where: any = {}
+    const where: any = {}
 
-        if (tenantId) where.tenantId = tenantId
-        if (userId) where.userId = userId
-        if (action) where.action = action
-        if (startDate || endDate) {
-            where.createdAt = {}
-            if (startDate) where.createdAt.gte = startDate
-            if (endDate) where.createdAt.lte = endDate
-        }
+    if (tenantId) where.tenantId = tenantId
+    if (userId) where.userId = userId
+    if (action) where.action = action
+    if (startDate || endDate) {
+      where.createdAt = {}
+      if (startDate) where.createdAt.gte = startDate
+      if (endDate) where.createdAt.lte = endDate
+    }
 
-        const [logs, total] = await Promise.all([
-            (prisma as any).auditLog.findMany({
-                where,
-                orderBy: { createdAt: 'desc' },
-                skip: (page - 1) * limit,
-                take: limit,
-            }),
-            (prisma as any).auditLog.count({ where }),
-        ])
+    const [logs, total] = await Promise.all([
+      prisma.auditLog.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip: (page - 1) * limit,
+        take: limit,
+      }) as Promise<AuditLog[]>,
+      prisma.auditLog.count({ where }),
+    ])
 
-        // Enrichissement manuel : AuditLog n'a pas de relation Prisma vers User/Tenant
-        const userIds   = [...new Set(logs.map((l: any) => l.userId).filter((id: any) => id && id !== 'superadmin'))]
-        const tenantIds = [...new Set(logs.map((l: any) => l.tenantId).filter(Boolean))]
+    // Enrichissement manuel : AuditLog n'a pas de relation Prisma vers User/Tenant
+    const userIds = [
+      ...new Set(logs.map((l: any) => l.userId).filter((id: any) => id && id !== 'superadmin')),
+    ]
+    const tenantIds = [...new Set(logs.map((l: any) => l.tenantId).filter(Boolean))]
 
-        const [users, tenants] = await Promise.all([
-            userIds.length
-                ? prisma.user.findMany({
-                    where: { id: { in: userIds as string[] } },
-                    select: { id: true, email: true, firstName: true, lastName: true, role: true },
-                  })
-                : [],
-            tenantIds.length
-                ? prisma.tenant.findMany({
-                    where: { id: { in: tenantIds as string[] } },
-                    select: { id: true, name: true, slug: true },
-                  })
-                : [],
-        ])
+    const [users, tenants] = await Promise.all([
+      userIds.length
+        ? (prisma.user.findMany({
+            where: { id: { in: userIds as string[] } },
+            select: { id: true, email: true, firstName: true, lastName: true, role: true },
+          }) as Promise<EnrichedUserSummary[]>)
+        : Promise.resolve([] as EnrichedUserSummary[]),
+      tenantIds.length
+        ? (prisma.tenant.findMany({
+            where: { id: { in: tenantIds as string[] } },
+            select: { id: true, name: true, slug: true },
+          }) as Promise<EnrichedTenantSummary[]>)
+        : Promise.resolve([] as EnrichedTenantSummary[]),
+    ])
 
-        const userMap   = Object.fromEntries((users   as any[]).map(u => [u.id, u]))
-        const tenantMap = Object.fromEntries((tenants as any[]).map(t => [t.id, t]))
+    const userMap = Object.fromEntries(users.map((u) => [u.id, u]))
+    const tenantMap = Object.fromEntries(tenants.map((t) => [t.id, t]))
 
-        const enrichedLogs = logs.map((log: any) => ({
-            ...log,
-            user:   log.userId && log.userId !== 'superadmin' ? userMap[log.userId]   ?? null : null,
-            tenant: log.tenantId ? tenantMap[log.tenantId] ?? null : null,
-        }))
+    const enrichedLogs = logs.map((log) => ({
+      ...log,
+      user: log.userId && log.userId !== 'superadmin' ? (userMap[log.userId] ?? null) : null,
+      tenant: log.tenantId ? (tenantMap[log.tenantId] ?? null) : null,
+    }))
 
-        return {
-            logs: enrichedLogs,
-            pagination: {
-                page,
-                limit,
-                total,
-                totalPages: Math.ceil(total / limit),
-            },
-        }
-    },
+    return {
+      logs: enrichedLogs,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    }
+  },
 
-    /**
-     * Get recent audit logs for a specific user
-     */
-    async getUserRecentLogs(userId: string, limit: number = 10) {
-        return (prisma as any).auditLog.findMany({
-            where: { userId },
-            orderBy: { createdAt: 'desc' },
-            take: limit,
-        })
-    },
+  /**
+   * Get recent audit logs for a specific user
+   */
+  async getUserRecentLogs(userId: string, limit: number = 10) {
+    return prisma.auditLog.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+    })
+  },
 
-    /**
-     * Get audit logs for a specific tenant
-     */
-    async getTenantLogs(tenantId: string, page: number = 1, limit: number = 50) {
-        return this.getLogs({ tenantId, page, limit })
-    },
+  /**
+   * Get audit logs for a specific tenant
+   */
+  async getTenantLogs(tenantId: string, page: number = 1, limit: number = 50) {
+    return this.getLogs({ tenantId, page, limit })
+  },
 }

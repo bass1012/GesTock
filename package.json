@@ -15,7 +15,9 @@
     "lint:fix": "npm -w frontend run lint -- --fix && npm -w backend run lint -- --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "prepare": "node -e \"if(process.env.NODE_ENV!=='production' && process.env.CI!=='true'){require('child_process').execSync('husky',{stdio:'inherit'})}\""
+    "prepare": "node -e \"if(process.env.NODE_ENV!=='production' && process.env.CI!=='true'){require('child_process').execSync('husky',{stdio:'inherit'})}\"",
+    "test:related:backend": "npm -w backend run test -- --findRelatedTests --passWithNoTests --forceExit",
+    "test:related:frontend": "npm -w frontend run test -- --passWithNoTests"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^8.30.0",
@@ -23,13 +25,19 @@
     "concurrently": "^9.0.1",
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^10.1.2",
+    "eslint-plugin-sonarjs": "^0.25.1",
     "husky": "^9.1.7",
     "lint-staged": "^15.5.0",
     "prettier": "^3.5.3"
   },
   "lint-staged": {
-    "*.{ts,tsx,js,jsx}": [
-      "eslint --fix"
+    "backend/src/**/*.{ts,js}": [
+      "eslint --fix",
+      "bash -c 'npm run test:related:backend -- $0'"
+    ],
+    "frontend/src/**/*.{ts,tsx}": [
+      "eslint --fix",
+      "bash -c 'npm run test:related:frontend'"
     ],
     "*.{json,md,css,scss,yml,yaml}": [
       "prettier --write"

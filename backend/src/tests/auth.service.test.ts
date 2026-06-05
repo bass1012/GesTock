@@ -12,10 +12,13 @@ const mockRefreshTokenUpsert = jest.fn()
 const mockRefreshTokenDelete = jest.fn()
 
 const mockVerifyRefreshToken = jest.fn(() => ({
-  userId: 'user-1', tenantId: 'tenant-1', role: 'admin',
+  userId: 'user-1',
+  tenantId: 'tenant-1',
+  role: 'admin',
 }))
 const mockJwtDecode = jest.fn(() => ({
-  userId: 'user-1', exp: Math.floor(Date.now() / 1000) + 3600,
+  userId: 'user-1',
+  exp: Math.floor(Date.now() / 1000) + 3600,
 }))
 const mockIsRefreshTokenBlacklisted = jest.fn().mockResolvedValue(false)
 const mockGetActiveSession = jest.fn()
@@ -85,6 +88,8 @@ const mockUser = {
   role: 'admin',
   tenantId: 'tenant-1',
   mustChangePassword: false,
+  failedLoginAttempts: 0,
+  lockoutUntil: null,
   tenant: {
     id: 'tenant-1',
     slug: 'ma-boutique',
@@ -138,7 +143,7 @@ describe('authService.register', () => {
     mockTenantFindUnique.mockResolvedValue(mockTenant)
 
     await expect(authService.register(registerData)).rejects.toThrow(
-      'Cet identifiant d\'entreprise est déjà pris'
+      "Cet identifiant d'entreprise est déjà pris",
     )
   })
 
@@ -167,6 +172,10 @@ describe('authService.login', () => {
     expect(result.user.email).toBe('test@example.com')
     expect(result.accessToken).toBe('mock-access-token')
     expect(result.refreshToken).toBe('mock-refresh-token')
+    expect(mockUserUpdate).toHaveBeenCalledWith({
+      where: { id: 'user-1' },
+      data: { failedLoginAttempts: 0, lockoutUntil: null },
+    })
   })
 
   it('connecte un utilisateur scoped à un tenant', async () => {
@@ -186,27 +195,61 @@ describe('authService.login', () => {
   it('lève NotFoundError si le tenant slug est invalide', async () => {
     mockTenantFindUnique.mockResolvedValue(null)
 
-    await expect(
-      authService.login('test@example.com', 'strongPass123', 'inconnu')
-    ).rejects.toThrow('Tenant introuvable')
+    await expect(authService.login('test@example.com', 'strongPass123', 'inconnu')).rejects.toThrow(
+      'Tenant introuvable',
+    )
   })
 
-  it('lève UnauthorizedError si l\'utilisateur n\'existe pas', async () => {
+  it("lève UnauthorizedError si l'utilisateur n'existe pas", async () => {
     mockUserFindFirst.mockResolvedValue(null)
 
-    await expect(
-      authService.login('inconnu@example.com', 'pass')
-    ).rejects.toThrow('Email ou mot de passe incorrect')
+    await expect(authService.login('inconnu@example.com', 'pass')).rejects.toThrow(
+      'Email ou mot de passe incorrect',
+    )
   })
 
-  it('lève UnauthorizedError si le mot de passe est invalide', async () => {
+  it('incrémente les échecs de login quand le mot de passe est invalide', async () => {
     mockUserFindFirst.mockResolvedValue(mockUser)
     const bcrypt = require('bcryptjs')
     bcrypt.compare.mockResolvedValueOnce(false)
 
-    await expect(
-      authService.login('test@example.com', 'wrong-password')
-    ).rejects.toThrow('Email ou mot de passe incorrect')
+    await expect(authService.login('test@example.com', 'wrong-password')).rejects.toThrow(
+      'Email ou mot de passe incorrect',
+    )
+
+    expect(mockUserUpdate).toHaveBeenCalledWith({
+      where: { id: 'user-1' },
+      data: { failedLoginAttempts: 1 },
+    })
+  })
+
+  it('verrouille le compte après le nombre maximal de tentatives', async () => {
+    mockUserFindFirst.mockResolvedValue({ ...mockUser, failedLoginAttempts: 4 })
+    const bcrypt = require('bcryptjs')
+    bcrypt.compare.mockResolvedValueOnce(false)
+
+    await expect(authService.login('test@example.com', 'wrong-password')).rejects.toThrow(
+      'Email ou mot de passe incorrect',
+    )
+
+    expect(mockUserUpdate).toHaveBeenCalledWith({
+      where: { id: 'user-1' },
+      data: expect.objectContaining({
+        failedLoginAttempts: 0,
+        lockoutUntil: expect.any(Date),
+      }),
+    })
+  })
+
+  it('lève UnauthorizedError si le compte est verrouillé', async () => {
+    mockUserFindFirst.mockResolvedValue({
+      ...mockUser,
+      lockoutUntil: new Date(Date.now() + 10 * 60 * 1000),
+    })
+
+    await expect(authService.login('test@example.com', 'strongPass123')).rejects.toThrow(
+      'Compte verrouillé',
+    )
   })
 
   it('lève UnauthorizedError si le tenant est suspendu', async () => {
@@ -215,9 +258,9 @@ describe('authService.login', () => {
       tenant: { ...mockUser.tenant, isSuspended: true },
     })
 
-    await expect(
-      authService.login('test@example.com', 'strongPass123')
-    ).rejects.toThrow('COMPTE SUSPENDU')
+    await expect(authService.login('test@example.com', 'strongPass123')).rejects.toThrow(
+      'COMPTE SUSPENDU',
+    )
   })
 
   it('remplace la session active existante', async () => {
@@ -242,6 +285,7 @@ describe('authService.refresh', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
+    mockIsRefreshTokenBlacklisted.mockResolvedValue(false)
   })
 
   it('émet de nouveaux tokens avec un refresh token valide', async () => {
@@ -258,9 +302,7 @@ describe('authService.refresh', () => {
   it('lève UnauthorizedError si le refresh token est blacklisté', async () => {
     mockIsRefreshTokenBlacklisted.mockResolvedValue(true)
 
-    await expect(
-      authService.refresh('blacklisted-token')
-    ).rejects.toThrow('Refresh token révoqué')
+    await expect(authService.refresh('blacklisted-token')).rejects.toThrow('Refresh token révoqué')
   })
 
   it('lève UnauthorizedError si le refresh token est expiré', async () => {
@@ -269,9 +311,9 @@ describe('authService.refresh', () => {
       expiresAt: new Date(Date.now() - 1000),
     })
 
-    await expect(
-      authService.refresh('expired-token')
-    ).rejects.toThrow('Refresh token invalide ou expiré')
+    await expect(authService.refresh('expired-token')).rejects.toThrow(
+      'Refresh token invalide ou expiré',
+    )
   })
 
   it('lève UnauthorizedError si le tenant est suspendu', async () => {
@@ -280,9 +322,7 @@ describe('authService.refresh', () => {
       user: { ...mockUser, tenant: { ...mockUser.tenant, isSuspended: true } },
     })
 
-    await expect(
-      authService.refresh('suspended-tenant-token')
-    ).rejects.toThrow('COMPTE SUSPENDU')
+    await expect(authService.refresh('suspended-tenant-token')).rejects.toThrow('COMPTE SUSPENDU')
   })
 })
 
@@ -293,7 +333,8 @@ describe('authService.logout', () => {
 
   it('blackliste le token et supprime la session', async () => {
     mockJwtDecode.mockReturnValue({
-      userId: 'user-1', exp: Math.floor(Date.now() / 1000) + 3600,
+      userId: 'user-1',
+      exp: Math.floor(Date.now() / 1000) + 3600,
     })
 
     await authService.logout('mock-access-token', 'mock-refresh-token')
@@ -308,7 +349,8 @@ describe('authService.logout', () => {
 
   it('fonctionne sans refresh token', async () => {
     mockJwtDecode.mockReturnValue({
-      userId: 'user-1', exp: Math.floor(Date.now() / 1000) + 3600,
+      userId: 'user-1',
+      exp: Math.floor(Date.now() / 1000) + 3600,
     })
 
     await authService.logout('mock-access-token')
@@ -318,7 +360,7 @@ describe('authService.logout', () => {
   })
 
   it('ne plante pas si le token est invalide (jwt.decode retourne null)', async () => {
-    mockJwtDecode.mockReturnValue(null)
+    mockJwtDecode.mockReturnValue(null as any)
 
     await expect(authService.logout('invalid-token')).resolves.not.toThrow()
   })

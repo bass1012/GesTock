@@ -15,9 +15,7 @@ const options: swaggerJsdoc.Options = {
         email: 'support@gestock.allsite.cloud',
       },
     },
-    servers: [
-      { url: '/api/v1', description: 'Production / Local' },
-    ],
+    servers: [{ url: '/api/v1', description: 'Production / Local' }],
     components: {
       securitySchemes: {
         BearerAuth: {
@@ -35,7 +33,7 @@ const options: swaggerJsdoc.Options = {
         Error: {
           type: 'object',
           properties: {
-            error: { type: 'string', example: 'Message d\'erreur' },
+            error: { type: 'string', example: "Message d'erreur" },
           },
         },
         Pagination: {
@@ -181,7 +179,10 @@ const options: swaggerJsdoc.Options = {
             lowStockCount: { type: 'integer' },
             totalMovements: { type: 'integer' },
             totalSalesThisMonth: { type: 'number' },
-            recentMovements: { type: 'array', items: { $ref: '#/components/schemas/StockMovement' } },
+            recentMovements: {
+              type: 'array',
+              items: { $ref: '#/components/schemas/StockMovement' },
+            },
             topProducts: { type: 'array', items: { type: 'object' } },
           },
         },

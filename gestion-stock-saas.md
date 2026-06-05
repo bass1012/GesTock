@@ -8,24 +8,26 @@ Application web de gestion de stock **multi-tenant** (SaaS), entièrement person
 
 ## Stack technique
 
-| Couche | Technologie |
-|---|---|
-| Frontend | React + Vite, TailwindCSS, React Query, React Router |
-| Backend | Node.js + Express (ou Fastify), Prisma ORM |
+| Couche          | Technologie                                            |
+| --------------- | ------------------------------------------------------ |
+| Frontend        | React + Vite, TailwindCSS, React Query, React Router   |
+| Backend         | Node.js + Express (ou Fastify), Prisma ORM             |
 | Base de données | PostgreSQL (schema-per-tenant), Redis (cache/sessions) |
-| Fichiers | S3-compatible (documents, exports) |
-| Auth | JWT + refresh tokens, rôles par tenant |
-| Infra | Docker, Railway / Render / VPS |
-| Paiements | Stripe (abonnements, plans) |
+| Fichiers        | S3-compatible (documents, exports)                     |
+| Auth            | JWT + refresh tokens, rôles par tenant                 |
+| Infra           | Docker, Railway / Render / VPS                         |
+| Paiements       | Stripe (abonnements, plans)                            |
 
 ---
 
 ## Architecture en 4 couches
 
 ### 1. Frontend — React.js
+
 Interface personnalisable par client (thème, modules actifs, langue).
 
 Modules disponibles :
+
 - Dashboard (KPIs, alertes, graphiques)
 - Inventaire (catalogue, mouvements, stocks)
 - Commandes (bons de commande, fournisseurs)
@@ -33,6 +35,7 @@ Modules disponibles :
 - Paramètres (configuration tenant, utilisateurs, rôles)
 
 ### 2. API Gateway — Node.js / Express
+
 - Authentification JWT
 - Rate limiting
 - Multi-tenant routing (identification du tenant par sous-domaine ou header)
@@ -40,15 +43,16 @@ Modules disponibles :
 
 ### 3. Services métier
 
-| Service | Responsabilités |
-|---|---|
-| Stock | CRUD articles, mouvements, alertes de seuil |
-| Fournisseurs | Catalogue fournisseurs, bons de commande |
-| Facturation | Gestion des plans SaaS, comptage de l'usage |
-| Rapports | Génération PDF, exports Excel |
-| Notifications | Emails, SMS, alertes in-app |
+| Service       | Responsabilités                             |
+| ------------- | ------------------------------------------- |
+| Stock         | CRUD articles, mouvements, alertes de seuil |
+| Fournisseurs  | Catalogue fournisseurs, bons de commande    |
+| Facturation   | Gestion des plans SaaS, comptage de l'usage |
+| Rapports      | Génération PDF, exports Excel               |
+| Notifications | Emails, SMS, alertes in-app                 |
 
 ### 4. Couche données
+
 - **PostgreSQL** — données métier (1 schema par tenant)
 - **Redis** — cache API, sessions, pub/sub
 - **S3** — fichiers, documents, exports
@@ -75,15 +79,18 @@ Chaque tenant est identifié automatiquement via son sous-domaine (`abc.monapp.c
 ## Modules à construire (ordre de priorité)
 
 ### Phase 1 — Fondations
+
 1. **Auth & gestion des tenants** — inscription, onboarding, isolation des données
 2. **Catalogue produits** — CRUD articles, catégories, unités, codes-barres
 
 ### Phase 2 — Cœur métier
+
 3. **Mouvements de stock** — entrées, sorties, transferts, historique complet
 4. **Alertes & seuils** — stock minimum, notifications email/in-app
 5. **Fournisseurs & bons de commande** — gestion des achats
 
 ### Phase 3 — Valeur ajoutée
+
 6. **Rapports & exports** — tableaux de bord, PDF, Excel
 7. **Facturation SaaS** — plans d'abonnement, limites d'usage (Stripe)
 
@@ -185,14 +192,14 @@ CREATE TABLE stock_movements (
 
 ## Plans tarifaires (SaaS)
 
-| Feature | Starter | Pro | Enterprise |
-|---|---|---|---|
-| Produits | 500 | 10 000 | Illimité |
-| Utilisateurs | 3 | 15 | Illimité |
-| Entrepôts | 1 | 5 | Illimité |
-| Rapports | Basiques | Avancés | Custom |
-| API Access | Non | Oui | Oui |
-| Support | Email | Prioritaire | Dédié |
+| Feature      | Starter  | Pro         | Enterprise |
+| ------------ | -------- | ----------- | ---------- |
+| Produits     | 500      | 10 000      | Illimité   |
+| Utilisateurs | 3        | 15          | Illimité   |
+| Entrepôts    | 1        | 5           | Illimité   |
+| Rapports     | Basiques | Avancés     | Custom     |
+| API Access   | Non      | Oui         | Oui        |
+| Support      | Email    | Prioritaire | Dédié      |
 
 ---
 

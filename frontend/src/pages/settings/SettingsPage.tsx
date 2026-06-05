@@ -19,6 +19,7 @@ import { usePlans, useBillingInfo, useInvoices, usePlanUsage } from '../../hooks
 import { useApiKeys } from '../../hooks/useApiKeys'
 import { useAuthStore } from '../../store/authStore'
 import toast from 'react-hot-toast'
+import ConfirmModal from '../../components/ConfirmModal'
 
 // Plan Card Component
 function PlanCard({
@@ -53,18 +54,18 @@ function PlanCard({
         </span>
       )}
       <div className="mb-4">
-        <h3 className="text-lg font-semibold text-gray-900">{plan.name}</h3>
+        <h3 className="text-lg font-semibold text-zinc-900">{plan.name}</h3>
         <div className="flex items-baseline gap-1 mt-1">
-          <span className="text-3xl font-bold text-gray-900">
+          <span className="text-3xl font-bold text-zinc-900">
             {plan.price.toLocaleString('fr-FR')} F CFA
           </span>
-          <span className="text-gray-500">/mois</span>
+          <span className="text-zinc-500">/mois</span>
         </div>
       </div>
 
       <ul className="space-y-2 mb-6">
         {plan.features.map((feature) => (
-          <li key={feature} className="flex items-start gap-2 text-sm text-gray-600">
+          <li key={feature} className="flex items-start gap-2 text-sm text-zinc-600">
             <Check size={16} className="text-green-500 mt-0.5 shrink-0" />
             <span>{feature}</span>
           </li>
@@ -91,6 +92,7 @@ export default function SettingsPage() {
   const { list: apiKeys, create: createApiKey, remove: removeApiKey } = useApiKeys()
   const [newKeyName, setNewKeyName] = useState('')
   const [generatedKey, setGeneratedKey] = useState<string | null>(null)
+  const [keyToDelete, setKeyToDelete] = useState<any | null>(null)
 
   // Billing hooks
   const { data: plansData, isLoading: plansLoading } = usePlans()
@@ -114,7 +116,7 @@ export default function SettingsPage() {
     const styles: Record<string, string> = {
       active: 'bg-green-100 text-green-800',
       trialing: 'bg-blue-100 text-blue-800',
-      canceled: 'bg-gray-100 text-gray-800',
+      canceled: 'bg-zinc-100 text-zinc-800',
       past_due: 'bg-red-100 text-red-800',
       unpaid: 'bg-red-100 text-red-800',
     }
@@ -127,7 +129,7 @@ export default function SettingsPage() {
     }
     return (
       <span
-        className={`px-2 py-1 rounded-full text-xs font-medium ${styles[status] || 'bg-gray-100 text-gray-800'}`}
+        className={`px-2 py-1 rounded-full text-xs font-medium ${styles[status] || 'bg-zinc-100 text-zinc-800'}`}
       >
         {labels[status] || status}
       </span>
@@ -138,12 +140,12 @@ export default function SettingsPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Paramètres</h1>
-        <p className="text-gray-500 mt-1">Configuration de votre espace et facturation</p>
+        <h1 className="text-2xl font-bold text-zinc-900">Paramètres</h1>
+        <p className="text-zinc-500 mt-1">Configuration de votre espace et facturation</p>
       </div>
 
       {/* Tabs */}
-      <div className="border-b border-gray-200">
+      <div className="border-b border-zinc-200">
         <div className="flex gap-6">
           {[
             { id: 'general', label: 'Général', icon: Settings },
@@ -156,7 +158,7 @@ export default function SettingsPage() {
               className={`flex items-center gap-2 pb-3 text-sm font-medium border-b-2 transition-colors ${
                 activeTab === tab.id
                   ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
+                  : 'border-transparent text-zinc-500 hover:text-zinc-700'
               }`}
             >
               <tab.icon size={16} />
@@ -170,12 +172,12 @@ export default function SettingsPage() {
       {activeTab === 'general' && (
         <div className="space-y-6">
           <div className="card p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Informations de l'espace</h3>
+            <h3 className="text-lg font-semibold text-zinc-900 mb-4">Informations de l'espace</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label
                   htmlFor="company-name"
-                  className="block text-sm font-medium text-gray-700 mb-1"
+                  className="block text-sm font-medium text-zinc-700 mb-1"
                 >
                   Nom de l'entreprise
                 </label>
@@ -185,13 +187,13 @@ export default function SettingsPage() {
                   value={tenant?.name || ''}
                   readOnly
                   disabled
-                  className="input w-full bg-gray-50"
+                  className="input w-full bg-zinc-50"
                 />
               </div>
               <div>
-                <p className="block text-sm font-medium text-gray-700 mb-1">Plan actuel</p>
+                <p className="block text-sm font-medium text-zinc-700 mb-1">Plan actuel</p>
                 <div className="flex items-center gap-2">
-                  <span className="input w-full bg-gray-50 capitalize">
+                  <span className="input w-full bg-zinc-50 capitalize">
                     {billing?.plan || 'Starter'}
                   </span>
                   {billing && getStatusBadge(billing.status)}
@@ -201,7 +203,7 @@ export default function SettingsPage() {
           </div>
 
           <div className="card p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Utilisation du plan</h3>
+            <h3 className="text-lg font-semibold text-zinc-900 mb-4">Utilisation du plan</h3>
             <div className="space-y-5">
               {plans && billing ? (
                 <>
@@ -216,17 +218,17 @@ export default function SettingsPage() {
                     return (
                       <div>
                         <div className="flex justify-between items-center mb-1.5">
-                          <span className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                          <span className="flex items-center gap-2 text-sm font-medium text-zinc-700">
                             <Package size={16} className="text-blue-500" /> Produits
                           </span>
                           <span
-                            className={`text-sm font-bold ${pct >= 90 ? 'text-red-600' : 'text-gray-600'}`}
+                            className={`text-sm font-bold ${pct >= 90 ? 'text-red-600' : 'text-zinc-600'}`}
                           >
                             {isUnlimited ? `${used} / Illimité` : `${used} / ${limit}`}
                           </span>
                         </div>
                         {!isUnlimited && (
-                          <div className="w-full bg-gray-200 rounded-full h-2.5">
+                          <div className="w-full bg-zinc-200 rounded-full h-2.5">
                             <div
                               className={`h-2.5 rounded-full transition-all ${color}`}
                               style={{ width: `${pct}%` }}
@@ -253,17 +255,17 @@ export default function SettingsPage() {
                     return (
                       <div>
                         <div className="flex justify-between items-center mb-1.5">
-                          <span className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                          <span className="flex items-center gap-2 text-sm font-medium text-zinc-700">
                             <Users size={16} className="text-green-500" /> Utilisateurs
                           </span>
                           <span
-                            className={`text-sm font-bold ${pct >= 90 ? 'text-red-600' : 'text-gray-600'}`}
+                            className={`text-sm font-bold ${pct >= 90 ? 'text-red-600' : 'text-zinc-600'}`}
                           >
                             {isUnlimited ? `${used} / Illimité` : `${used} / ${limit}`}
                           </span>
                         </div>
                         {!isUnlimited && (
-                          <div className="w-full bg-gray-200 rounded-full h-2.5">
+                          <div className="w-full bg-zinc-200 rounded-full h-2.5">
                             <div
                               className={`h-2.5 rounded-full transition-all ${color}`}
                               style={{ width: `${pct}%` }}
@@ -282,10 +284,10 @@ export default function SettingsPage() {
                   {/* Entrepôts */}
                   <div>
                     <div className="flex justify-between items-center mb-1.5">
-                      <span className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                      <span className="flex items-center gap-2 text-sm font-medium text-zinc-700">
                         <Warehouse size={16} className="text-purple-500" /> Entrepôts
                       </span>
-                      <span className="text-sm font-bold text-gray-600">
+                      <span className="text-sm font-bold text-zinc-600">
                         {plans[billing.plan].warehouseLimit === Infinity ||
                         plans[billing.plan].warehouseLimit === null
                           ? 'Illimité'
@@ -296,7 +298,7 @@ export default function SettingsPage() {
                 </>
               ) : (
                 <div className="flex items-center justify-center p-4">
-                  <Loader2 className="animate-spin text-gray-400" size={20} />
+                  <Loader2 className="animate-spin text-zinc-400" size={20} />
                 </div>
               )}
             </div>
@@ -309,20 +311,20 @@ export default function SettingsPage() {
         <div className="space-y-6">
           {/* Current Subscription */}
           <div className="card p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Abonnement actuel</h3>
+            <h3 className="text-lg font-semibold text-zinc-900 mb-4">Abonnement actuel</h3>
             {billingLoading ? (
               <div className="flex items-center justify-center p-8">
-                <Loader2 className="animate-spin text-gray-400" size={24} />
+                <Loader2 className="animate-spin text-zinc-400" size={24} />
               </div>
             ) : billing ? (
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center justify-between p-4 bg-zinc-50 rounded-lg">
                   <div>
-                    <p className="text-sm text-gray-500">Plan</p>
-                    <p className="text-lg font-semibold text-gray-900 capitalize">{billing.plan}</p>
+                    <p className="text-sm text-zinc-500">Plan</p>
+                    <p className="text-lg font-semibold text-zinc-900 capitalize">{billing.plan}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm text-gray-500">Statut</p>
+                    <p className="text-sm text-zinc-500">Statut</p>
                     {getStatusBadge(billing.status)}
                   </div>
                 </div>
@@ -339,14 +341,14 @@ export default function SettingsPage() {
                 )}
               </div>
             ) : (
-              <p className="text-gray-500">Chargement des informations…</p>
+              <p className="text-zinc-500">Chargement des informations…</p>
             )}
           </div>
 
           {/* Plans - Mode Offline Mobile Money */}
           {isAdmin && (
             <div className="card p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              <h3 className="text-lg font-semibold text-zinc-900 mb-4">
                 Changer de plan (Paiement Mobile Money)
               </h3>
               <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-6">
@@ -369,7 +371,7 @@ export default function SettingsPage() {
                   </li>
                 </ul>
                 <a
-                  href="https://wa.me/2250000000000?text=Bonjour,%20je%20viens%20d'effectuer%20un%20paiement%20pour%20mon%20compte%20GesStock…"
+                  href="https://wa.me/2250709822377?text=Bonjour,%20je%20viens%20d'effectuer%20un%20paiement%20pour%20mon%20compte%20GesStock…"
                   target="_blank"
                   rel="noreferrer"
                   className="btn btn-primary inline-flex items-center gap-2"
@@ -380,7 +382,7 @@ export default function SettingsPage() {
 
               {plansLoading ? (
                 <div className="flex items-center justify-center p-8">
-                  <Loader2 className="animate-spin text-gray-400" size={24} />
+                  <Loader2 className="animate-spin text-zinc-400" size={24} />
                 </div>
               ) : plans ? (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -413,47 +415,47 @@ export default function SettingsPage() {
                   />
                 </div>
               ) : (
-                <p className="text-gray-500">Chargement des plans…</p>
+                <p className="text-zinc-500">Chargement des plans…</p>
               )}
             </div>
           )}
 
           {/* Invoices */}
           <div className="card p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <h3 className="text-lg font-semibold text-zinc-900 mb-4 flex items-center gap-2">
               <Receipt size={20} />
               Historique des factures
             </h3>
             {invoicesLoading ? (
               <div className="flex items-center justify-center p-8">
-                <Loader2 className="animate-spin text-gray-400" size={24} />
+                <Loader2 className="animate-spin text-zinc-400" size={24} />
               </div>
             ) : invoices.length > 0 ? (
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-gray-50">
+                  <thead className="bg-zinc-50">
                     <tr>
-                      <th className="text-left text-xs font-medium text-gray-500 uppercase px-4 py-3">
+                      <th className="text-left text-xs font-medium text-zinc-500 uppercase px-4 py-3">
                         Date
                       </th>
-                      <th className="text-left text-xs font-medium text-gray-500 uppercase px-4 py-3">
+                      <th className="text-left text-xs font-medium text-zinc-500 uppercase px-4 py-3">
                         Montant
                       </th>
-                      <th className="text-left text-xs font-medium text-gray-500 uppercase px-4 py-3">
+                      <th className="text-left text-xs font-medium text-zinc-500 uppercase px-4 py-3">
                         Statut
                       </th>
-                      <th className="text-left text-xs font-medium text-gray-500 uppercase px-4 py-3">
+                      <th className="text-left text-xs font-medium text-zinc-500 uppercase px-4 py-3">
                         Action
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100">
+                  <tbody className="divide-y divide-zinc-100">
                     {invoices.map((invoice) => (
                       <tr key={invoice.id}>
-                        <td className="px-4 py-3 text-sm text-gray-900">
+                        <td className="px-4 py-3 text-sm text-zinc-900">
                           {formatDate(invoice.createdAt)}
                         </td>
-                        <td className="px-4 py-3 text-sm text-gray-900">
+                        <td className="px-4 py-3 text-sm text-zinc-900">
                           {invoice.amount.toFixed(2)} F CFA
                         </td>
                         <td className="px-4 py-3">
@@ -463,7 +465,7 @@ export default function SettingsPage() {
                                 ? 'bg-green-100 text-green-800'
                                 : invoice.status === 'open'
                                   ? 'bg-blue-100 text-blue-800'
-                                  : 'bg-gray-100 text-gray-800'
+                                  : 'bg-zinc-100 text-zinc-800'
                             }`}
                           >
                             {invoice.status === 'paid'
@@ -491,7 +493,7 @@ export default function SettingsPage() {
                 </table>
               </div>
             ) : (
-              <p className="text-gray-500 text-center py-8">Aucune facture disponible</p>
+              <p className="text-zinc-500 text-center py-8">Aucune facture disponible</p>
             )}
           </div>
         </div>
@@ -503,8 +505,8 @@ export default function SettingsPage() {
           <div className="card p-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">Clés d'API externes</h3>
-                <p className="text-sm text-gray-500">
+                <h3 className="text-lg font-semibold text-zinc-900">Clés d'API externes</h3>
+                <p className="text-sm text-zinc-500">
                   Utilisez ces clés pour connecter votre site e-commerce ou logiciel comptable.
                 </p>
               </div>
@@ -555,6 +557,8 @@ export default function SettingsPage() {
                       toast.success('Copié !')
                     }}
                     className="p-2 bg-white border border-amber-300 rounded hover:bg-amber-100 text-amber-600"
+                    title="Copier"
+                    aria-label="Copier la clé d'API dans le presse-papiers"
                   >
                     <Copy size={16} />
                   </button>
@@ -570,49 +574,43 @@ export default function SettingsPage() {
 
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-50">
+                <thead className="bg-zinc-50">
                   <tr>
-                    <th className="text-left text-xs font-medium text-gray-500 uppercase px-4 py-3">
+                    <th className="text-left text-xs font-medium text-zinc-500 uppercase px-4 py-3">
                       Nom
                     </th>
-                    <th className="text-left text-xs font-medium text-gray-500 uppercase px-4 py-3">
+                    <th className="text-left text-xs font-medium text-zinc-500 uppercase px-4 py-3">
                       Créée le
                     </th>
-                    <th className="text-left text-xs font-medium text-gray-500 uppercase px-4 py-3">
+                    <th className="text-left text-xs font-medium text-zinc-500 uppercase px-4 py-3">
                       Dernière utilisation
                     </th>
-                    <th className="text-right text-xs font-medium text-gray-500 uppercase px-4 py-3">
+                    <th className="text-right text-xs font-medium text-zinc-500 uppercase px-4 py-3">
                       Actions
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
+                <tbody className="divide-y divide-zinc-100">
                   {apiKeys?.data?.map((key) => (
-                    <tr key={key.id} className="hover:bg-gray-50 transition-colors">
+                    <tr key={key.id} className="hover:bg-zinc-50 transition-colors">
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
                           <Key size={14} className="text-blue-500" />
-                          <span className="text-sm font-medium text-gray-900">{key.name}</span>
+                          <span className="text-sm font-medium text-zinc-900">{key.name}</span>
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-500">
+                      <td className="px-4 py-3 text-sm text-zinc-500">
                         {formatDate(key.createdAt)}
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-500">
+                      <td className="px-4 py-3 text-sm text-zinc-500">
                         {key.lastUsedAt ? formatDate(key.lastUsedAt) : 'Jamais utilisée'}
                       </td>
                       <td className="px-4 py-3 text-right">
                         <button
-                          onClick={() => {
-                            if (
-                              confirm(
-                                "Révoquer cette clé ? Les services l'utilisant ne pourront plus se connecter.",
-                              )
-                            ) {
-                              removeApiKey.mutate(key.id)
-                            }
-                          }}
-                          className="p-1.5 text-gray-400 hover:text-red-600 transition-colors"
+                          onClick={() => setKeyToDelete(key)}
+                          className="p-1.5 text-zinc-400 hover:text-red-600 transition-colors"
+                          title="Supprimer"
+                          aria-label={`Supprimer la clé d'API ${key.name}`}
                         >
                           <Trash2 size={16} />
                         </button>
@@ -621,7 +619,7 @@ export default function SettingsPage() {
                   ))}
                   {(!apiKeys?.data || apiKeys.data.length === 0) && (
                     <tr>
-                      <td colSpan={4} className="text-center py-8 text-gray-500 text-sm">
+                      <td colSpan={4} className="text-center py-8 text-zinc-500 text-sm">
                         Aucune clé API active. Générez-en une pour commencer l'intégration.
                       </td>
                     </tr>
@@ -650,6 +648,19 @@ export default function SettingsPage() {
           </div>
         </div>
       )}
+      <ConfirmModal
+        isOpen={!!keyToDelete}
+        onClose={() => setKeyToDelete(null)}
+        onConfirm={() => {
+          if (keyToDelete) {
+            removeApiKey.mutate(keyToDelete.id)
+            setKeyToDelete(null)
+          }
+        }}
+        title="Révoquer la clé d'API"
+        message={`Voulez-vous vraiment révoquer la clé d'API "${keyToDelete?.name}" ? Les services l'utilisant ne pourront plus se connecter.`}
+        confirmText="Révoquer"
+      />
     </div>
   )
 }

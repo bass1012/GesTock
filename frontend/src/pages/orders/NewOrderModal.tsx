@@ -82,13 +82,13 @@ export default function NewOrderModal({ isOpen, onClose }: NewOrderModalProps) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-900/50 backdrop-blur-sm">
       <div className="bg-white rounded-xl shadow-xl w-full max-w-3xl overflow-hidden flex flex-col max-h-[90vh]">
-        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between shrink-0">
-          <h2 className="text-lg font-semibold text-gray-900">
+        <div className="px-6 py-4 border-b border-zinc-100 flex items-center justify-between shrink-0">
+          <h2 className="text-lg font-semibold text-zinc-900">
             Nouveau Bon de Commande (Brouillon)
           </h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-500">
+          <button onClick={onClose} className="text-zinc-400 hover:text-zinc-500">
             <X size={20} />
           </button>
         </div>
@@ -99,7 +99,7 @@ export default function NewOrderModal({ isOpen, onClose }: NewOrderModalProps) {
               <div>
                 <label
                   htmlFor="order-supplier"
-                  className="block text-sm font-medium text-gray-700 mb-1"
+                  className="block text-sm font-medium text-zinc-700 mb-1"
                 >
                   Fournisseur *
                 </label>
@@ -122,7 +122,7 @@ export default function NewOrderModal({ isOpen, onClose }: NewOrderModalProps) {
               <div>
                 <label
                   htmlFor="order-expected-date"
-                  className="block text-sm font-medium text-gray-700 mb-1"
+                  className="block text-sm font-medium text-zinc-700 mb-1"
                 >
                   Date de réception souhaitée
                 </label>
@@ -136,9 +136,9 @@ export default function NewOrderModal({ isOpen, onClose }: NewOrderModalProps) {
               </div>
             </div>
 
-            <div className="mt-8 border border-gray-200 rounded-lg overflow-hidden">
-              <div className="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
-                <h3 className="font-medium text-gray-700 text-sm">Lignes de commande</h3>
+            <div className="mt-8 border border-zinc-200 rounded-lg overflow-hidden">
+              <div className="bg-zinc-50 px-4 py-3 border-b border-zinc-200 flex justify-between items-center">
+                <h3 className="font-medium text-zinc-700 text-sm">Lignes de commande</h3>
                 <button
                   type="button"
                   onClick={handleAddItem}
@@ -148,13 +148,13 @@ export default function NewOrderModal({ isOpen, onClose }: NewOrderModalProps) {
                 </button>
               </div>
 
-              <div className="divide-y divide-gray-100">
+              <div className="divide-y divide-zinc-100">
                 {items.map((item, index) => (
                   <div key={item.id} className="p-4 grid grid-cols-12 gap-4 items-end">
                     <div className="col-span-12 sm:col-span-5">
                       <label
                         htmlFor={`order-item-${index}-product`}
-                        className="block text-xs font-medium text-gray-500 mb-1"
+                        className="block text-xs font-medium text-zinc-500 mb-1"
                       >
                         Produit
                       </label>
@@ -177,7 +177,7 @@ export default function NewOrderModal({ isOpen, onClose }: NewOrderModalProps) {
                     <div className="col-span-6 sm:col-span-2">
                       <label
                         htmlFor={`order-item-${index}-quantity`}
-                        className="block text-xs font-medium text-gray-500 mb-1"
+                        className="block text-xs font-medium text-zinc-500 mb-1"
                       >
                         Quantité
                       </label>
@@ -197,7 +197,7 @@ export default function NewOrderModal({ isOpen, onClose }: NewOrderModalProps) {
                     <div className="col-span-6 sm:col-span-3">
                       <label
                         htmlFor={`order-item-${index}-unit-price`}
-                        className="block text-xs font-medium text-gray-500 mb-1"
+                        className="block text-xs font-medium text-zinc-500 mb-1"
                       >
                         Prix Unitaire HT
                       </label>
@@ -220,7 +220,7 @@ export default function NewOrderModal({ isOpen, onClose }: NewOrderModalProps) {
                         type="button"
                         onClick={() => handleRemoveItem(index)}
                         disabled={items.length === 1}
-                        className="p-2 text-gray-500 hover:text-red-500 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
+                        className="p-2 text-zinc-500 hover:text-red-500 hover:bg-zinc-100 rounded-lg transition-colors disabled:opacity-50"
                       >
                         <Trash2 size={18} />
                       </button>
@@ -228,9 +228,9 @@ export default function NewOrderModal({ isOpen, onClose }: NewOrderModalProps) {
                   </div>
                 ))}
               </div>
-              <div className="bg-gray-50 px-6 py-4 flex justify-between items-center border-t border-gray-200">
-                <span className="font-medium text-gray-600 sm:text-base">Montant Total Estimé</span>
-                <span className="font-bold text-gray-900 text-lg">
+              <div className="bg-zinc-50 px-6 py-4 flex justify-between items-center border-t border-zinc-200">
+                <span className="font-medium text-zinc-600 sm:text-base">Montant Total Estimé</span>
+                <span className="font-bold text-zinc-900 text-lg">
                   {xofFormatter.format(calculateTotal())}
                 </span>
               </div>
@@ -238,7 +238,7 @@ export default function NewOrderModal({ isOpen, onClose }: NewOrderModalProps) {
           </form>
         </div>
 
-        <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3 shrink-0 bg-gray-50">
+        <div className="px-6 py-4 border-t border-zinc-100 flex justify-end gap-3 shrink-0 bg-zinc-50">
           <button
             type="button"
             onClick={onClose}
