@@ -153,7 +153,7 @@ router.get('/:id/pdf', async (req, res, next) => {
     res.setHeader('Content-Type', 'application/pdf')
     res.setHeader('Content-Disposition', `attachment; filename="Duplicata_${sale.reference}.pdf"`)
 
-    await pdfService.generateReceiptPDF(sale, res)
+    await pdfService.generateReceiptPDF(sale, res, req.tenantSlug!)
   } catch (error) {
     next(error)
   }

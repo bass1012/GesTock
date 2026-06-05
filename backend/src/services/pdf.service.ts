@@ -1,5 +1,8 @@
 import PDFDocument from 'pdfkit'
 import { Response } from 'express'
+import { PrismaClient } from '@prisma/client'
+
+const prisma = new PrismaClient()
 
 function formatPrice(amount: number): string {
   return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
@@ -7,11 +10,15 @@ function formatPrice(amount: number): string {
 
 export const pdfService = {
   /**
-  /**
    * Generates a PDF receipt/invoice for a Sale and writes it directly to the response stream.
    * Thermal cash register format (80mm width / dynamic height).
    */
-  async generateReceiptPDF(sale: any, res: Response): Promise<void> {
+  async generateReceiptPDF(sale: any, res: Response, tenantSlug: string): Promise<void> {
+    const tenant = await prisma.tenant.findUnique({
+      where: { slug: tenantSlug }
+    })
+    const tenantName = tenant?.name || 'GesStock'
+
     const itemHeight = 26
     const calculatedHeight = 250 + (sale.items.length * itemHeight)
     const pageHeight = Math.max(350, calculatedHeight)
@@ -23,7 +30,7 @@ export const pdfService = {
     doc.pipe(res)
 
     // Center header
-    doc.fontSize(14).fillColor('#18181b').font('Helvetica-Bold').text('GesStock', 12, 12, { align: 'center', width: 202 })
+    doc.fontSize(14).fillColor('#18181b').font('Helvetica-Bold').text(tenantName, 12, 12, { align: 'center', width: 202 })
     doc.fontSize(7).fillColor('#71717a').font('Helvetica').text('Terminal Point de Vente', 12, 28, { align: 'center', width: 202 })
 
     // Separation line
