@@ -268,7 +268,7 @@ export default function POSPage() {
                 onChange={(e) => setSelectedClientId(e.target.value)}
                 className="w-full mt-1 px-3 py-2 border rounded-lg text-sm bg-white"
               >
-                <option value="">: Client de passage,</option>
+                <option value="">Client de passage</option>
                 {clients.map((c: any) => (
                   <option key={c.id} value={c.id}>
                     {c.name} {c.loyaltyPoints > 0 ? `(${c.loyaltyPoints} pts)` : ''}
