@@ -99,16 +99,6 @@ export function getTenantSchemaQueries(schemaName: string) {
                 updated_at TIMESTAMP DEFAULT NOW()
             )`,
 
-    `CREATE TABLE IF NOT EXISTS "${schemaName}".loyalty_transactions (
-                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-                client_id UUID NOT NULL REFERENCES "${schemaName}".clients(id) ON DELETE CASCADE,
-                sale_id UUID REFERENCES "${schemaName}".sales(id) ON DELETE SET NULL,
-                type VARCHAR NOT NULL,
-                points INT NOT NULL,
-                description TEXT,
-                created_at TIMESTAMP DEFAULT NOW()
-            )`,
-
     `CREATE TABLE IF NOT EXISTS "${schemaName}".sales (
                 id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
                 client_id UUID REFERENCES "${schemaName}".clients(id),
@@ -129,6 +119,17 @@ export function getTenantSchemaQueries(schemaName: string) {
                 quantity INT NOT NULL,
                 unit_price DOUBLE PRECISION NOT NULL
             )`,
+
+    `CREATE TABLE IF NOT EXISTS "${schemaName}".loyalty_transactions (
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                client_id UUID NOT NULL REFERENCES "${schemaName}".clients(id) ON DELETE CASCADE,
+                sale_id UUID REFERENCES "${schemaName}".sales(id) ON DELETE SET NULL,
+                type VARCHAR NOT NULL,
+                points INT NOT NULL,
+                description TEXT,
+                created_at TIMESTAMP DEFAULT NOW()
+            )`,
+
 
     `CREATE TABLE IF NOT EXISTS "${schemaName}".supplier_returns (
                 id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
