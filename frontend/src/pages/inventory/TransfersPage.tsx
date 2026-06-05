@@ -47,8 +47,43 @@ export default function TransfersPage() {
   const warehouses = warehousesData ?? []
   const products = productsData?.products ?? []
 
-  // Recent TRANSFER movements only
-  const recentTransfers = (movementsData?.movements ?? []).filter((m) => m.type === 'TRANSFER')
+  // Group recent movements by reference to present unified transfers
+  const groupedTransfers = (() => {
+    const transfersMap = new Map<string, {
+      id: string
+      productName: string
+      quantity: number
+      createdAt: string
+      note: string
+      sourceWarehouseName?: string
+      destWarehouseName?: string
+    }>()
+
+    const transferMovements = (movementsData?.movements ?? []).filter((m) => m.type === 'TRANSFER')
+
+    for (const m of transferMovements) {
+      const ref = m.reference || m.id
+      if (!transfersMap.has(ref)) {
+        transfersMap.set(ref, {
+          id: ref,
+          productName: m.product?.name ?? '-',
+          quantity: Math.abs(m.quantity),
+          createdAt: m.createdAt,
+          note: m.note ?? 'Transfert de stock',
+        })
+      }
+
+      const entry = transfersMap.get(ref)!
+      if (m.quantity < 0) {
+        entry.sourceWarehouseName = m.warehouse?.name
+      } else {
+        entry.destWarehouseName = m.warehouse?.name
+      }
+    }
+
+    return Array.from(transfersMap.values())
+  })()
+
 
   const stockByWarehouse = (warehouseStock ?? []).reduce((acc: Record<string, number>, s) => {
     acc[s.warehouse_id] = Number(s.quantity)
@@ -103,8 +138,8 @@ export default function TransfersPage() {
         <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-primary-50 border border-primary-100 rounded-xl">
           <TrendingUp size={16} className="text-primary-600" />
           <span className="text-sm font-medium text-primary-700">
-            {recentTransfers.length} transfert{recentTransfers.length !== 1 ? 's' : ''} récent
-            {recentTransfers.length !== 1 ? 's' : ''}
+            {groupedTransfers.length} transfert{groupedTransfers.length !== 1 ? 's' : ''} récent
+            {groupedTransfers.length !== 1 ? 's' : ''}
           </span>
         </div>
       </div>
@@ -353,30 +388,42 @@ export default function TransfersPage() {
                 Transferts récents
               </h2>
             </div>
-            {recentTransfers.length === 0 ? (
+            {groupedTransfers.length === 0 ? (
               <div className="p-8 text-center">
                 <ArrowRightLeft size={36} className="mx-auto text-zinc-200 mb-3" />
                 <p className="text-sm text-zinc-400">Aucun transfert effectué.</p>
               </div>
             ) : (
               <ul className="divide-y divide-zinc-50">
-                {recentTransfers.map((m) => (
-                  <li key={m.id} className="px-5 py-3.5 hover:bg-zinc-50 transition-colors">
+                {groupedTransfers.map((t) => (
+                  <li key={t.id} className="px-5 py-3.5 hover:bg-zinc-50 transition-colors">
                     <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0">
+                      <div className="min-w-0 flex-1">
                         <p className="text-sm font-medium text-zinc-900 truncate">
-                          {m.product?.name ?? '-'}
+                          {t.productName}
                         </p>
-                        <p className="text-xs text-zinc-400 mt-0.5">
-                          {m.note ?? 'Transfert stock'}
-                        </p>
+                        <div className="flex flex-col gap-1 mt-1">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="font-semibold text-red-600 bg-red-50 px-1.5 py-0.5 rounded text-[10px]">
+                              Débit: {t.sourceWarehouseName || 'Inconnu'}
+                            </span>
+                            <ArrowRight size={10} className="text-zinc-400 shrink-0" />
+                            <span className="font-semibold text-green-600 bg-green-50 px-1.5 py-0.5 rounded text-[10px]">
+                              Reçu: {t.destWarehouseName || 'Inconnu'}
+                            </span>
+                          </div>
+                          {t.note && (
+                            <p className="text-xs text-zinc-500 font-normal mt-0.5">
+                              {t.note}
+                            </p>
+                          )}
+                        </div>
                       </div>
-                      <span className="shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-primary-100 text-primary-700">
-                        {m.quantity > 0 ? '+' : ''}
-                        {m.quantity}
+                      <span className="shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-zinc-100 text-zinc-700 border border-zinc-200">
+                        {t.quantity}
                       </span>
                     </div>
-                    <p className="text-xs text-zinc-300 mt-1">{formatDateTime(m.createdAt)}</p>
+                    <p className="text-[10px] text-zinc-300 mt-1">{formatDateTime(t.createdAt)}</p>
                   </li>
                 ))}
               </ul>
