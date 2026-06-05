@@ -1,18 +1,19 @@
 -- AlterTable
-ALTER TABLE "api_keys" ADD COLUMN     "iv" TEXT;
+ALTER TABLE "api_keys" ADD COLUMN IF NOT EXISTS "iv" TEXT;
 
 -- AlterTable
-ALTER TABLE "users" ADD COLUMN     "email_verification_expires" TIMESTAMP(3),
-ADD COLUMN     "email_verification_token" TEXT,
-ADD COLUMN     "email_verified" BOOLEAN NOT NULL DEFAULT false,
-ADD COLUMN     "failed_login_attempts" INTEGER NOT NULL DEFAULT 0,
-ADD COLUMN     "lockout_until" TIMESTAMP(3),
-ADD COLUMN     "two_factor_backup_codes" JSONB,
-ADD COLUMN     "two_factor_enabled" BOOLEAN NOT NULL DEFAULT false,
-ADD COLUMN     "two_factor_secret" TEXT;
+ALTER TABLE "users" 
+ADD COLUMN IF NOT EXISTS "email_verification_expires" TIMESTAMP(3),
+ADD COLUMN IF NOT EXISTS "email_verification_token" TEXT,
+ADD COLUMN IF NOT EXISTS "email_verified" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN IF NOT EXISTS "failed_login_attempts" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN IF NOT EXISTS "lockout_until" TIMESTAMP(3),
+ADD COLUMN IF NOT EXISTS "two_factor_backup_codes" JSONB,
+ADD COLUMN IF NOT EXISTS "two_factor_enabled" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN IF NOT EXISTS "two_factor_secret" TEXT;
 
 -- CreateTable
-CREATE TABLE "audit_logs" (
+CREATE TABLE IF NOT EXISTS "audit_logs" (
     "id" TEXT NOT NULL,
     "action" TEXT NOT NULL,
     "user_id" TEXT,
@@ -28,7 +29,7 @@ CREATE TABLE "audit_logs" (
 );
 
 -- CreateTable
-CREATE TABLE "supplier_returns" (
+CREATE TABLE IF NOT EXISTS "supplier_returns" (
     "id" TEXT NOT NULL,
     "supplier_id" TEXT NOT NULL,
     "warehouse_id" TEXT,
@@ -43,7 +44,7 @@ CREATE TABLE "supplier_returns" (
 );
 
 -- CreateTable
-CREATE TABLE "supplier_return_items" (
+CREATE TABLE IF NOT EXISTS "supplier_return_items" (
     "id" TEXT NOT NULL,
     "return_id" TEXT NOT NULL,
     "product_id" TEXT NOT NULL,
@@ -54,112 +55,112 @@ CREATE TABLE "supplier_return_items" (
 );
 
 -- CreateIndex
-CREATE INDEX "audit_logs_tenant_id_idx" ON "audit_logs"("tenant_id");
+CREATE INDEX IF NOT EXISTS "audit_logs_tenant_id_idx" ON "audit_logs"("tenant_id");
 
 -- CreateIndex
-CREATE INDEX "audit_logs_created_at_idx" ON "audit_logs"("created_at");
+CREATE INDEX IF NOT EXISTS "audit_logs_created_at_idx" ON "audit_logs"("created_at");
 
 -- CreateIndex
-CREATE INDEX "audit_logs_action_idx" ON "audit_logs"("action");
+CREATE INDEX IF NOT EXISTS "audit_logs_action_idx" ON "audit_logs"("action");
 
 -- CreateIndex
-CREATE INDEX "audit_logs_user_id_idx" ON "audit_logs"("user_id");
+CREATE INDEX IF NOT EXISTS "audit_logs_user_id_idx" ON "audit_logs"("user_id");
 
 -- CreateIndex
-CREATE INDEX "supplier_returns_supplier_id_idx" ON "supplier_returns"("supplier_id");
+CREATE INDEX IF NOT EXISTS "supplier_returns_supplier_id_idx" ON "supplier_returns"("supplier_id");
 
 -- CreateIndex
-CREATE INDEX "supplier_returns_warehouse_id_idx" ON "supplier_returns"("warehouse_id");
+CREATE INDEX IF NOT EXISTS "supplier_returns_warehouse_id_idx" ON "supplier_returns"("warehouse_id");
 
 -- CreateIndex
-CREATE INDEX "supplier_returns_status_idx" ON "supplier_returns"("status");
+CREATE INDEX IF NOT EXISTS "supplier_returns_status_idx" ON "supplier_returns"("status");
 
 -- CreateIndex
-CREATE INDEX "supplier_return_items_return_id_idx" ON "supplier_return_items"("return_id");
+CREATE INDEX IF NOT EXISTS "supplier_return_items_return_id_idx" ON "supplier_return_items"("return_id");
 
 -- CreateIndex
-CREATE INDEX "supplier_return_items_product_id_idx" ON "supplier_return_items"("product_id");
+CREATE INDEX IF NOT EXISTS "supplier_return_items_product_id_idx" ON "supplier_return_items"("product_id");
 
 -- CreateIndex
-CREATE INDEX "api_keys_tenant_id_idx" ON "api_keys"("tenant_id");
+CREATE INDEX IF NOT EXISTS "api_keys_tenant_id_idx" ON "api_keys"("tenant_id");
 
 -- CreateIndex
-CREATE INDEX "api_keys_created_at_idx" ON "api_keys"("created_at");
+CREATE INDEX IF NOT EXISTS "api_keys_created_at_idx" ON "api_keys"("created_at");
 
 -- CreateIndex
-CREATE INDEX "products_category_id_idx" ON "products"("category_id");
+CREATE INDEX IF NOT EXISTS "products_category_id_idx" ON "products"("category_id");
 
 -- CreateIndex
-CREATE INDEX "products_created_at_idx" ON "products"("created_at");
+CREATE INDEX IF NOT EXISTS "products_created_at_idx" ON "products"("created_at");
 
 -- CreateIndex
-CREATE INDEX "products_sku_idx" ON "products"("sku");
+CREATE INDEX IF NOT EXISTS "products_sku_idx" ON "products"("sku");
 
 -- CreateIndex
-CREATE INDEX "products_is_active_idx" ON "products"("is_active");
+CREATE INDEX IF NOT EXISTS "products_is_active_idx" ON "products"("is_active");
 
 -- CreateIndex
-CREATE INDEX "products_is_deleted_idx" ON "products"("is_deleted");
+CREATE INDEX IF NOT EXISTS "products_is_deleted_idx" ON "products"("is_deleted");
 
 -- CreateIndex
-CREATE INDEX "purchase_order_items_purchase_order_id_idx" ON "purchase_order_items"("purchase_order_id");
+CREATE INDEX IF NOT EXISTS "purchase_order_items_purchase_order_id_idx" ON "purchase_order_items"("purchase_order_id");
 
 -- CreateIndex
-CREATE INDEX "purchase_order_items_product_id_idx" ON "purchase_order_items"("product_id");
+CREATE INDEX IF NOT EXISTS "purchase_order_items_product_id_idx" ON "purchase_order_items"("product_id");
 
 -- CreateIndex
-CREATE INDEX "purchase_orders_supplier_id_idx" ON "purchase_orders"("supplier_id");
+CREATE INDEX IF NOT EXISTS "purchase_orders_supplier_id_idx" ON "purchase_orders"("supplier_id");
 
 -- CreateIndex
-CREATE INDEX "purchase_orders_status_idx" ON "purchase_orders"("status");
+CREATE INDEX IF NOT EXISTS "purchase_orders_status_idx" ON "purchase_orders"("status");
 
 -- CreateIndex
-CREATE INDEX "purchase_orders_created_at_idx" ON "purchase_orders"("created_at");
+CREATE INDEX IF NOT EXISTS "purchase_orders_created_at_idx" ON "purchase_orders"("created_at");
 
 -- CreateIndex
-CREATE INDEX "refresh_tokens_user_id_idx" ON "refresh_tokens"("user_id");
+CREATE INDEX IF NOT EXISTS "refresh_tokens_user_id_idx" ON "refresh_tokens"("user_id");
 
 -- CreateIndex
-CREATE INDEX "refresh_tokens_token_idx" ON "refresh_tokens"("token");
+CREATE INDEX IF NOT EXISTS "refresh_tokens_token_idx" ON "refresh_tokens"("token");
 
 -- CreateIndex
-CREATE INDEX "refresh_tokens_expires_at_idx" ON "refresh_tokens"("expires_at");
+CREATE INDEX IF NOT EXISTS "refresh_tokens_expires_at_idx" ON "refresh_tokens"("expires_at");
 
 -- CreateIndex
-CREATE INDEX "sale_items_sale_id_idx" ON "sale_items"("sale_id");
+CREATE INDEX IF NOT EXISTS "sale_items_sale_id_idx" ON "sale_items"("sale_id");
 
 -- CreateIndex
-CREATE INDEX "sale_items_product_id_idx" ON "sale_items"("product_id");
+CREATE INDEX IF NOT EXISTS "sale_items_product_id_idx" ON "sale_items"("product_id");
 
 -- CreateIndex
-CREATE INDEX "sales_client_id_idx" ON "sales"("client_id");
+CREATE INDEX IF NOT EXISTS "sales_client_id_idx" ON "sales"("client_id");
 
 -- CreateIndex
-CREATE INDEX "sales_status_idx" ON "sales"("status");
+CREATE INDEX IF NOT EXISTS "sales_status_idx" ON "sales"("status");
 
 -- CreateIndex
-CREATE INDEX "sales_created_at_idx" ON "sales"("created_at");
+CREATE INDEX IF NOT EXISTS "sales_created_at_idx" ON "sales"("created_at");
 
 -- CreateIndex
-CREATE INDEX "sales_reference_idx" ON "sales"("reference");
+CREATE INDEX IF NOT EXISTS "sales_reference_idx" ON "sales"("reference");
 
 -- CreateIndex
-CREATE INDEX "stock_movements_product_id_idx" ON "stock_movements"("product_id");
+CREATE INDEX IF NOT EXISTS "stock_movements_product_id_idx" ON "stock_movements"("product_id");
 
 -- CreateIndex
-CREATE INDEX "stock_movements_created_at_idx" ON "stock_movements"("created_at");
+CREATE INDEX IF NOT EXISTS "stock_movements_created_at_idx" ON "stock_movements"("created_at");
 
 -- CreateIndex
-CREATE INDEX "stock_movements_type_idx" ON "stock_movements"("type");
+CREATE INDEX IF NOT EXISTS "stock_movements_type_idx" ON "stock_movements"("type");
 
 -- CreateIndex
-CREATE INDEX "users_tenant_id_idx" ON "users"("tenant_id");
+CREATE INDEX IF NOT EXISTS "users_tenant_id_idx" ON "users"("tenant_id");
 
 -- CreateIndex
-CREATE INDEX "users_created_at_idx" ON "users"("created_at");
+CREATE INDEX IF NOT EXISTS "users_created_at_idx" ON "users"("created_at");
 
 -- CreateIndex
-CREATE INDEX "users_role_idx" ON "users"("role");
+CREATE INDEX IF NOT EXISTS "users_role_idx" ON "users"("role");
 
 -- AddForeignKey
 ALTER TABLE "supplier_returns" ADD CONSTRAINT "supplier_returns_supplier_id_fkey" FOREIGN KEY ("supplier_id") REFERENCES "suppliers"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
