@@ -139,6 +139,13 @@ describe('POSPage', () => {
       const searchInputs = screen.getAllByPlaceholderText(/search|chercher|recherche/i)
       expect(searchInputs.length).toBeGreaterThan(0)
     })
+
+    it('affiche le bouton de scan de code-barres', () => {
+      renderPOSPage()
+
+      const scanButton = screen.getByRole('button', { name: /scanner/i })
+      expect(scanButton).toBeInTheDocument()
+    })
   })
 
   describe('Product Selection', () => {

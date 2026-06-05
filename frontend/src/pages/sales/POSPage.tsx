@@ -14,9 +14,12 @@ import {
   Warehouse,
   Star,
   Gift,
+  Camera,
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useWarehouses } from '../../hooks/useWarehouses'
+import BarcodeScannerModal from '../../components/BarcodeScannerModal'
+
 
 export default function POSPage() {
   const { data: productsData } = useProducts(1, 1000)
@@ -32,6 +35,20 @@ export default function POSPage() {
   const [pointsToRedeem, setPointsToRedeem] = useState(0)
 
   const { data: loyalty } = useClientLoyalty(selectedClientId || null)
+  const [showScanner, setShowScanner] = useState(false)
+
+  const handleScan = (decodedText: string) => {
+    if (!productsData?.products) return
+    const matchedProduct = productsData.products.find(
+      (p: any) => p.sku?.toLowerCase() === decodedText.toLowerCase() || p.id === decodedText,
+    )
+    if (matchedProduct) {
+      addToCart(matchedProduct)
+      toast.success(`Produit détecté : ${matchedProduct.name}`)
+    } else {
+      toast.error(`Aucun produit trouvé avec le code : ${decodedText}`)
+    }
+  }
 
   // Select default warehouse
   useEffect(() => {
@@ -117,17 +134,28 @@ export default function POSPage() {
     <div className="flex flex-col lg:flex-row h-[calc(100vh-4rem)] bg-zinc-50 overflow-hidden">
       {/* Products Grid */}
       <div className="flex-1 p-4 lg:p-6 overflow-y-auto">
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <h1 className="text-2xl font-bold text-zinc-900">Catalogue Caisse</h1>
-          <div className="relative w-64">
-            <Search className="absolute left-3 top-1/2 -tranzinc-y-1/2 text-zinc-400" size={18} />
-            <input
-              type="text"
-              placeholder="Rechercher par nom, SKU…"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 rounded-lg bg-white border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all"
-            />
+          <div className="flex gap-2 w-full sm:w-auto">
+            <div className="relative flex-1 sm:w-64 sm:flex-initial">
+              <Search className="absolute left-3 top-1/2 -tranzinc-y-1/2 text-zinc-400" size={18} />
+              <input
+                type="text"
+                placeholder="Rechercher par nom, SKU…"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 rounded-lg bg-white border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowScanner(true)}
+              className="px-3 py-2 bg-white text-zinc-600 rounded-lg hover:bg-zinc-50 hover:text-zinc-950 transition-colors border border-zinc-200 shadow-sm flex items-center gap-1.5"
+              title="Scanner le code produit"
+            >
+              <Camera size={18} />
+              <span className="hidden sm:inline text-sm font-medium">Scanner</span>
+            </button>
           </div>
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -346,6 +374,13 @@ export default function POSPage() {
           </button>
         </div>
       </div>
+
+      <BarcodeScannerModal
+        isOpen={showScanner}
+        onClose={() => setShowScanner(false)}
+        onScan={handleScan}
+      />
     </div>
   )
 }
+
