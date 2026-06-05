@@ -1,88 +1,118 @@
 import PDFDocument from 'pdfkit'
 import { Response } from 'express'
 
+function formatPrice(amount: number): string {
+  return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
+}
+
 export const pdfService = {
   /**
+  /**
    * Generates a PDF receipt/invoice for a Sale and writes it directly to the response stream.
+   * Thermal cash register format (80mm width / dynamic height).
    */
   async generateReceiptPDF(sale: any, res: Response): Promise<void> {
-    const doc = new PDFDocument({ margin: 40, size: 'A4' })
+    const itemHeight = 26
+    const calculatedHeight = 250 + (sale.items.length * itemHeight)
+    const pageHeight = Math.max(350, calculatedHeight)
+
+    const doc = new PDFDocument({
+      margin: 12,
+      size: [226, pageHeight]
+    })
     doc.pipe(res)
 
-    // Header
-    doc.fontSize(22).fillColor('#18181b').font('Helvetica-Bold').text('GesStock', 40, 40)
-    doc.fontSize(10).fillColor('#71717a').font('Helvetica').text('Terminal Point de Vente / Facturation', 40, 65)
+    // Center header
+    doc.fontSize(14).fillColor('#18181b').font('Helvetica-Bold').text('GesStock', 12, 12, { align: 'center', width: 202 })
+    doc.fontSize(7).fillColor('#71717a').font('Helvetica').text('Terminal Point de Vente', 12, 28, { align: 'center', width: 202 })
 
-    // Meta Info
-    doc.fontSize(10).fillColor('#18181b').font('Helvetica-Bold').text(`Reçu N° : ${sale.reference}`, 350, 40, { align: 'right', width: 200 })
-    doc.font('Helvetica').fillColor('#71717a').text(`Date : ${new Date(sale.createdAt).toLocaleString('fr-FR')}`, 350, 55, { align: 'right', width: 200 })
-    
+    // Separation line
+    doc.moveTo(12, 40).lineTo(214, 40).strokeColor('#e4e4e7').lineWidth(1).stroke()
+
+    // Metadata
+    let currentY = 46
+    doc.fontSize(7).fillColor('#27272a').font('Helvetica-Bold')
+    doc.text(`Reçu N° :`, 12, currentY, { width: 60 })
+    doc.font('Helvetica').text(sale.reference, 72, currentY, { width: 142, align: 'right' })
+    currentY += 10
+
+    doc.font('Helvetica-Bold').text(`Date :`, 12, currentY, { width: 60 })
+    doc.font('Helvetica').text(new Date(sale.createdAt).toLocaleString('fr-FR'), 72, currentY, { width: 142, align: 'right' })
+    currentY += 10
+
     const clientName = sale.client?.name || 'Client de passage'
-    doc.text(`Client : ${clientName}`, 350, 70, { align: 'right', width: 200 })
+    doc.font('Helvetica-Bold').text(`Client :`, 12, currentY, { width: 60 })
+    doc.font('Helvetica').text(clientName, 72, currentY, { width: 142, align: 'right' })
+    currentY += 12
 
-    // Horizontal separator
-    doc.moveTo(40, 100).lineTo(550, 100).strokeColor('#e4e4e7').stroke()
+    // Table Header Separator
+    doc.moveTo(12, currentY).lineTo(214, currentY).strokeColor('#e4e4e7').stroke()
+    currentY += 6
 
-    // Table Header
-    let currentY = 120
-    doc.fontSize(10).fillColor('#27272a').font('Helvetica-Bold')
-    doc.text('Désignation Produit', 40, currentY, { width: 240 })
-    doc.text('Qté', 290, currentY, { width: 40, align: 'right' })
-    doc.text('Prix U.', 340, currentY, { width: 90, align: 'right' })
-    doc.text('Montant', 440, currentY, { width: 110, align: 'right' })
-
-    // Border line under header
-    doc.moveTo(40, currentY + 15).lineTo(550, currentY + 15).strokeColor('#e4e4e7').stroke()
-    currentY += 25
-
-    // Table Rows
-    doc.font('Helvetica').fillColor('#27272a')
+    // Items list
+    doc.fontSize(8).fillColor('#18181b')
     for (const item of sale.items) {
-      if (currentY > 750) {
-        doc.addPage()
-        currentY = 40
-      }
       const productName = item.product?.name || 'Produit inconnu'
-      doc.text(productName, 40, currentY, { width: 240 })
-      doc.text(item.quantity.toString(), 290, currentY, { width: 40, align: 'right' })
-      doc.text(`${item.unitPrice.toLocaleString('fr-FR')} F`, 340, currentY, { width: 90, align: 'right' })
-      doc.text(`${(item.unitPrice * item.quantity).toLocaleString('fr-FR')} F`, 440, currentY, { width: 110, align: 'right' })
-      currentY += 20
+      
+      // Line 1: Product Name
+      doc.font('Helvetica-Bold').text(productName, 12, currentY, { width: 202 })
+      
+      // Line 2: Qté x Prix Unitaire (Left) | Total (Right)
+      doc.font('Helvetica').text(
+        `${item.quantity} x ${formatPrice(item.unitPrice)} F`, 
+        20, 
+        currentY + 10, 
+        { width: 100 }
+      )
+      doc.font('Helvetica-Bold').text(
+        `${formatPrice(item.unitPrice * item.quantity)} F`, 
+        120, 
+        currentY + 10, 
+        { width: 94, align: 'right' }
+      )
+      
+      currentY += itemHeight
     }
 
-    // Border line before totals
-    doc.moveTo(40, currentY).lineTo(550, currentY).strokeColor('#e4e4e7').stroke()
-    currentY += 15
+    // Totals Separator
+    doc.moveTo(12, currentY).lineTo(214, currentY).strokeColor('#e4e4e7').stroke()
+    currentY += 8
 
-    if (currentY > 750) {
-      doc.addPage()
-      currentY = 40
-    }
-
-    // Totals Section
-    doc.fontSize(10).font('Helvetica-Bold')
-    doc.text('Total Brut :', 300, currentY, { width: 130, align: 'right' })
+    // Totals calculation
     const subTotal = sale.items.reduce((acc: number, item: any) => acc + (item.unitPrice * item.quantity), 0)
-    doc.text(`${subTotal.toLocaleString('fr-FR')} F CFA`, 440, currentY, { width: 110, align: 'right' })
-    currentY += 15
+    
+    doc.fontSize(7).font('Helvetica')
+    doc.text('Total Brut :', 12, currentY, { width: 100 })
+    doc.text(`${formatPrice(subTotal)} F`, 112, currentY, { width: 102, align: 'right' })
+    currentY += 10
 
     if (sale.taxRate && sale.taxRate > 0) {
       const taxAmount = subTotal * (sale.taxRate / 100)
-      doc.text(`TVA (${sale.taxRate}%) :`, 300, currentY, { width: 130, align: 'right' })
-      doc.text(`${taxAmount.toLocaleString('fr-FR')} F CFA`, 440, currentY, { width: 110, align: 'right' })
-      currentY += 15
+      doc.text(`TVA (${sale.taxRate}%) :`, 12, currentY, { width: 100 })
+      doc.text(`${formatPrice(taxAmount)} F`, 112, currentY, { width: 102, align: 'right' })
+      currentY += 10
     }
 
     const discount = sale.pointsToRedeem ? sale.pointsToRedeem * 50 : 0
     if (discount > 0) {
-      doc.text('Remise Fidélité :', 300, currentY, { width: 130, align: 'right' })
-      doc.text(`-${discount.toLocaleString('fr-FR')} F CFA`, 440, currentY, { width: 110, align: 'right' })
-      currentY += 15
+      doc.text('Remise Fidélité :', 12, currentY, { width: 100 })
+      doc.text(`-${formatPrice(discount)} F`, 112, currentY, { width: 102, align: 'right' })
+      currentY += 10
     }
 
-    doc.fontSize(12).fillColor('#18181b')
-    doc.text('TOTAL NET À PAYER :', 300, currentY, { width: 130, align: 'right' })
-    doc.text(`${sale.totalAmount.toLocaleString('fr-FR')} F CFA`, 440, currentY, { width: 110, align: 'right' })
+    // Net Total line
+    doc.moveTo(12, currentY).lineTo(214, currentY).strokeColor('#e4e4e7').stroke()
+    currentY += 6
+
+    doc.fontSize(9).font('Helvetica-Bold')
+    doc.text('NET A PAYER :', 12, currentY, { width: 90 })
+    doc.text(`${formatPrice(sale.totalAmount)} F CFA`, 102, currentY, { width: 112, align: 'right' })
+    currentY += 18
+
+    // Thank you note
+    doc.moveTo(12, currentY).lineTo(214, currentY).strokeColor('#e4e4e7').stroke()
+    currentY += 8
+    doc.fontSize(7).font('Helvetica-Oblique').fillColor('#71717a').text('Merci pour votre visite !', 12, currentY, { align: 'center', width: 202 })
 
     doc.end()
   },
@@ -100,7 +130,7 @@ export const pdfService = {
     doc.fontSize(9).text(`Généré le : ${new Date().toLocaleString('fr-FR')}`, 40, 77)
 
     // Summary Box
-    doc.fontSize(10).fillColor('#18181b').font('Helvetica-Bold').text(`Valeur Totale Stock : ${report.summary.totalValue.toLocaleString('fr-FR')} F CFA`, 320, 40, { align: 'right', width: 230 })
+    doc.fontSize(10).fillColor('#18181b').font('Helvetica-Bold').text(`Valeur Totale Stock : ${formatPrice(report.summary.totalValue)} F CFA`, 320, 40, { align: 'right', width: 230 })
     doc.font('Helvetica').fillColor('#dc2626').text(`Alerte(s) : ${report.summary.lowStockProducts} stock(s) faible(s), ${report.summary.outOfStock} rupture(s)`, 320, 55, { align: 'right', width: 230 })
 
     doc.moveTo(40, 95).lineTo(550, 95).strokeColor('#e4e4e7').stroke()
@@ -129,8 +159,8 @@ export const pdfService = {
       doc.text(product.name, 110, currentY, { width: 170 })
       doc.text(product.category || 'N/A', 280, currentY, { width: 90 })
       doc.text(product.currentStock.toString(), 370, currentY, { width: 45, align: 'right' })
-      doc.text(`${product.price.toLocaleString('fr-FR')} F`, 420, currentY, { width: 65, align: 'right' })
-      doc.text(`${product.stockValue.toLocaleString('fr-FR')} F`, 490, currentY, { width: 60, align: 'right' })
+      doc.text(`${formatPrice(product.price)} F`, 420, currentY, { width: 65, align: 'right' })
+      doc.text(`${formatPrice(product.stockValue)} F`, 490, currentY, { width: 60, align: 'right' })
       currentY += 18
     }
 
